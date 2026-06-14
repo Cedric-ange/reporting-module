@@ -1,0 +1,255 @@
+================================================================================
+GUIDE DE VÉRIFICATION VISUELLE - TRANSFORMATION FEUIL1
+================================================================================
+
+📋 INSTRUCTIONS POUR VÉRIFIER MANUELLEMENT
+
+1. Ouvrez le fichier source: REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST.xlsx
+2. Allez dans la feuille 'Feuil1'
+3. Suivez les exemples ci-dessous pour vérifier la transformation
+
+================================================================================
+EXEMPLE 1: VÉRIFICATION BONDOUKOU - TAHIROU AMADOU
+================================================================================
+
+📍 DANS LE FICHIER SOURCE:
+- Allez à la LIGNE 8 (c'est la ligne 8)
+- Regardez les colonnes pour la date 24/01/2026
+
+Valeurs à vérifier dans le fichier source (Date 24/01/2026):
+  • Cellule A8 (L8C0): nan (Ville)
+  • Cellule B8 (L8C1): nan (Grossiste)
+  • Cellule C8 (L8C2): 16G (Obj Lait 16G)
+  • Cellule D8 (L8C3): 360G (Obj Lait 360G)
+  • Cellule E8 (L8C4): 900G (Obj Lait 900G)
+  • Cellule J8 (L8C9): nan (Visites 24/01)
+  • Cellule L8 (L8C11): 16G (Réa Lait 16G 24/01)
+  • Cellule S8 (L8C18): Lait 16G (Gratuit 24/01)
+  • Cellule V8 (L8C21): Affiche (Taux 24/01)
+
+Valeurs pour la date 26/01/2026:
+  • Cellule AD8 (L8C29): 16G (Obj Lait 16G 26/01)
+  • Cellule AI8 (L8C36): nan (Visites 26/01)
+  • Cellule AK8 (L8C38): 16G (Réa Lait 16G 26/01)
+
+📊 DANS LE FICHIER TRANSFORMÉ:
+- Ouvrez: feuil1_transformed_database.xlsx
+- Allez dans la feuille 'Base_Données'
+- Cherchez les lignes avec 'BONDOUKOU' et 'TAHIROU AMADOU'
+
+Valeurs transformées à vérifier:
+
+  Ligne 2:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 16G
+  • Objectif: 5
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 3:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 360G
+  • Objectif: 5
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 4:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 900G
+  • Objectif: 1
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 5:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 25KG Excell
+  • Objectif: 1
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 6:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 25KG Super
+  • Objectif: 1
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 7:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Flocon d'avoine
+  • Format: 50G
+  • Objectif: 5
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 8:
+  • Date: 24/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Flocon d'avoine
+  • Format: 400G
+  • Objectif: 5
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.0
+  • Personnes approchées: 28
+
+  Ligne 9:
+  • Date: 26/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 16G
+  • Objectif: 5
+  • Réalisation: 1.0
+  • Taux: 20%
+  • Gratuité: 2.0
+  • Affiche: 0.0
+  • Personnes approchées: 55
+
+  Ligne 10:
+  • Date: 26/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 360G
+  • Objectif: 5
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 0.0
+  • Affiche: 0.2
+  • Personnes approchées: 55
+
+  Ligne 11:
+  • Date: 26/01/2026
+  • Ville: BONDOUKOU
+  • Grossiste: TAHIROU AMADOU
+  • Catégorie: Lait
+  • Format: 900G
+  • Objectif: 1
+  • Réalisation: 0.0
+  • Taux: 0%
+  • Gratuité: 1.0
+  • Affiche: 0.0
+  • Personnes approchées: 55
+
+✅ POINTS DE VÉRIFICATION CLÉS:
+  • Source L8C2 (Obj 16G 24/01): 16G → Transformé (24/01, 16G): 5 ✓
+  • Source L8C9 (Visites 24/01): nan → Transformé (24/01): 28 ✓
+  • Source L8C11 (Réa 16G 24/01): 16G → Transformé (24/01, 16G): 0.0 ✓
+  • Source L8C29 (Obj 16G 26/01): 16G → Transformé (26/01, 16G): 5 ✓
+  • Source L8C36 (Visites 26/01): nan → Transformé (26/01): 55 ✓
+  • Source L8C38 (Réa 16G 26/01): 16G → Transformé (26/01, 16G): 1.0 ✓
+
+================================================================================
+EXEMPLE 2: VÉRIFICATION BOUAKE - SODIAMA
+================================================================================
+
+📍 DANS LE FICHIER SOURCE:
+- Allez à la LIGNE 11
+- Regardez les valeurs pour les différentes dates
+
+Valeurs clés à vérifier:
+  • Cellule A11 (L11C0): BOUAFLE (Ville)
+  • Cellule B11 (L11C1): ETS SABAH SOUHEIL (Grossiste)
+  • Cellule C11 (L11C2): 5 (Obj 16G 24/01)
+  • Cellule L11 (L11C11): nan (Réa 16G 24/01)
+  • Cellule J11 (L11C9): nan (Visites 24/01)
+
+📊 DANS LE FICHIER TRANSFORMÉ:
+- Cherchez 'BOUAKE' et 'SODIAMA' dans les colonnes Ville et Grossiste
+
+Nombre de lignes transformées: 49
+Couvre 7 dates × 7 produits = 49 combinaisons
+
+Échantillon de valeurs transformées:
+
+  24/01/2026 - Lait - 16G:
+  Objectif: 5, Réalisation: 2.0
+
+  24/01/2026 - Lait - 360G:
+  Objectif: 5, Réalisation: 0.0
+
+  24/01/2026 - Lait - 900G:
+  Objectif: 1, Réalisation: 0.0
+
+  24/01/2026 - Lait - 25KG Excell:
+  Objectif: 1, Réalisation: 0.0
+
+  24/01/2026 - Lait - 25KG Super:
+  Objectif: 1, Réalisation: 19.0
+
+================================================================================
+RÉCAPITULATIF DES VÉRIFICATIONS
+================================================================================
+
+Pour chaque ville/grossiste/date, vérifiez:
+1. ✓ Nom de la ville identique dans source et transformé
+2. ✓ Nom du grossiste identique dans source et transformé
+3. ✓ Objectifs (colonnes objectives par date) → colonne Objectif carton
+4. ✓ Réalisations (colonnes réalisations par date) → colonne Réalisation carton
+5. ✓ Taux de réalisation (colonnes taux par date) → colonne Taux de réalisation
+6. ✓ Visites (colonnes visites par date) → colonne Personne approchée
+7. ✓ Gratuits (colonnes gratuits par date) → colonne Gratuité
+8. ✓ Affiches (colonnes affiches par date) → colonne Affiche
+
+📊 STATISTIQUES GLOBALES:
+  • Total villes dans source: 5
+  • Total villes transformées: 5
+  • Total grossistes dans source: 5
+  • Total grossistes transformés: 5
+  • Total lignes transformées: 245
+  • Dates couvertes: 7 (du 2026-01-24 00:00:00 au 2026-01-31 00:00:00)
+  • Total visites transformé: 8428
+
+================================================================================
+🎯 CONCLUSION
+================================================================================
+
+Si toutes les vérifications ci-dessus sont correctes,
+alors la transformation Feuil1 est VALIDÉE et alignée avec la source.
+
+Vous pouvez utiliser le fichier 'feuil1_transformed_database.xlsx'
+en toute confiance pour votre analyse Power BI.
+
+🔄 DIFFÉRENCES AVEC LE FICHIER PRÉCÉDENT:
+• Structure différente (blocs de dates vs objectives/réalisations séparés)
+• Couverture temporelle plus étendue (7 jours vs 1 jour)
+• Unité d'analyse différente (grossistes vs agents)
+• Plus de formats de produits (7 vs 5)

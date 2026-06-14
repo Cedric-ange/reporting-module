@@ -1,0 +1,96 @@
+=== RAPPORT DE VÉRIFICATION TRANSFORMATION BIBLOS ===
+
+Fichier source: REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx
+Feuille source: JEUDI 22 JANV
+Date extraite: 2026-01-22 00:00:00
+Ville extraite: SAN PEDRO
+
+=== MAPPING DES COLONNES ===
+
+Source -> Transformation:
+Ligne 1, Col 1 'SAN PEDRO/ 22/01/2026' -> Date: 22/01/2026, Ville: SAN PEDRO
+Lignes 7-26, Col 1 -> Grossiste (Nom agent)
+Lignes 7-26, Col 2-6 -> Personne approchée (somme des visites)
+Lignes 7-26, Col 17 -> Objectif carton (Lait Premium 16g)
+Lignes 7-26, Col 18 -> Objectif carton (Lait Premium 360g)
+Lignes 7-26, Col 19 -> Objectif carton (Lait Excellence 900g)
+Lignes 7-26, Col 20 -> Objectif carton (Flocon d'avoine 50g)
+Lignes 7-26, Col 21 -> Objectif carton (Flocon d'avoine 400g)
+Lignes 7-26, Col 42 -> Réalisation carton (Lait Premium 16g)
+Lignes 7-26, Col 43 -> Réalisation carton (Lait Premium 360g)
+Lignes 7-26, Col 44 -> Réalisation carton (Lait Excellence 900g)
+Lignes 7-26, Col 45 -> Réalisation carton (Flocon d'avoine 50g)
+Lignes 7-26, Col 46 -> Réalisation carton (Flocon d'avoine 400g)
+Lignes 7-26, Col 47 -> Affiche
+Lignes 7-26, Col 52 -> Gratuité
+Calcul -> Taux de réalisation = (Réalisation/Objectif) × 100
+
+=== VÉRIFICATION ÉCHANTILLON (Premier agent DIBI SIMEON) ===
+
+Agent: DIBI SIMEON
+Date: 2026-01-22 00:00:00
+Ville: SAN PEDRO
+Personnes approchées: 20
+
+Détail par produit:
+
+Lait - Premium 16g:
+  Objectif: 0.5
+  Réalisation: 1.0
+  Taux: 200.0%
+  Gratuité: 18
+  Affiche: 3
+
+Lait - Premium 360g:
+  Objectif: 0.16666666666666666
+  Réalisation: 0.0
+  Taux: 0.0%
+  Gratuité: 18
+  Affiche: 3
+
+Lait - Excellence 900g:
+  Objectif: 0.1
+  Réalisation: 0.15
+  Taux: 150.0%
+  Gratuité: 18
+  Affiche: 3
+
+Flocon d'avoine - 50g:
+  Objectif: 0.6
+  Réalisation: 0.0
+  Taux: 0.0%
+  Gratuité: 18
+  Affiche: 3
+
+Flocon d'avoine - 400g:
+  Objectif: 0.15
+  Réalisation: 2.0
+  Taux: 1333.33%
+  Gratuité: 18
+  Affiche: 3
+
+=== COMPARAISON SOURCE VS TRANSFORMÉ ===
+
+Vérification valeurs clés pour DIBI SIMEON:
+Source Ligne 8, Col 1 (Nom): DIBI SIMEON -> Transformé: DIBI SIMEON ✓
+Source Ligne 8, Col 2 (Visites Boutique): 10 -> Inclu dans personnes approchées ✓
+Source Ligne 8, Col 17 (Obj Lait 16g): 0.5 -> Transformé: 0.5 ✓
+Source Ligne 8, Col 42 (Réa Lait 16g): 1 -> Transformé: 1.0 ✓
+Source Ligne 8, Col 47 (Affiches): 3 -> Transformé: 3 ✓
+Source Ligne 8, Col 52 (Gratuits): 18 -> Transformé: 18 ✓
+
+=== STATISTIQUES GLOBALES ===
+
+Total lignes transformées: 90
+Agents uniques: 18
+Catégories: ['Lait', "Flocon d'avoine"]
+Formats: ['Premium 16g', 'Premium 360g', 'Excellence 900g', '50g', '400g']
+Total visites: 1800
+Total ventes: 44.85
+
+=== CONCLUSION ===
+
+✓ Transformation alignée avec la source
+✓ Mapping correct des colonnes
+✓ Calculs automatiques validés
+✓ Structure conforme à la demande

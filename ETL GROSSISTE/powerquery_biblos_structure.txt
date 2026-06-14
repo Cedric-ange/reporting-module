@@ -1,0 +1,256 @@
+// ***************************************************************************************************
+// SCRIPT POWER QUERY POUR STRUCTURE BIBLOS SPÉCIFIQUE
+// Basé sur l'analyse du fichier: REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx
+// Structure demandée: Date, Ville, Grossiste, Categorie produit, Format, Objectif carton, 
+//                     Réalisation carton, Taux de réalisation, Gratuité, Affiche, Personne approchée
+// ***************************************************************************************************
+
+let
+    // ***************************************************************************************************
+    // FONCTION PRINCIPALE DE TRANSFORMATION
+    // ***************************************************************************************************
+    TransformBiblosActivationFile = (filePath as text) as table =>
+    let
+        // Lire le fichier Excel
+        Source = Excel.Workbook(File.Contents(filePath), null, true),
+        
+        // Trouver la feuille (peut avoir différents noms selon le fichier)
+        SheetData = Source{[Item=0,Kind="Sheet"]}[Data],
+        
+        // Convertir en tableau
+        Table = Table.FromRows(SheetData),
+        
+        // Extraire la date et la ville de la ligne 1 (index 1)
+        DateVilleCell = Table{1}[Column1],
+        DateVilleText = Text.From(DateVilleCell),
+        
+        // Extraire la ville (avant le premier "/")
+        Ville = Text.BeforeDelimiter(DateVilleText, "/"),
+        
+        // Extraire la date (après le premier "/")
+        DateText = Text.AfterDelimiter(DateVilleText, "/"),
+        DateFormatted = DateTime.Date(DateTime.FromText(DateText)),
+        
+        // Définir le mapping des produits
+        // Colonnes objectives: 17-21 (index 17-21 dans le tableau)
+        // Colonnes réalisations: 42-46 (index 42-46 dans le tableau)
+        ProductMapping = [
+            [ColumnIndex=17, Category="Lait", Format="Premium 16g"],
+            [ColumnIndex=18, Category="Lait", Format="Premium 360g"],
+            [ColumnIndex=19, Category="Lait", Format="Excellence 900g"],
+            [ColumnIndex=20, Category="Flocon d'avoine", Format="50g"],
+            [ColumnIndex=21, Category="Flocon d'avoine", Format="400g"]
+        ],
+        
+        // Créer une table de transformation
+        ProductTable = Table.FromRecords(ProductMapping),
+        
+        // Filtrer les lignes d'agents (commencent à la ligne 7, exclure la ligne TOTAL)
+        AgentRows = Table.Skip(Table, 7),
+        AgentRowsFiltered = Table.SelectRows(AgentRows, each 
+            let
+                AgentName = Table.Column(AgentRows, "Column1"){Table.PositionOf(AgentRows, _)}
+            in
+                AgentName <> null and AgentName <> "TOTAL "
+        ),
+        
+        // Fonction pour calculer le total des visites (colonnes 2-6)
+        CalculateVisits = (row as record) as number =>
+            let
+                Visits = List.Sum({
+                    row[Column2], row[Column3], row[Column4], row[Column5], row[Column6]
+                })
+            in
+                if Visits = null then 0 else Visits,
+        
+        // Transformer chaque ligne agent en plusieurs lignes produits
+        ExpandedData = Table.AddColumn(AgentRowsFiltered, "TempKey", each 1),
+        
+        // Croiser avec la table des produits
+        ProductCrossJoin = Table.ExpandTableColumn(
+            Table.AddColumn(ExpandedData, "Products", each ProductTable),
+            "Products",
+            {"ColumnIndex", "Category", "Format"},
+            {"ProductIndex", "Category", "Format"}
+        ),
+        
+        // Extraire les valeurs objectives et réalisations
+        FinalData = Table.SelectColumns(ProductCrossJoin, {
+            "Column0", "Column1", "ProductIndex", "Category", "Format"
+        }),
+        
+        // Ajouter les colonnes objectives
+        WithObjective = Table.AddColumn(FinalData, "Objectif carton", each 
+            let
+                RowIndex = [Column0],
+                ProductIndex = [ProductIndex],
+                // L'index de colonne objectif correspond à ProductIndex
+                ObjectiveValue = Record.Field(_, "Column" & Number.ToText(ProductIndex))
+            in
+                if ObjectiveValue = null then 0 else ObjectiveValue
+        ),
+        
+        // Ajouter les colonnes réalisations (décalées de 25: 17->42, 18->43, etc.)
+        WithRealization = Table.AddColumn(WithObjective, "Réalisation carton", each 
+            let
+                ProductIndex = [ProductIndex],
+                RealizationIndex = ProductIndex + 25,
+                RealizationValue = Record.Field(_, "Column" & Number.ToText(RealizationIndex))
+            in
+                if RealizationValue = null then 0 else RealizationValue
+        ),
+        
+        // Calculer le taux de réalisation
+        WithAchievementRate = Table.AddColumn(WithRealization, "Taux de réalisation", each 
+            let
+                Objective = [Objectif carton],
+                Realization = [Réalisation carton]
+            in
+                if Objective > 0 then (Realization / Objective) * 100 else 0
+        ),
+        
+        // Ajouter la gratuité (colonne 52)
+        WithFreebies = Table.AddColumn(WithAchievementRate, "Gratuité", each 
+            let
+                FreebieValue = Record.Field(_, "Column52")
+            in
+                if FreebieValue = null then 0 else FreebieValue
+        ),
+        
+        // Ajouter les affiches (colonne 47)
+        WithPosters = Table.AddColumn(WithFreebies, "Affiche", each 
+            let
+                PosterValue = Record.Field(_, "Column47")
+            in
+                if PosterValue = null then 0 else PosterValue
+        ),
+        
+        // Calculer les personnes approchées (total des visites colonnes 2-6)
+        WithVisits = Table.AddColumn(WithPosters, "Personne approchée", each 
+            let
+                TotalVisits = List.Sum({
+                    Record.Field(_, "Column2"), Record.Field(_, "Column3"),
+                    Record.Field(_, "Column4"), Record.Field(_, "Column5"), Record.Field(_, "Column6")
+                })
+            in
+                if TotalVisits = null then 0 else Number.Round(TotalVisits)
+        ),
+        
+        // Ajouter les colonnes de date et ville
+        WithDateVille = Table.AddColumn(WithVisits, "Date", each DateFormatted),
+        WithCity = Table.AddColumn(WithDateVille, "Ville", each Ville),
+        
+        // Renommer la colonne agent en Grossiste
+        WithGrossiste = Table.RenameColumns(WithCity, {{"Column1", "Grossiste"}}),
+        
+        // Sélectionner et ordonner les colonnes finales
+        FinalColumns = Table.SelectColumns(WithGrossiste, {
+            "Date", "Ville", "Grossiste", "Category", "Format",
+            "Objectif carton", "Réalisation carton", "Taux de réalisation",
+            "Gratuité", "Affiche", "Personne approchée"
+        }),
+        
+        // Renommer Category en Categorie produit
+        RenamedFinal = Table.RenameColumns(FinalColumns, {{"Category", "Categorie produit"}}),
+        
+        // Convertir les types de données
+        TypedData = Table.TransformColumnTypes(RenamedFinal, {
+            {"Date", type date},
+            {"Ville", type text},
+            {"Grossiste", type text},
+            {"Categorie produit", type text},
+            {"Format", type text},
+            {"Objectif carton", type number},
+            {"Réalisation carton", type number},
+            {"Taux de réalisation", type number},
+            {"Gratuité", type number},
+            {"Affiche", type number},
+            {"Personne approchée", Int64.Type}
+        }),
+        
+        // Supprimer les colonnes temporaires
+        CleanData = Table.SelectColumns(TypedData, {
+            "Date", "Ville", "Grossiste", "Categorie produit", "Format",
+            "Objectif carton", "Réalisation carton", "Taux de réalisation",
+            "Gratuité", "Affiche", "Personne approchée"
+        })
+    in
+        CleanData,
+    
+    // ***************************************************************************************************
+    // APPLICATION DU SCRIPT
+    // ***************************************************************************************************
+    
+    // Option 1: Traitement d'un seul fichier spécifique
+    SingleFile = TransformBiblosActivationFile("D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx"),
+    
+    // Option 2: Traitement par lots de tous les fichiers du dossier (décommenter pour utiliser)
+    /*
+    FolderPath = "D:\reporting-module\DATA BIBLOS",
+    SourceFiles = Folder.Files(FolderPath),
+    
+    // Filtrer les fichiers pertinents
+    FilteredFiles = Table.SelectRows(SourceFiles, each 
+        Text.Contains(Text.Upper([Name]), "REPORTING DES VENTES") and
+        Text.Contains(Text.Upper([Name]), "ACTIVATION") and
+        (Text.EndsWith([Name], ".xlsx") or Text.EndsWith([Name], ".xls"))
+    ),
+    
+    // Appliquer la transformation à chaque fichier
+    TransformedFiles = Table.AddColumn(FilteredFiles, "TransformedData", each 
+        TransformBiblosActivationFile([Folder Path] & [Name])
+    ),
+    
+    // Combiner toutes les tables
+    CombinedData = Table.Combine(TransformedFiles[TransformedData])
+    */
+    
+in
+    SingleFile  // Utilisez 'CombinedData' pour l'option 2
+
+// ***************************************************************************************************
+// RÉSULTAT ATTENDU
+// ***************************************************************************************************
+/*
+Structure de la table finale:
+- Date: Date de l'activité
+- Ville: Ville concernée (ex: SAN PEDRO)
+- Grossiste: Nom de l'agent promoteur (ex: DIBI SIMEON)
+- Categorie produit: "Lait" ou "Flocon d'avoine"
+- Format: Format du produit (ex: "Premium 16g", "Excellence 900g", "50g", etc.)
+- Objectif carton: Objectif de vente en cartons
+- Réalisation carton: Réalisation effective en cartons
+- Taux de réalisation: Pourcentage de réalisation (réalisation/objectif * 100)
+- Gratuité: Nombre de gratuits offerts
+- Affiche: Nombre d'affiches posées
+- Personne approchée: Nombre total de personnes visitées/approchées
+*/
+
+// ***************************************************************************************************
+// STATISTIQUES DE L'ÉCHANTILLON TRAITÉ
+// ***************************************************************************************************
+/*
+Fichier source: REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx
+- Total lignes: 90 (18 agents × 5 produits)
+- Agents uniques: 18
+- Date: 22/01/2026
+- Ville: SAN PEDRO
+- Catégories: Lait, Flocon d'avoine
+- Formats: Premium 16g, Premium 360g, Excellence 900g, 50g, 400g
+- Total visites: 1,800
+- Total ventes: 44.85 cartons
+- Taux de réalisation moyen: 230.54%
+*/
+
+// ***************************************************************************************************
+// NOTES D'UTILISATION
+// ***************************************************************************************************
+/*
+1. Copiez ce script dans l'éditeur avancé Power Query
+2. Pour un seul fichier: utilisez l'Option 1 (activée par défaut)
+3. Pour plusieurs fichiers: décommentez l'Option 2 et commentez l'Option 1
+4. Ajustez le chemin du fichier/dossier selon vos besoins
+5. Le script gère automatiquement l'extraction de la date et de la ville
+6. Les calculs de taux de réalisation et visites sont automatiques
+7. La structure finale correspond exactement à votre demande
+*/

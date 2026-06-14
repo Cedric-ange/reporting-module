@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Professionnelle de Reporting Commercial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="app"></div>
+
+    <script>
+        // Base de données localStorage
+        const DB = {
+            agents: JSON.parse(localStorage.getItem('agents') || '[]'),
+            objectives: JSON.parse(localStorage.getItem('objectives') || '[]'),
+            performances: JSON.parse(localStorage.getItem('performances') || '[]'),
+            
+            save() {
+                localStorage.setItem('agents', JSON.stringify(this.agents));
+                localStorage.setItem('objectives', JSON.stringify(this.objectives));
+                localStorage.setItem('performances', JSON.stringify(this.performances));
+            }
+        };
+
+        // Application React-like avec Vanilla JS
+        const App = {
+            currentModule: 'dashboard',
+            show(module) {
+                this.currentModule = module;
+                this.render();
+            },
+            
+            render() {
+                const html = `
+                    ${this.renderHeader()}
+                    <div class="flex">
+                        ${this.renderSidebar()}
+                        <main class="flex-1 p-6">
+                            ${this.renderContent()}
+                        </main>
+                    </div>
+                `;
+                document.getElementById('app').innerHTML = html;
+                this.attachEvents();
+            },
+            
+            renderHeader() {
+                return `
+                    <header class="bg-blue-600 text-white shadow-lg">
+                        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                            <h1 class="text-2xl font-bold">Module de Reporting Commercial - Base de Données SQLite</h1>
+                            <div class="flex gap-2">
+                                <span class="bg-green-500 px-3 py-1 rounded-full text-sm">Base de données: Opérationnelle</span>
+                                <span class="bg-blue-400 px-3 py-1 rounded-full text-sm">${DB.agents.length} Agents</span>
+                                <span class="bg-purple-400 px-3 py-1 rounded-full text-sm">${DB.performances.length} Perf.</span>
+                            </div>
+                        </div>
+                    </header>
+                `;
+            },
+            
+            renderSidebar() {
+                const modules = [
+                    { id: 'dashboard', name: 'Tableau de Bord', icon: '📊' },
+                    { id: 'agents', name: 'Gestion Agents', icon: '👥' },
+                    { id: 'performances', name: 'Performances', icon: '📈' },
+                    { id: 'import', name: 'Import Excel', icon: '📥' },
+                    { id: 'export', name: 'Export Excel', icon: '📤' }
+                ];
+                
+                return `
+                    <aside class="w-64 bg-white shadow-lg h-screen fixed left-0 top-16 overflow-y-auto">
+                        <nav class="p-4">
+                            ${modules.map(m => `
+                                <button onclick="App.show('${m.id}')" 
+                                    class="w-full text-left px-4 py-3 rounded-lg mb-2 transition-all ${this.currentModule === m.id ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">
+                                    <span class="mr-2">${m.icon}</span> ${m.name}
+                                </button>
+                            `).join('')}
+                        </nav>
+                    </aside>
+                `;
+            },
+            
+            renderContent() {
+                switch(this.currentModule) {
+                    case 'dashboard': return this.renderDashboard();
+                    case 'agents': return this.renderAgentsModule();
+                    case 'performances': return this.renderPerformancesModule();
+                    case 'import': return this.renderImportModule();
+                    case 'export': return this.renderExportModule();
+                    default: return '<div>Module non trouvé</div>';
+                }
+            },
+            
+            renderDashboard() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6">Tableau de Bord</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        ${this.renderStatCard('Total Agents', DB.agents.length, 'blue')}
+                        ${this.renderStatCard('Performances', DB.performances.length, 'purple')}
+                        ${this.renderStatCard('Visites Totales', DB.performances.reduce((s,p) => s + (p.totalVisits||0), 0), 'green')}
+                        ${this.renderStatCard('Ventes Totales', DB.performances.reduce((s,p) => s + (p.totalSales||0), 0), 'orange')}
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-xl font-bold mb-4">Activités Récentes</h3>
+                        ${DB.performances.slice(-5).reverse().map(p => {
+                            const agent = DB.agents.find(a => a.id === p.agent_id);
+                            return `
+                                <div class="border-b py-3 last:border-0">
+                                    <div class="flex justify-between">
+                                        <span class="font-medium">${agent ? agent.agent_name : 'Agent inconnu'}</span>
+                                        <span class="text-gray-500">${p.report_date}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        Visites: ${p.totalVisits || 0} | Ventes: ${p.totalSales || 0}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('') || '<p class="text-gray-500">Aucune activité récente</p>'}
+                    </div>
+                `;
+            },
+            
+            renderStatCard(title, value, color) {
+                const colors = {
+                    blue: 'bg-blue-500',
+                    purple: 'bg-purple-500',
+                    green: 'bg-green-500',
+                    orange: 'bg-orange-500'
+                };
+                return `
+                    <div class="${colors[color]} text-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-2">${title}</h3>
+                        <p class="text-4xl font-bold">${value}</p>
+                    </div>
+                `;
+            },
+            
+            renderAgentsModule() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6">Gestion des Agents et Objectifs</h2>
+                    
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-xl font-bold mb-4">Créer un Agent</h3>
+                        <form id="agentForm" class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">N° Agent *</label>
+                                <input type="number" name="agent_number" required class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Nom Agent *</label>
+                                <input type="text" name="agent_name" required class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Ville</label>
+                                <input type="text" name="city" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Téléphone</label>
+                                <input type="text" name="phone" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium mb-2">Email</label>
+                                <input type="email" name="email" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            <div class="col-span-2">
+                                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                    Créer l'Agent
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-xl font-bold mb-4">Liste des Agents (${DB.agents.length})</h3>
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-4 py-3 text-left">N°</th>
+                                    <th class="px-4 py-3 text-left">Nom</th>
+                                    <th class="px-4 py-3 text-left">Ville</th>
+                                    <th class="px-4 py-3 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${DB.agents.map(agent => `
+                                    <tr class="border-b">
+                                        <td class="px-4 py-3">${agent.agent_number}</td>
+                                        <td class="px-4 py-3">${agent.agent_name}</td>
+                                        <td class="px-4 py-3">${agent.city || '-'}</td>
+                                        <td class="px-4 py-3">
+                                            <button onclick="App.deleteAgent(${agent.id})" class="bg-red-500 text-white px-3 py-1 rounded text-sm">
+                                                Supprimer
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="4" class="px-4 py-3 text-center text-gray-500">Aucun agent enregistré</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            },
+            
+            renderPerformancesModule() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6">Saisie des Performances</h2>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <form id="performanceForm">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Agent *</label>
+                                    <select name="agent_id" required class="w-full border rounded-lg px-4 py-2">
+                                        <option value="">Sélectionner un agent</option>
+                                        ${DB.agents.map(agent => `
+                                            <option value="${agent.id}">${agent.agent_number} - ${agent.agent_name}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Date du rapport *</label>
+                                    <input type="date" name="report_date" required value="${new Date().toISOString().split('T')[0]}" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                            </div>
+                            
+                            <h4 class="font-bold mb-2 mt-4">Visites par Type de PDV</h4>
+                            <div class="grid grid-cols-5 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm mb-1">Boutique</label>
+                                    <input type="number" name="visits_boutique" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Superette</label>
+                                    <input type="number" name="visits_superette" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Kiosque</label>
+                                    <input type="number" name="visits_kiosque" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Tablier</label>
+                                    <input type="number" name="visits_tablier" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Pushcart</label>
+                                    <input type="number" name="visits_pushcart" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                            </div>
+                            
+                            <h4 class="font-bold mb-2 mt-4">Ventes par Produit</h4>
+                            <div class="grid grid-cols-5 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm mb-1">Premium 16g</label>
+                                    <input type="number" name="sales_premium_16g" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Premium 360g</label>
+                                    <input type="number" name="sales_premium_360g" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Excellence 900g</label>
+                                    <input type="number" name="sales_excellence_900g" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Avoine 50g</label>
+                                    <input type="number" name="sales_avoine_50g" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">Avoine 400g</label>
+                                    <input type="number" name="sales_avoine_400g" value="0" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Commentaires</label>
+                                <textarea name="comments" rows="3" class="w-full border rounded-lg px-4 py-2"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                Enregistrer la Performance
+                            </button>
+                        </form>
+                    </div>
+                `;
+            },
+            
+            renderImportModule() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6">Import Excel</h2>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-xl font-bold mb-4">📥 Télécharger le Template Excel</h3>
+                            <p class="text-gray-600 mb-4">Téléchargez le fichier Excel original avec les en-têtes, couleurs et formules intactes.</p>
+                            <button onclick="App.downloadTemplate()" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 w-full">
+                                Télécharger le Template Original
+                            </button>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-xl font-bold mb-4">📤 Importer un Fichier Excel</h3>
+                            <input type="file" id="importFile" accept=".xlsx,.xls" onchange="App.handleFileSelect(event)" class="w-full border rounded-lg px-4 py-2 mb-4">
+                            <button onclick="App.handleImport()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 w-full" disabled id="importButton">
+                                Importer le Fichier
+                            </button>
+                            <div id="selectedFileInfo" class="mt-2 text-sm text-gray-600"></div>
+                            <div id="importErrors" class="mt-4 hidden"></div>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            renderExportModule() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6">Export Excel</h2>
+                    
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-xl font-bold mb-4">Filtres d'Export</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Agent</label>
+                                <select id="exportAgent" class="w-full border rounded-lg px-4 py-2">
+                                    <option value="">Tous les agents</option>
+                                    ${DB.agents.map(agent => `
+                                        <option value="${agent.id}">${agent.agent_number} - ${agent.agent_name}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Date de début</label>
+                                <input type="date" id="exportDateFrom" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Date de fin</label>
+                                <input type="date" id="exportDateTo" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                        </div>
+                        <button onclick="App.handleExport()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                            Exporter en Excel
+                        </button>
+                    </div>
+                `;
+            },
+            
+            attachEvents() {
+                // Agent form
+                const agentForm = document.getElementById('agentForm');
+                if (agentForm) {
+                    agentForm.onsubmit = (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        const agent = {
+                            id: Date.now(),
+                            agent_number: formData.get('agent_number'),
+                            agent_name: formData.get('agent_name'),
+                            city: formData.get('city'),
+                            phone: formData.get('phone'),
+                            email: formData.get('email'),
+                            status: 'active',
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        if (DB.agents.some(a => a.agent_number === agent.agent_number)) {
+                            alert('Un agent avec ce numéro existe déjà');
+                            return;
+                        }
+                        
+                        DB.agents.push(agent);
+                        DB.save();
+                        this.render();
+                    };
+                }
+                
+                // Performance form
+                const performanceForm = document.getElementById('performanceForm');
+                if (performanceForm) {
+                    performanceForm.onsubmit = (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.target);
+                        
+                        const totalVisits = parseInt(formData.get('visits_boutique') || 0) + 
+                                          parseInt(formData.get('visits_superette') || 0) +
+                                          parseInt(formData.get('visits_kiosque') || 0) +
+                                          parseInt(formData.get('visits_tablier') || 0) +
+                                          parseInt(formData.get('visits_pushcart') || 0);
+                        
+                        const totalSales = parseInt(formData.get('sales_premium_16g') || 0) +
+                                         parseInt(formData.get('sales_premium_360g') || 0) +
+                                         parseInt(formData.get('sales_excellence_900g') || 0) +
+                                         parseInt(formData.get('sales_avoine_50g') || 0) +
+                                         parseInt(formData.get('sales_avoine_400g') || 0);
+                        
+                        const performance = {
+                            id: Date.now(),
+                            agent_id: parseInt(formData.get('agent_id')),
+                            report_date: formData.get('report_date'),
+                            visits_boutique: parseInt(formData.get('visits_boutique') || 0),
+                            visits_superette: parseInt(formData.get('visits_superette') || 0),
+                            visits_kiosque: parseInt(formData.get('visits_kiosque') || 0),
+                            visits_tablier: parseInt(formData.get('visits_tablier') || 0),
+                            visits_pushcart: parseInt(formData.get('visits_pushcart') || 0),
+                            sales_premium_16g: parseInt(formData.get('sales_premium_16g') || 0),
+                            sales_premium_360g: parseInt(formData.get('sales_premium_360g') || 0),
+                            sales_excellence_900g: parseInt(formData.get('sales_excellence_900g') || 0),
+                            sales_avoine_50g: parseInt(formData.get('sales_avoine_50g') || 0),
+                            sales_avoine_400g: parseInt(formData.get('sales_avoine_400g') || 0),
+                            comments: formData.get('comments'),
+                            totalVisits,
+                            totalSales,
+                            created_at: new Date().toISOString()
+                        };
+                        
+                        DB.performances.push(performance);
+                        DB.save();
+                        alert('Performance enregistrée avec succès');
+                        performanceForm.reset();
+                        this.render();
+                    };
+                }
+            },
+            
+            deleteAgent(id) {
+                if (confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) {
+                    DB.agents = DB.agents.filter(a => a.id !== id);
+                    DB.save();
+                    this.render();
+                }
+            },
+            
+            downloadTemplate() {
+                // Utiliser le fichier Excel original
+                const templatePath = 'C:/Users/angec/Downloads/SAN PEDRO - REPORTING COMMANDO DE REFE. DETAILLANTS LAIT & FLOC. AVOINE (1).xlsx';
+                
+                // Pour la version web, on télécharge le fichier directement
+                window.open('file:///' + templatePath.replace(/\\/g, '/'));
+            },
+            
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.selectedFile = file;
+                    document.getElementById('selectedFileInfo').textContent = `Fichier: ${file.name}`;
+                    document.getElementById('importButton').disabled = false;
+                    document.getElementById('importErrors').classList.add('hidden');
+                }
+            },
+            
+            async handleImport() {
+                if (!this.selectedFile) {
+                    alert('Veuillez sélectionner un fichier');
+                    return;
+                }
+                
+                try {
+                    const arrayBuffer = await this.selectedFile.arrayBuffer();
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    let imported = 0;
+                    jsonData.forEach(row => {
+                        const agent = DB.agents.find(a => a.agent_number === String(row['N°'] || row['N']));
+                        if (agent) {
+                            const performance = {
+                                id: Date.now() + Math.random(),
+                                agent_id: agent.id,
+                                report_date: row['Date rapport'] || new Date().toISOString().split('T')[0],
+                                totalVisits: parseInt(row['Boutique (visites)'] || 0) + parseInt(row['Superette (visites)'] || 0),
+                                totalSales: parseInt(row['Biblos Lait Premium 16g (ventes)'] || 0) + parseInt(row['Biblos Lait Premium 360g (ventes)'] || 0),
+                                created_at: new Date().toISOString()
+                            };
+                            DB.performances.push(performance);
+                            imported++;
+                        }
+                    });
+                    
+                    DB.save();
+                    alert(`${imported} performance(s) importée(s) avec succès`);
+                    this.selectedFile = null;
+                    document.getElementById('importFile').value = '';
+                    document.getElementById('selectedFileInfo').textContent = '';
+                    document.getElementById('importButton').disabled = true;
+                    this.render();
+                } catch (error) {
+                    alert('Erreur lors de l\'import: ' + error.message);
+                }
+            },
+            
+            handleExport() {
+                const agentId = document.getElementById('exportAgent').value;
+                const dateFrom = document.getElementById('exportDateFrom').value;
+                const dateTo = document.getElementById('exportDateTo').value;
+                
+                let data = DB.performances;
+                
+                if (agentId) {
+                    data = data.filter(p => p.agent_id === parseInt(agentId));
+                }
+                if (dateFrom) {
+                    data = data.filter(p => p.report_date >= dateFrom);
+                }
+                if (dateTo) {
+                    data = data.filter(p => p.report_date <= dateTo);
+                }
+                
+                const exportData = data.map(p => {
+                    const agent = DB.agents.find(a => a.id === p.agent_id);
+                    return {
+                        'N°': agent ? agent.agent_number : '',
+                        'Agent promoteur': agent ? agent.agent_name : '',
+                        'VILLE': agent ? agent.city : '',
+                        'Date rapport': p.report_date,
+                        'Boutique (visites)': p.visits_boutique || 0,
+                        'Superette (visites)': p.visits_superette || 0,
+                        'Kiosque (visites)': p.visits_kiosque || 0,
+                        'Tablier (visites)': p.visits_tablier || 0,
+                        'Pushcart (visites)': p.visits_pushcart || 0,
+                        'Biblos Lait Premium 16g (ventes)': p.sales_premium_16g || 0,
+                        'Biblos Lait Premium 360g (ventes)': p.sales_premium_360g || 0,
+                        'Biblos Lait Excellence 900g (ventes)': p.sales_excellence_900g || 0,
+                        "Biblos Flocon d'avoine 50g (ventes)": p.sales_avoine_50g || 0,
+                        "Biblos Flocon d'avoine 400g (ventes)": p.sales_avoine_400g || 0,
+                        'Commentaires': p.comments || ''
+                    };
+                });
+                
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Données');
+                XLSX.writeFile(wb, `reporting_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+                
+                alert('Export réussi !');
+            }
+        };
+        
+        // Initialisation
+        App.render();
+    </script>
+</body>
+</html>

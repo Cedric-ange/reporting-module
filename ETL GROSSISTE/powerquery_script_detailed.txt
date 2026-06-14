@@ -1,0 +1,238 @@
+// ***************************************************************************************************
+// SCRIPT POWER QUERY AVANCÉ POUR FICHIERS REPORTING VENTES BIBLOS
+// Version optimisée basée sur l'analyse de la structure exacte des fichiers
+// ***************************************************************************************************
+
+let
+    // Fonction principale pour transformer un fichier
+    TransformBiblosFile = (filePath as text) as table =>
+    let
+        // Lire le fichier Excel
+        Source = Excel.Workbook(File.Contents(filePath), null, true),
+        
+        // Trouver la première feuille (contenant les données principales)
+        SheetData = Source{[Item=0,Kind="Sheet"]}[Data],
+        
+        // Convertir en tableau
+        Table = Table.FromRows(Source{[Item=0,Kind="Sheet"]}[Data]),
+        
+        // Supprimer les 3 premières lignes de titres
+        SkipHeaders = Table.Skip(Table, 3),
+        
+        // La ligne 4 contient les vrais en-têtes (VILLE, GROSSISTE, dates)
+        Headers = Table.FirstN(SkipHeaders, 1),
+        DataRows = Table.Skip(SkipHeaders, 1),
+        
+        // Créer les en-têtes à partir de la ligne 4
+        HeaderRow = Table.First(Headers),
+        ColumnNames = List.Transform(Table.ToColumns(Headers), each Text.From(_{0})),
+        
+        // Appliquer les en-têtes aux données
+        WithHeaders = Table.FromRows(Table.ToRows(DataRows), ColumnNames),
+        
+        // Renommer les colonnes principales
+        RenamedColumns = Table.RenameColumns(WithHeaders, {
+            {"VILLE", "Ville"},
+            {"GROSSISTE", "Grossiste"}
+        }),
+        
+        // Nettoyer les noms de colonnes qui sont des dates
+        CleanColumnNames = Table.TransformColumnNames(RenamedColumns, each 
+            let
+                OriginalName = _,
+                // Si le nom contient un format de date, le normaliser
+                CleanName = if Text.Contains(OriginalName, "00:00:00") then 
+                    "Date_" & DateTime.Text(DateTime.From(OriginalName), "yyyy-MM-dd")
+                else
+                    OriginalName
+            in
+                CleanName
+        ),
+        
+        // Filtrer les lignes :
+        // - Garder uniquement les lignes de données (villes + grossistes)
+        // - Supprimer les lignes de produits (contenant "Lait", "Flocon", etc.)
+        // - Supprimer la ligne TOTAL
+        FilteredRows = Table.SelectRows(CleanColumnNames, each 
+            let
+                VilleValue = [Ville],
+                IsValidRow = VilleValue <> null and 
+                             VilleValue <> "TOTAL" and
+                             VilleValue <> "Objectif de vente (carton)" and
+                             not Text.Contains(Text.Upper(VilleValue), "LAIT") and
+                             not Text.Contains(Text.Upper(VilleValue), "FLOCON") and
+                             not Text.Contains(Text.Upper(VilleValue), "AVOINE") and
+                             not Text.Contains(Text.Upper(VilleValue), "AFFICHE") and
+                             // Vérifier que la colonne Ville contient un nom de ville valide
+                             Text.Length(Text.Trim(VilleValue)) > 2
+            in
+                IsValidRow
+        ),
+        
+        // Nettoyer les données: remplacer null par 0 dans les colonnes numériques
+        NumericColumns = List.Select(Table.ColumnNames(FilteredRows), each 
+            not List.Contains({"Ville", "Grossiste"}, _)
+        ),
+        
+        ReplaceNulls = Table.ReplaceValue(FilteredRows, null, 0, Replacer.ReplaceValue, NumericColumns),
+        
+        // Ajouter des colonnes de métadonnées
+        WithMetadata = Table.AddColumn(ReplaceNulls, "Nom_Fichier", each File.Name(filePath)),
+        
+        // Extraire la date du fichier si possible (basé sur le numéro dans le nom)
+        WithFileDate = Table.AddColumn(WithMetadata, "Date_Fichier", each 
+            let
+                FileName = File.Name(filePath),
+                // Extraire le numéro du fichier (ex: "5" dans "...INDUST 5.xlsx")
+                FileNumber = Text.Select(FileName, {"0".."9"}),
+                FileDate = if Text.Length(FileNumber) > 0 then 
+                            #date(2026, 1, Number.From(Text.Middle(FileNumber, 0, 1))) 
+                           else 
+                            null
+            in
+                FileDate
+        ),
+        
+        // Convertir les types de données
+        ChangedTypes = Table.TransformColumnTypes(WithFileDate, {
+            {"Ville", type text},
+            {"Grossiste", type text},
+            {"Nom_Fichier", type text},
+            {"Date_Fichier", type date}
+        })
+    in
+        ChangedTypes,
+    
+    // ***************************************************************************************************
+    // CONFIGURATION DU TRAITEMENT
+    // ***************************************************************************************************
+    
+    // Option 1: Traiter UN SEUL FICHIER
+    // Décommentez cette section et commentez l'Option 2 pour traiter un seul fichier
+    /*
+    SingleFilePath = "D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx",
+    FinalResult = TransformBiblosFile(SingleFilePath)
+    */
+    
+    // Option 2: Traiter TOUS LES FICHIERS du dossier (RECOMMANDÉ)
+    // Cette option compile tous les fichiers similaires
+    
+    // Lister tous les fichiers du dossier
+    FolderPath = "D:\reporting-module\DATA BIBLOS",
+    SourceFiles = Folder.Files(FolderPath),
+    
+    // Filtrer uniquement les fichiers de reporting ventes activation grossiste
+    FilteredFiles = Table.SelectRows(SourceFiles, each 
+        let
+            UpperName = Text.Upper([Name]),
+            IsReportingFile = Text.Contains(UpperName, "REPORTING DES VENTES") and
+                              Text.Contains(UpperName, "ACTIVATION GROSSISTE") and
+                              (Text.EndsWith([Name], ".xlsx") or Text.EndsWith([Name], ".xls")),
+            // Exclure les fichiers de référence qui ont une structure différente
+            IsNotRefFile = not Text.Contains(UpperName, "COMMANDO") and
+                           not Text.Contains(UpperName, "DETAILLANTS")
+        in
+            IsReportingFile and IsNotRefFile
+    ),
+    
+    // Appliquer la transformation à chaque fichier
+    TransformedFiles = Table.AddColumn(FilteredFiles, "TransformedData", each 
+        TransformBiblosFile([Folder Path] & [Name])
+    ),
+    
+    // Supprimer les colonnes métadonnées inutiles
+    CleanMetadata = Table.SelectColumns(TransformedFiles, {"Name", "TransformedData"}),
+    
+    // Combiner toutes les tables en une seule
+    CombinedTable = Table.Combine(CleanMetadata[TransformedData]),
+    
+    // ÉTAPE FINALE: UNPIVOT POUR STRUCTURE ANALYTIQUE
+    // Cette étape transforme les données en format "long" plus facile à analyser dans Power BI
+    
+    // Sélectionner les colonnes d'identifiant
+    IDColumns = {"Ville", "Grossiste", "Nom_Fichier", "Date_Fichier"},
+    
+    // Sélectionner les colonnes de données (celles qui commencent par "Date_")
+    DateColumns = List.Select(Table.ColumnNames(CombinedTable), each Text.StartsWith(_, "Date_")),
+    
+    // Sélectionner les colonnes restantes (produits, objectifs, etc.)
+    DataColumns = List.Difference(Table.ColumnNames(CombinedTable), IDColumns & DateColumns),
+    
+    // Créer la version unpivotée pour les colonnes de dates
+    UnpivotDates = Table.Unpivot(CombinedTable, DateColumns, "Date_Colonne", "Valeur_Date"),
+    
+    // Nettoyer les noms de colonnes unpivotées
+    CleanUnpivot = Table.TransformColumns(UnpivotDates, {
+        {"Date_Colonne", each Text.Replace(_, "Date_", "")}
+    }),
+    
+    // Convertir la colonne de date en type date
+    WithDateType = Table.TransformColumnTypes(CleanUnpivot, {
+        {"Date_Colonne", type date}
+    }),
+    
+    // Renommer pour plus de clarté
+    FinalRenamed = Table.RenameColumns(WithDateType, {
+        {"Date_Colonne", "Date_Vente"},
+        {"Valeur_Date", "Montant_Vente"}
+    }),
+    
+    // Conversion finale des types
+    FinalTypes = Table.TransformColumnTypes(FinalRenamed, {
+        {"Montant_Vente", type number}
+    })
+    
+in
+    FinalTypes
+
+// ***************************************************************************************************
+// NOTES D'UTILISATION ET PERSONNALISATION
+// ***************************************************************************************************
+
+/*
+INSTRUCTIONS POUR POWER BI:
+
+1. IMPORTATION DU SCRIPT:
+   - Ouvrez Power BI Desktop
+   - Allez dans "Données" > "Obtenir des données" > "Autre" > "Requête vide"
+   - Dans l'éditeur Power Query, cliquez sur "Éditeur avancé"
+   - Copiez-collez ce script
+
+2. CONFIGURATION:
+   - Modifiez le chemin du dossier: FolderPath = "D:\reporting-module\DATA BIBLOS"
+   - Pour un seul fichier, commentez l'Option 2 et décommentez l'Option 1
+
+3. AJUSTEMENTS FILTRAGE:
+   - Si certains fichiers ne sont pas inclus, ajustez les conditions dans "FilteredFiles"
+   - Si certaines lignes sont mal filtrées, modifiez les conditions dans "FilteredRows"
+
+4. STRUCTURE DES DONNÉES RÉSULTANTES:
+   - Ville: Nom de la ville
+   - Grossiste: Nom du grossiste
+   - Nom_Fichier: Nom du fichier source
+   - Date_Fichier: Date déduite du nom de fichier
+   - Date_Vente: Date de la vente (colonne unpivotée)
+   - Montant_Vente: Montant de la vente pour cette date
+
+5. POUR POWER BI:
+   - Créez des relations avec vos autres tables de référence
+   - Créez des mesures DAX pour les analyses (TOTAL, MOYENNE, etc.)
+   - Utilisez les segments Ville, Grossiste, Date pour vos visualisations
+
+6. PERSONNALISATION AVANCÉE:
+   - Si vous avez besoin de séparer les différents types de produits, 
+     vous pouvez ajouter des étapes de transformation spécifiques
+   - Pour les totaux par fichier, ajoutez une étape de groupement
+*/
+
+// ***************************************************************************************************
+// VERSION SIMPLIFIÉE (SANS UNPIVOT)
+// ***************************************************************************************************
+
+/*
+let
+    SingleFilePath = "D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx",
+    Result = TransformBiblosFile(SingleFilePath)
+in
+    Result
+*/

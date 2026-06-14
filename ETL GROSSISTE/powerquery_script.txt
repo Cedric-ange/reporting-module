@@ -1,0 +1,172 @@
+let
+    // ***************************************************************************************************
+    // SCRIPT POWER QUERY POUR TRANSFORMER LES FICHIERS DE REPORTING VENTES BIBLOS
+    // Auteur : Devin AI
+    // Date : 2026-06-13
+    // ***************************************************************************************************
+    
+    // ÉTAPE 1 : Créer une fonction pour traiter un fichier individuel
+    TransformFile = (filePath as text) as table =>
+    let
+        Source = Excel.Workbook(File.Contents(filePath), null, true),
+        // Trouver la feuille principale (généralement la première)
+        FirstSheet = Source{[Item=0,Kind="Sheet"]}[Data],
+        
+        // Convertir en tableau et supprimer les premières lignes d'en-tête
+        #"Table supprimée lignes supérieures" = Table.Skip(FirstSheet,3),
+        
+        // Les en-têtes sont maintenant sur la première ligne
+        #"En-têtes promus" = Table.PromoteHeaders(#"Table supprimée lignes supérieures", [PromoteAllScalars=true]),
+        
+        // Renommer les colonnes principales pour faciliter le traitement
+        #"Colonnes renommées" = Table.RenameColumns(#"En-têtes promus",{
+            {"VILLE", "Ville"},
+            {"GROSSISTE", "Grossiste"}
+        }),
+        
+        // Supprimer les lignes vides et de totaux
+        #"Lignes filtrées" = Table.SelectRows(#"Colonnes renommées", each ([Ville] <> null and [Ville] <> "TOTAL" and [Grossiste] <> null)),
+        
+        // Supprimer les lignes qui ne contiennent pas de données de vente (lignes de produits)
+        #"Filtrer lignes de données" = Table.SelectRows(#"Lignes filtrées", each 
+            // Vérifier si c'est une ligne de données (ville commence par une majuscule et n'est pas un nom de produit)
+            Text.StartsWith(Text.Upper([Ville]), Text.Upper(Text.Start([Ville], 1))) and 
+            not Text.Contains([Ville], "Lait") and
+            not Text.Contains([Ville], "Flocon") and
+            not Text.Contains([Ville], "Affiche")
+        ),
+        
+        // Ajouter une colonne avec le nom du fichier source
+        #"Ajout nom fichier" = Table.AddColumn(#"Filtrer lignes de données", "Fichier_Source", each File.Name(filePath)),
+        
+        // Extraire la date du nom de fichier si possible (format: REPORTING DES VENTES... 5.xlsx)
+        #"Extraction date" = Table.AddColumn(#"Ajout nom fichier", "Date_Extraction", each DateTime.LocalNow()),
+        
+        // Nettoyer les noms de colonnes pour les dates
+        #"Colonnes nettoyées" = Table.TransformColumnNames(#"Extraction date", each 
+            if Text.Contains(_, "00:00:00") then DateTime.Text(DateTime.From(_), "yyyy-MM-dd") else _
+        )
+    in
+        #"Colonnes nettoyées",
+    
+    // ÉTAPE 2 : Définir les fichiers à traiter
+    // Option A : Traiter un fichier spécifique
+    // SingleFile = TransformFile("D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx"),
+    
+    // Option B : Traiter tous les fichiers du dossier
+    SourceFiles = Folder.Files("D:\reporting-module\DATA BIBLOS"),
+    
+    // Filtrer uniquement les fichiers Excel de reporting
+    #"Fichiers filtrés" = Table.SelectRows(SourceFiles, each 
+        Text.Contains(Text.Upper([Name]), "REPORTING DES VENTES") and
+        (Text.EndsWith([Name], ".xlsx") or Text.EndsWith([Name], ".xls"))
+    ),
+    
+    // Appliquer la transformation à tous les fichiers
+    #"Transformation personnalisée" = Table.AddColumn(#"Fichiers filtrés", "TransformedData", each TransformFile([Folder Path] & [Name])),
+    
+    // Supprimer les colonnes métadonnées sauf le nom de fichier
+    #"Colonnes supprimées" = Table.SelectColumns(#"Transformation personnalisée", {"Name", "TransformedData"}),
+    
+    // Développer les tables transformées
+    #"Données développées" = Table.ExpandTableColumn(#"Colonnes supprimées", "TransformedData", 
+        {"Ville", "Grossiste", "Fichier_Source", "Date_Extraction"} & 
+        List.Skip(Table.ColumnNames(TransformFile("D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx")), 4),
+        {"Ville", "Grossiste", "Fichier_Source", "Date_Extraction"} & 
+        List.Skip(Table.ColumnNames(TransformFile("D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx")), 4)
+    ),
+    
+    // ÉTAPE 3 : Pivoter les données pour avoir une structure tabulaire
+    // Sélectionner les colonnes d'identifiant
+    #"Colonnes identifiant" = Table.SelectColumns(#"Données développées", {"Ville", "Grossiste", "Fichier_Source", "Date_Extraction"}),
+    
+    // Sélectionner les colonnes de données (dates et chiffres)
+    #"Colonnes données" = Table.SelectColumns(#"Données développées", 
+        List.Select(Table.ColumnNames(#"Données développées"), each 
+            not List.Contains({"Ville", "Grossiste", "Fichier_Source", "Date_Extraction"}, _)
+        )
+    ),
+    
+    // Pour une structure plus simple, on peut également unpivoter les données
+    // Cette partie dépend de la structure exacte de vos colonnes de dates
+    
+    // ÉTAPE 4 : Nettoyage final
+    #"Types de données modifiés" = Table.TransformColumnTypes(#"Données développées",{
+        {"Ville", type text},
+        {"Grossiste", type text},
+        {"Fichier_Source", type text},
+        {"Date_Extraction", type datetime}
+    }),
+    
+    // Remplacer les valeurs null par 0 pour les colonnes numériques
+    #"Remplacement valeurs" = Table.ReplaceValue(#"Types de données modifiés",null,0,Replacer.ReplaceValue,
+        List.Select(Table.ColumnNames(#"Types de données modifiés"), each 
+            not List.Contains({"Ville", "Grossiste", "Fichier_Source", "Date_Extraction"}, _)
+        )
+    )
+in
+    #"Remplacement valeurs"
+
+// ***************************************************************************************************
+// VERSION SIMPLIFIÉE POUR UN SEUL FICHIER
+// ***************************************************************************************************
+
+/*
+let
+    // Pour traiter un seul fichier
+    Source = Excel.Workbook(File.Contents("D:\reporting-module\DATA BIBLOS\REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx"), null, true),
+    FirstSheet = Source{[Item=0,Kind="Sheet"]}[Data],
+    
+    // Supprimer les 3 premières lignes (titres)
+    #"Header Rows" = Table.Skip(FirstSheet,3),
+    
+    // Utiliser la 4ème ligne comme en-têtes
+    #"Promoted Headers" = Table.PromoteHeaders(#"Header Rows", [PromoteAllScalars=true]),
+    
+    // Renommer les colonnes principales
+    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers",{
+        {"VILLE", "Ville"},
+        {"GROSSISTE", "Grossiste"}
+    }),
+    
+    // Filtrer les lignes de données (supprimer totaux et lignes vides)
+    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each 
+        [Ville] <> null and 
+        [Ville] <> "TOTAL" and 
+        [Grossiste] <> null and
+        // Conserver uniquement les lignes où Ville contient des noms de villes (pas de produits)
+        Text.Length(Text.Trim([Ville])) > 2
+    ),
+    
+    // Nettoyer les noms de colonnes de dates
+    #"Cleaned Column Names" = Table.TransformColumnNames(#"Filtered Rows", each 
+        if Text.Contains(_, "00:00:00") then 
+            "Date_" & DateTime.Text(DateTime.From(_), "yyyy-MM-dd") 
+        else _ 
+    ),
+    
+    // Convertir les types de données
+    #"Changed Type" = Table.TransformColumnTypes(#"Cleaned Column Names",{
+        {"Ville", type text},
+        {"Grossiste", type text}
+    })
+    
+    // Pour les colonnes numériques, vous devrez peut-être ajuster les types manuellement
+    // dans Power BI après l'importation
+in
+    #"Changed Type"
+*/
+
+// ***************************************************************************************************
+// INSTRUCTIONS D'UTILISATION DANS POWER BI
+// ***************************************************************************************************
+
+/*
+1. Copiez ce script dans l'éditeur Power Query (Données > Transformer les données)
+2. Ajustez le chemin du dossier/fichier selon vos besoins
+3. Pour traiter plusieurs fichiers, utilisez la version principale (commentée "Option B")
+4. Pour un seul fichier, utilisez la version simplifiée (commentée en bas)
+5. Ajustez le filtrage des lignes selon vos besoins spécifiques
+6. Vous devrez peut-être ajuster la gestion des colonnes de dates selon la structure exacte
+7. Après importation dans Power BI, définissez les relations et les mesures selon vos besoins analytiques
+*/

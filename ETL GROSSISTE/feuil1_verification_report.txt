@@ -1,0 +1,50 @@
+=== FEUIL1 TRANSFORMATION VERIFICATION ===
+
+Source: REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST.xlsx
+Sheet: Feuil1
+Shape: (22, 218)
+
+=== STRUCTURE ANALYSIS ===
+Row 0: Title
+Row 1: Subtitle
+Row 2: Empty
+Row 3: Headers (VILLE, GROSSISTE, dates: 24/01, 26/01, 27/01, 28/01, 29/01, 30/01, 31/01, TOTAL)
+Row 4: Sub-headers (Objectif, persons, client, realization, gratuit, rate)
+Row 5: Empty
+Row 6: Product categories (Lait, Flocon d'avoine)
+Row 7: Product formats (16G, 360G, 900G, 25KG Excell, 25KG Super, 50G, 400G)
+Rows 8-12: Data by city/grossiste
+Row 13: TOTAL
+
+=== COLUMN MAPPING ===
+For each date block:
+  - Objective: base_col
+  - Persons: base_col + 7
+  - Realization: base_col + 9
+  - Gratuit: base_col + 16
+  - Achievement rate: base_col + 20
+  - Poster: base_col + 19 (when available)
+
+=== TRANSFORMATION STATISTICS ===
+Total rows transformed: 245
+Unique cities: 5
+Unique grossistes: 5
+Date range: 2026-01-24 00:00:00 to 2026-01-31 00:00:00
+Categories: ['Lait', "Flocon d'avoine"]
+Formats: ['16G', '360G', '900G', '25KG Excell', '25KG Super', '50G', '400G']
+Total visits: 1466
+Total sales: 211.5
+Average achievement rate: 3.78%
+
+=== SAMPLE DATA ===
+        Date      Ville       Grossiste Categorie produit       Format  Objectif carton  Réalisation carton  Taux de réalisation  Gratuité  Affiche  Personne approchée
+0 2026-01-24  BONDOUKOU  TAHIROU AMADOU              Lait          16G                5                 0.0                  0.0       0.0      0.0                  28
+1 2026-01-24  BONDOUKOU  TAHIROU AMADOU              Lait         360G                5                 0.0                  0.0       0.0      0.0                   0
+2 2026-01-24  BONDOUKOU  TAHIROU AMADOU              Lait         900G                1                 0.0                  0.0       0.0      0.0                   0
+3 2026-01-24  BONDOUKOU  TAHIROU AMADOU              Lait  25KG Excell                1                 0.0                  0.0       0.0      0.0                   0
+4 2026-01-24  BONDOUKOU  TAHIROU AMADOU              Lait   25KG Super                1                 0.0                  0.0       0.0      0.0                   0
+5 2026-01-24  BONDOUKOU  TAHIROU AMADOU   Flocon d'avoine          50G                5                 0.0                  0.0       0.0      0.0                   0
+6 2026-01-24  BONDOUKOU  TAHIROU AMADOU   Flocon d'avoine         400G                5                 0.0                  0.0       0.0      0.0                   0
+7 2026-01-26  BONDOUKOU  TAHIROU AMADOU              Lait          16G                5                 1.0                 20.0       2.0      0.0                  55
+8 2026-01-26  BONDOUKOU  TAHIROU AMADOU              Lait         360G                5                 0.0                  0.0       0.0      0.2                   3
+9 2026-01-26  BONDOUKOU  TAHIROU AMADOU              Lait         900G                1                 0.0                  0.0       1.0      0.0                   1

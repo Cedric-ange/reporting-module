@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(ls)",
+      "Exec(dir)",
+      "Exec(Get-ChildItem)",
+      "Exec(npm install)",
+      "Exec(npm run)",
+      "Exec(npm start)",
+      "Exec(cd backend)",
+      "Exec(curl)",
+      "Exec(cd frontend)",
+      "Exec(Get-Process)",
+      "Exec(Remove-Item)",
+      "Exec(cd)",
+      "Exec($env:BROWSER=\"none\")",
+      "Exec(netstat)",
+      "Exec(taskkill)",
+      "Exec(agent_number)",
+      "Exec(agent_id)",
+      "Exec(report_date)",
+      "Exec(Invoke-RestMethod)",
+      "Exec(N°)",
+      "Exec(powershell)"
+    ]
+  }
+}

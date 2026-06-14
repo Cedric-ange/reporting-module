@@ -1,0 +1,1347 @@
+Shape: (22, 218)
+
+=== ROW BY ROW ANALYSIS ===
+
+Row 0:
+  Col 0: ACTIVATION  GROSSISTES LAIT ET FLOCON D'AVOINE BIBLOS
+
+Row 1:
+  Col 0: REPORTING DES VENTES JOURNALIERES
+
+Row 2:
+  [EMPTY]
+
+Row 3:
+  Col 0: VILLE
+  Col 1: GROSSISTE
+  Col 2: 2026-01-24 00:00:00
+  Col 29: 2026-01-26 00:00:00
+  Col 56: 2026-01-27 00:00:00
+  Col 83: 2026-01-28 00:00:00
+  Col 110: 2026-01-29 00:00:00
+  Col 137: 2026-01-30 00:00:00
+  Col 164: 2026-01-31 00:00:00
+  Col 191: TOTAL
+
+Row 4:
+  Col 2: Objectif de vente (carton)
+  Col 9: personnes approchées
+  Col 10: Client acheteur
+  Col 11: Réalisation (carton)
+  Col 18: Gratuit (chapelet & sachet)
+  Col 22: Taux de réalisation
+  Col 29: Objectif de vente (carton)
+  Col 36: personnes approchées
+  Col 37: Client acheteur
+  Col 38: Réalisation (carton)
+  Col 45: Gratuit (chapelet & sachet)
+  Col 49: Taux de réalisation
+  Col 56: Objectif de vente (carton)
+  Col 63: personnes approchées
+  Col 64: Client acheteur
+  Col 65: Réalisation (carton)
+  Col 72: Gratuit (chapelet & sachet)
+  Col 76: Taux de réalisation
+  Col 83: Objectif de vente (carton)
+  Col 90: personnes approchées
+  Col 91: Client acheteur
+  Col 92: Réalisation (carton)
+  Col 99: Gratuit (chapelet & sachet)
+  Col 103: Taux de réalisation
+  Col 110: Objectif de vente (carton)
+  Col 117: personnes approchées
+  Col 118: Client acheteur
+  Col 119: Réalisation (carton)
+  Col 126: Gratuit (chapelet & sachet)
+  Col 130: Taux de réalisation
+  Col 137: Objectif de vente (carton)
+  Col 144: personnes approchées
+  Col 145: Client acheteur
+  Col 146: Réalisation (carton)
+  Col 153: Gratuit (chapelet & sachet)
+  Col 157: Taux de réalisation
+  Col 164: Objectif de vente (carton)
+  Col 171: personnes approchées
+  Col 172: Client acheteur
+  Col 173: Réalisation (carton)
+  Col 180: Gratuit (chapelet & sachet)
+  Col 184: Taux de réalisation
+  Col 191: Objectif de vente (carton)
+  Col 198: personnes approchées
+  Col 199: Client acheteur
+  Col 200: Réalisation (carton)
+  Col 207: Gratuit (chapelet & sachet)
+  Col 211: Taux de réalisation
+
+Row 5:
+  [EMPTY]
+
+Row 6:
+  Col 2: Lait
+  Col 7: Flocon d'avoine
+  Col 11: Lait
+  Col 16: Flocon d'avoine
+  Col 22: Lait
+  Col 27: Flocon d'avoine
+  Col 29: Lait
+  Col 34: Flocon d'avoine
+  Col 38: Lait
+  Col 43: Flocon d'avoine
+  Col 49: Lait
+  Col 54: Flocon d'avoine
+  Col 56: Lait
+  Col 61: Flocon d'avoine
+  Col 65: Lait
+  Col 70: Flocon d'avoine
+  Col 76: Lait
+  Col 81: Flocon d'avoine
+  Col 83: Lait
+  Col 88: Flocon d'avoine
+  Col 92: Lait
+  Col 97: Flocon d'avoine
+  Col 103: Lait
+  Col 108: Flocon d'avoine
+  Col 110: Lait
+  Col 115: Flocon d'avoine
+  Col 119: Lait
+  Col 124: Flocon d'avoine
+  Col 130: Lait
+  Col 135: Flocon d'avoine
+  Col 137: Lait
+  Col 142: Flocon d'avoine
+  Col 146: Lait
+  Col 151: Flocon d'avoine
+  Col 157: Lait
+  Col 162: Flocon d'avoine
+  Col 164: Lait
+  Col 169: Flocon d'avoine
+  Col 173: Lait
+  Col 178: Flocon d'avoine
+  Col 184: Lait
+  Col 189: Flocon d'avoine
+  Col 191: Lait
+  Col 196: Flocon d'avoine
+  Col 200: Lait
+  Col 205: Flocon d'avoine
+  Col 211: Lait
+  Col 216: Flocon d'avoine
+
+Row 7:
+  Col 2: 16G
+  Col 3: 360G
+  Col 4: 900G
+  Col 5: 25KG Excell
+  Col 6: 25KG Super
+  Col 7: 50G
+  Col 8: 400G
+  Col 11: 16G
+  Col 12: 360G
+  Col 13: 900G
+  Col 14: 25KG Excell
+  Col 15: 25KG Super
+  Col 16: 50G
+  Col 17: 400G
+  Col 18: Lait 16G
+  Col 19: Lait 900G
+  Col 20: Flocon d'avoine 50g
+  Col 21: Affiche
+  Col 22: 16G
+  Col 23: 360G
+  Col 24: 900G
+  Col 25: 25KG Excell
+  Col 26: 25KG Super
+  Col 27: 50G
+  Col 28: 400G
+  Col 29: 16G
+  Col 30: 360G
+  Col 31: 900G
+  Col 32: 25KG Excell
+  Col 33: 25KG Super
+  Col 34: 50G
+  Col 35: 400G
+  Col 38: 16G
+  Col 39: 360G
+  Col 40: 900G
+  Col 41: 25KG Excell
+  Col 42: 25KG Super
+  Col 43: 50G
+  Col 44: 400G
+  Col 45: Lait 16G
+  Col 46: Lait 900G
+  Col 47: Flocon d'avoine 50g
+  Col 48: Affiche
+  Col 49: 16G
+  Col 50: 360G
+  Col 51: 900G
+  Col 52: 25KG Excell
+  Col 53: 25KG Super
+  Col 54: 50G
+  Col 55: 400G
+  Col 56: 16G
+  Col 57: 360G
+  Col 58: 900G
+  Col 59: 25KG Excell
+  Col 60: 25KG Super
+  Col 61: 50G
+  Col 62: 400G
+  Col 65: 16G
+  Col 66: 360G
+  Col 67: 900G
+  Col 68: 25KG Excell
+  Col 69: 25KG Super
+  Col 70: 50G
+  Col 71: 400G
+  Col 72: Lait 16G
+  Col 73: Lait 900G
+  Col 74: Flocon d'avoine 50g
+  Col 75: Affiche
+  Col 76: 16G
+  Col 77: 360G
+  Col 78: 900G
+  Col 79: 25KG Excell
+  Col 80: 25KG Super
+  Col 81: 50G
+  Col 82: 400G
+  Col 83: 16G
+  Col 84: 360G
+  Col 85: 900G
+  Col 86: 25KG Excell
+  Col 87: 25KG Super
+  Col 88: 50G
+  Col 89: 400G
+  Col 92: 16G
+  Col 93: 360G
+  Col 94: 900G
+  Col 95: 25KG Excell
+  Col 96: 25KG Super
+  Col 97: 50G
+  Col 98: 400G
+  Col 99: Lait 16G
+  Col 100: Lait 900G
+  Col 101: Flocon d'avoine 50g
+  Col 102: Affiche
+  Col 103: 16G
+  Col 104: 360G
+  Col 105: 900G
+  Col 106: 25KG Excell
+  Col 107: 25KG Super
+  Col 108: 50G
+  Col 109: 400G
+  Col 110: 16G
+  Col 111: 360G
+  Col 112: 900G
+  Col 113: 25KG Excell
+  Col 114: 25KG Super
+  Col 115: 50G
+  Col 116: 400G
+  Col 119: 16G
+  Col 120: 360G
+  Col 121: 900G
+  Col 122: 25KG Excell
+  Col 123: 25KG Super
+  Col 124: 50G
+  Col 125: 400G
+  Col 126: Lait 16G
+  Col 127: Lait 900G
+  Col 128: Flocon d'avoine 50g
+  Col 129: Affiche
+  Col 130: 16G
+  Col 131: 360G
+  Col 132: 900G
+  Col 133: 25KG Excell
+  Col 134: 25KG Super
+  Col 135: 50G
+  Col 136: 400G
+  Col 137: 16G
+  Col 138: 360G
+  Col 139: 900G
+  Col 140: 25KG Excell
+  Col 141: 25KG Super
+  Col 142: 50G
+  Col 143: 400G
+  Col 146: 16G
+  Col 147: 360G
+  Col 148: 900G
+  Col 149: 25KG Excell
+  Col 150: 25KG Super
+  Col 151: 50G
+  Col 152: 400G
+  Col 153: Lait 16G
+  Col 154: Lait 900G
+  Col 155: Flocon d'avoine 50g
+  Col 156: Affiche
+  Col 157: 16G
+  Col 158: 360G
+  Col 159: 900G
+  Col 160: 25KG Excell
+  Col 161: 25KG Super
+  Col 162: 50G
+  Col 163: 400G
+  Col 164: 16G
+  Col 165: 360G
+  Col 166: 900G
+  Col 167: 25KG Excell
+  Col 168: 25KG Super
+  Col 169: 50G
+  Col 170: 400G
+  Col 173: 16G
+  Col 174: 360G
+  Col 175: 900G
+  Col 176: 25KG Excell
+  Col 177: 25KG Super
+  Col 178: 50G
+  Col 179: 400G
+  Col 180: Lait 16G
+  Col 181: Lait 900G
+  Col 182: Flocon d'avoine 50g
+  Col 183: Affiche
+  Col 184: 16G
+  Col 185: 360G
+  Col 186: 900G
+  Col 187: 25KG Excell
+  Col 188: 25KG Super
+  Col 189: 50G
+  Col 190: 400G
+  Col 191: 16G
+  Col 192: 360G
+  Col 193: 900G
+  Col 194: 25KG Excell
+  Col 195: 25KG Super
+  Col 196: 50G
+  Col 197: 400G
+  Col 200: 16G
+  Col 201: 360G
+  Col 202: 900G
+  Col 203: 25KG Excell
+  Col 204: 25KG Super
+  Col 205: 50G
+  Col 206: 400G
+  Col 207: Lait 16G
+  Col 208: Lait 900G
+  Col 209: Flocon d'avoine 50g
+  Col 210: Affiche
+  Col 211: 16G
+  Col 212: 360G
+  Col 213: 900G
+  Col 214: 25KG Excell
+  Col 215: 25KG Super
+  Col 216: 50G
+  Col 217: 400G
+
+Row 8:
+  Col 0: BONDOUKOU
+  Col 1: TAHIROU AMADOU
+  Col 2: 5
+  Col 3: 5
+  Col 4: 1
+  Col 5: 1
+  Col 6: 1
+  Col 7: 5
+  Col 8: 5
+  Col 9: 28
+  Col 10: 0
+  Col 22: 0
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 0
+  Col 27: 0
+  Col 28: 0
+  Col 29: 5
+  Col 30: 5
+  Col 31: 1
+  Col 32: 1
+  Col 33: 1
+  Col 34: 5
+  Col 35: 5
+  Col 36: 55
+  Col 37: 3
+  Col 38: 1
+  Col 43: 1
+  Col 44: 1
+  Col 45: 2
+  Col 47: 1
+  Col 48: 0
+  Col 49: 0.2
+  Col 50: 0
+  Col 51: 0
+  Col 52: 0
+  Col 53: 0
+  Col 54: 0.2
+  Col 55: 0.2
+  Col 56: 5
+  Col 57: 5
+  Col 58: 1
+  Col 59: 1
+  Col 60: 1
+  Col 61: 5
+  Col 62: 5
+  Col 63: 35
+  Col 64: 2
+  Col 65: 2
+  Col 72: 2
+  Col 76: 0.4
+  Col 77: 0
+  Col 78: 0
+  Col 79: 0
+  Col 80: 0
+  Col 81: 0
+  Col 82: 0
+  Col 83: 5
+  Col 84: 5
+  Col 85: 1
+  Col 86: 1
+  Col 87: 1
+  Col 88: 5
+  Col 89: 5
+  Col 90: 30
+  Col 91: 2
+  Col 92: 1
+  Col 98: 1
+  Col 99: 1
+  Col 101: 1
+  Col 103: 0.2
+  Col 104: 0
+  Col 105: 0
+  Col 106: 0
+  Col 107: 0
+  Col 108: 0
+  Col 109: 0.2
+  Col 110: 5
+  Col 111: 5
+  Col 112: 1
+  Col 113: 1
+  Col 114: 1
+  Col 115: 5
+  Col 116: 5
+  Col 117: 27
+  Col 118: 0
+  Col 130: 0
+  Col 131: 0
+  Col 132: 0
+  Col 133: 0
+  Col 134: 0
+  Col 135: 0
+  Col 136: 0
+  Col 137: 5
+  Col 138: 5
+  Col 139: 1
+  Col 140: 1
+  Col 141: 1
+  Col 142: 5
+  Col 143: 5
+  Col 144: 35
+  Col 145: 2
+  Col 146: 1
+  Col 152: 1
+  Col 153: 1
+  Col 155: 1
+  Col 157: 0.2
+  Col 158: 0
+  Col 159: 0
+  Col 160: 0
+  Col 161: 0
+  Col 162: 0
+  Col 163: 0.2
+  Col 164: 5
+  Col 165: 5
+  Col 166: 1
+  Col 167: 1
+  Col 168: 1
+  Col 169: 5
+  Col 170: 5
+  Col 171: 27
+  Col 172: 0
+  Col 184: 0
+  Col 185: 0
+  Col 186: 0
+  Col 187: 0
+  Col 188: 0
+  Col 189: 0
+  Col 190: 0
+  Col 191: 35
+  Col 192: 35
+  Col 193: 7
+  Col 194: 7
+  Col 195: 7
+  Col 196: 35
+  Col 197: 35
+  Col 198: 237
+  Col 199: 9
+  Col 200: 5
+  Col 201: 0
+  Col 202: 0
+  Col 203: 0
+  Col 204: 0
+  Col 205: 1
+  Col 206: 3
+  Col 207: 6
+  Col 208: 0
+  Col 209: 3
+  Col 210: 0
+  Col 211: 0.14285714285714285
+  Col 212: 0
+  Col 213: 0
+  Col 214: 0
+  Col 215: 0
+  Col 216: 0.02857142857142857
+  Col 217: 0.08571428571428572
+
+Row 9:
+  Col 0: ABENGOUROU
+  Col 1: DISTRIBAF
+  Col 2: 5
+  Col 3: 5
+  Col 4: 1
+  Col 5: 1
+  Col 6: 1
+  Col 7: 5
+  Col 8: 5
+  Col 9: 36
+  Col 10: 1
+  Col 11: 1
+  Col 18: 1
+  Col 21: 0
+  Col 22: 0.2
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 0
+  Col 27: 0
+  Col 28: 0
+  Col 29: 5
+  Col 30: 5
+  Col 31: 1
+  Col 32: 1
+  Col 33: 1
+  Col 34: 5
+  Col 35: 5
+  Col 36: 45
+  Col 37: 0
+  Col 49: 0
+  Col 50: 0
+  Col 51: 0
+  Col 52: 0
+  Col 53: 0
+  Col 54: 0
+  Col 55: 0
+  Col 56: 5
+  Col 57: 5
+  Col 58: 1
+  Col 59: 1
+  Col 60: 1
+  Col 61: 5
+  Col 62: 5
+  Col 63: 56
+  Col 64: 0
+  Col 76: 0
+  Col 77: 0
+  Col 78: 0
+  Col 79: 0
+  Col 80: 0
+  Col 81: 0
+  Col 82: 0
+  Col 83: 5
+  Col 84: 5
+  Col 85: 1
+  Col 86: 1
+  Col 87: 1
+  Col 88: 5
+  Col 89: 5
+  Col 90: 12
+  Col 103: 0
+  Col 104: 0
+  Col 105: 0
+  Col 106: 0
+  Col 107: 0
+  Col 108: 0
+  Col 109: 0
+  Col 110: 5
+  Col 111: 5
+  Col 112: 1
+  Col 113: 1
+  Col 114: 1
+  Col 115: 5
+  Col 116: 5
+  Col 117: 25
+  Col 118: 0
+  Col 130: 0
+  Col 131: 0
+  Col 132: 0
+  Col 133: 0
+  Col 134: 0
+  Col 135: 0
+  Col 136: 0
+  Col 137: 5
+  Col 138: 5
+  Col 139: 1
+  Col 140: 1
+  Col 141: 1
+  Col 142: 5
+  Col 143: 5
+  Col 144: 36
+  Col 145: 0
+  Col 157: 0
+  Col 158: 0
+  Col 159: 0
+  Col 160: 0
+  Col 161: 0
+  Col 162: 0
+  Col 163: 0
+  Col 164: 5
+  Col 165: 5
+  Col 166: 1
+  Col 167: 1
+  Col 168: 1
+  Col 169: 5
+  Col 170: 5
+  Col 171: 40
+  Col 172: 0
+  Col 184: 0
+  Col 185: 0
+  Col 186: 0
+  Col 187: 0
+  Col 188: 0
+  Col 189: 0
+  Col 190: 0
+  Col 191: 35
+  Col 192: 35
+  Col 193: 7
+  Col 194: 7
+  Col 195: 7
+  Col 196: 35
+  Col 197: 35
+  Col 198: 250
+  Col 199: 1
+  Col 200: 1
+  Col 201: 0
+  Col 202: 0
+  Col 203: 0
+  Col 204: 0
+  Col 205: 0
+  Col 206: 0
+  Col 207: 1
+  Col 208: 0
+  Col 209: 0
+  Col 210: 0
+  Col 211: 0.02857142857142857
+  Col 212: 0
+  Col 213: 0
+  Col 214: 0
+  Col 215: 0
+  Col 216: 0
+  Col 217: 0
+
+Row 10:
+  Col 0: BOUAFLE
+  Col 1: ETS SABAH SOUHEIL
+  Col 2: 5
+  Col 3: 5
+  Col 4: 1
+  Col 5: 1
+  Col 6: 1
+  Col 7: 5
+  Col 8: 5
+  Col 22: 0
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 0
+  Col 27: 0
+  Col 28: 0
+  Col 29: 5
+  Col 30: 5
+  Col 31: 1
+  Col 32: 1
+  Col 33: 1
+  Col 34: 5
+  Col 35: 5
+  Col 49: 0
+  Col 50: 0
+  Col 51: 0
+  Col 52: 0
+  Col 53: 0
+  Col 54: 0
+  Col 55: 0
+  Col 56: 5
+  Col 57: 5
+  Col 58: 1
+  Col 59: 1
+  Col 60: 1
+  Col 61: 5
+  Col 62: 5
+  Col 76: 0
+  Col 77: 0
+  Col 78: 0
+  Col 79: 0
+  Col 80: 0
+  Col 81: 0
+  Col 82: 0
+  Col 83: 5
+  Col 84: 5
+  Col 85: 1
+  Col 86: 1
+  Col 87: 1
+  Col 88: 5
+  Col 89: 5
+  Col 103: 0
+  Col 104: 0
+  Col 105: 0
+  Col 106: 0
+  Col 107: 0
+  Col 108: 0
+  Col 109: 0
+  Col 110: 5
+  Col 111: 5
+  Col 112: 1
+  Col 113: 1
+  Col 114: 1
+  Col 115: 5
+  Col 116: 5
+  Col 130: 0
+  Col 131: 0
+  Col 132: 0
+  Col 133: 0
+  Col 134: 0
+  Col 135: 0
+  Col 136: 0
+  Col 137: 5
+  Col 138: 5
+  Col 139: 1
+  Col 140: 1
+  Col 141: 1
+  Col 142: 5
+  Col 143: 5
+  Col 157: 0
+  Col 158: 0
+  Col 159: 0
+  Col 160: 0
+  Col 161: 0
+  Col 162: 0
+  Col 163: 0
+  Col 164: 5
+  Col 165: 5
+  Col 166: 1
+  Col 167: 1
+  Col 168: 1
+  Col 169: 5
+  Col 170: 5
+  Col 184: 0
+  Col 185: 0
+  Col 186: 0
+  Col 187: 0
+  Col 188: 0
+  Col 189: 0
+  Col 190: 0
+  Col 191: 35
+  Col 192: 35
+  Col 193: 7
+  Col 194: 7
+  Col 195: 7
+  Col 196: 35
+  Col 197: 35
+  Col 198: 0
+  Col 199: 0
+  Col 200: 0
+  Col 201: 0
+  Col 202: 0
+  Col 203: 0
+  Col 204: 0
+  Col 205: 0
+  Col 206: 0
+  Col 207: 0
+  Col 208: 0
+  Col 209: 0
+  Col 210: 0
+  Col 211: 0
+  Col 212: 0
+  Col 213: 0
+  Col 214: 0
+  Col 215: 0
+  Col 216: 0
+  Col 217: 0
+
+Row 11:
+  Col 0: BOUAKE
+  Col 1: SODIAMA
+  Col 2: 5
+  Col 3: 5
+  Col 4: 1
+  Col 5: 1
+  Col 6: 1
+  Col 7: 5
+  Col 8: 5
+  Col 9: 62
+  Col 10: 13
+  Col 11: 2
+  Col 15: 19
+  Col 16: 4
+  Col 18: 2
+  Col 19: 19
+  Col 20: 4
+  Col 21: 13
+  Col 22: 0.4
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 19
+  Col 27: 0.8
+  Col 28: 0
+  Col 29: 5
+  Col 30: 5
+  Col 31: 1
+  Col 32: 1
+  Col 33: 1
+  Col 34: 5
+  Col 35: 5
+  Col 36: 56
+  Col 37: 16
+  Col 38: 1
+  Col 41: 37
+  Col 43: 2
+  Col 44: 1
+  Col 45: 1
+  Col 46: 37
+  Col 47: 3
+  Col 48: 16
+  Col 49: 0.2
+  Col 50: 0
+  Col 51: 0
+  Col 52: 37
+  Col 53: 0
+  Col 54: 0.4
+  Col 55: 0.2
+  Col 56: 5
+  Col 57: 5
+  Col 58: 1
+  Col 59: 1
+  Col 60: 1
+  Col 61: 5
+  Col 62: 5
+  Col 63: 32
+  Col 64: 6
+  Col 67: 0.5
+  Col 68: 14
+  Col 70: 1
+  Col 73: 14
+  Col 74: 1
+  Col 75: 6
+  Col 76: 0
+  Col 77: 0
+  Col 78: 0.5
+  Col 79: 14
+  Col 80: 0
+  Col 81: 0.2
+  Col 82: 0
+  Col 83: 5
+  Col 84: 5
+  Col 85: 1
+  Col 86: 1
+  Col 87: 1
+  Col 88: 5
+  Col 89: 5
+  Col 90: 40
+  Col 91: 8
+  Col 95: 15
+  Col 97: 1
+  Col 100: 15
+  Col 101: 1
+  Col 103: 0
+  Col 104: 0
+  Col 105: 0
+  Col 106: 15
+  Col 107: 0
+  Col 108: 0.2
+  Col 109: 0
+  Col 110: 5
+  Col 111: 5
+  Col 112: 1
+  Col 113: 1
+  Col 114: 1
+  Col 115: 5
+  Col 116: 5
+  Col 117: 42
+  Col 118: 6
+  Col 121: 1
+  Col 122: 78
+  Col 127: 79
+  Col 129: 6
+  Col 130: 0
+  Col 131: 0
+  Col 132: 1
+  Col 133: 78
+  Col 134: 0
+  Col 135: 0
+  Col 136: 0
+  Col 137: 5
+  Col 138: 5
+  Col 139: 1
+  Col 140: 1
+  Col 141: 1
+  Col 142: 5
+  Col 143: 5
+  Col 144: 30
+  Col 145: 3
+  Col 150: 3
+  Col 151: 1
+  Col 154: 3
+  Col 155: 1
+  Col 157: 0
+  Col 158: 0
+  Col 159: 0
+  Col 160: 0
+  Col 161: 3
+  Col 162: 0.2
+  Col 163: 0
+  Col 164: 5
+  Col 165: 5
+  Col 166: 1
+  Col 167: 1
+  Col 168: 1
+  Col 169: 5
+  Col 170: 5
+  Col 171: 32
+  Col 172: 2
+  Col 176: 2
+  Col 181: 2
+  Col 184: 0
+  Col 185: 0
+  Col 186: 0
+  Col 187: 2
+  Col 188: 0
+  Col 189: 0
+  Col 190: 0
+  Col 191: 35
+  Col 192: 35
+  Col 193: 7
+  Col 194: 7
+  Col 195: 7
+  Col 196: 35
+  Col 197: 35
+  Col 198: 294
+  Col 199: 54
+  Col 200: 3
+  Col 201: 0
+  Col 202: 1.5
+  Col 203: 146
+  Col 204: 22
+  Col 205: 9
+  Col 206: 1
+  Col 207: 3
+  Col 208: 169
+  Col 209: 10
+  Col 210: 41
+  Col 211: 0.08571428571428572
+  Col 212: 0
+  Col 213: 0.21428571428571427
+  Col 214: 20.857142857142858
+  Col 215: 3.142857142857143
+  Col 216: 0.2571428571428571
+  Col 217: 0.02857142857142857
+
+Row 12:
+  Col 0: KORHOGO
+  Col 1: ETS KONE & FRERE
+  Col 2: 5
+  Col 3: 5
+  Col 4: 1
+  Col 5: 1
+  Col 6: 1
+  Col 7: 5
+  Col 8: 5
+  Col 9: 38
+  Col 10: 1
+  Col 16: 1
+  Col 20: 1
+  Col 21: 0
+  Col 22: 0
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 0
+  Col 27: 0.2
+  Col 28: 0
+  Col 29: 5
+  Col 30: 5
+  Col 31: 1
+  Col 32: 1
+  Col 33: 1
+  Col 34: 5
+  Col 35: 5
+  Col 36: 61
+  Col 37: 1
+  Col 38: 3
+  Col 43: 3
+  Col 45: 3
+  Col 47: 3
+  Col 48: 0
+  Col 49: 0.6
+  Col 50: 0
+  Col 51: 0
+  Col 52: 0
+  Col 53: 0
+  Col 54: 0.6
+  Col 55: 0
+  Col 56: 5
+  Col 57: 5
+  Col 58: 1
+  Col 59: 1
+  Col 60: 1
+  Col 61: 5
+  Col 62: 5
+  Col 63: 69
+  Col 64: 3
+  Col 68: 6
+  Col 71: 1
+  Col 73: 6
+  Col 74: 1
+  Col 76: 0
+  Col 77: 0
+  Col 78: 0
+  Col 79: 6
+  Col 80: 0
+  Col 81: 0
+  Col 82: 0.2
+  Col 83: 5
+  Col 84: 5
+  Col 85: 1
+  Col 86: 1
+  Col 87: 1
+  Col 88: 5
+  Col 89: 5
+  Col 90: 72
+  Col 91: 1
+  Col 97: 1
+  Col 101: 1
+  Col 103: 0
+  Col 104: 0
+  Col 105: 0
+  Col 106: 0
+  Col 107: 0
+  Col 108: 0.2
+  Col 109: 0
+  Col 110: 5
+  Col 111: 5
+  Col 112: 1
+  Col 113: 1
+  Col 114: 1
+  Col 115: 5
+  Col 116: 5
+  Col 117: 52
+  Col 118: 1
+  Col 124: 1
+  Col 128: 1
+  Col 130: 0
+  Col 131: 0
+  Col 132: 0
+  Col 133: 0
+  Col 134: 0
+  Col 135: 0.2
+  Col 136: 0
+  Col 137: 5
+  Col 138: 5
+  Col 139: 1
+  Col 140: 1
+  Col 141: 1
+  Col 142: 5
+  Col 143: 5
+  Col 144: 72
+  Col 145: 2
+  Col 151: 2
+  Col 155: 2
+  Col 157: 0
+  Col 158: 0
+  Col 159: 0
+  Col 160: 0
+  Col 161: 0
+  Col 162: 0.4
+  Col 163: 0
+  Col 164: 5
+  Col 165: 5
+  Col 166: 1
+  Col 167: 1
+  Col 168: 1
+  Col 169: 5
+  Col 170: 5
+  Col 171: 59
+  Col 172: 1
+  Col 176: 1
+  Col 181: 1
+  Col 184: 0
+  Col 185: 0
+  Col 186: 0
+  Col 187: 1
+  Col 188: 0
+  Col 189: 0
+  Col 190: 0
+  Col 191: 35
+  Col 192: 35
+  Col 193: 7
+  Col 194: 7
+  Col 195: 7
+  Col 196: 35
+  Col 197: 35
+  Col 198: 423
+  Col 199: 10
+  Col 200: 3
+  Col 201: 0
+  Col 202: 0
+  Col 203: 7
+  Col 204: 0
+  Col 205: 8
+  Col 206: 1
+  Col 207: 3
+  Col 208: 7
+  Col 209: 9
+  Col 210: 0
+  Col 211: 0.08571428571428572
+  Col 212: 0
+  Col 213: 0
+  Col 214: 1
+  Col 215: 0
+  Col 216: 0.22857142857142856
+  Col 217: 0.02857142857142857
+
+Row 13:
+  Col 0: TOTAL
+  Col 2: 25
+  Col 3: 25
+  Col 4: 5
+  Col 5: 5
+  Col 6: 5
+  Col 7: 25
+  Col 8: 25
+  Col 9: 164
+  Col 10: 15
+  Col 11: 3
+  Col 12: 0
+  Col 13: 0
+  Col 14: 0
+  Col 15: 19
+  Col 16: 5
+  Col 17: 0
+  Col 18: 3
+  Col 19: 19
+  Col 20: 5
+  Col 21: 13
+  Col 22: 0.12
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 3.8
+  Col 27: 0.2
+  Col 28: 0
+  Col 29: 25
+  Col 30: 25
+  Col 31: 5
+  Col 32: 5
+  Col 33: 5
+  Col 34: 25
+  Col 35: 25
+  Col 36: 217
+  Col 37: 20
+  Col 38: 5
+  Col 39: 0
+  Col 40: 0
+  Col 41: 37
+  Col 42: 0
+  Col 43: 6
+  Col 44: 2
+  Col 45: 6
+  Col 46: 37
+  Col 47: 7
+  Col 48: 16
+  Col 49: 0.2
+  Col 50: 0
+  Col 51: 0
+  Col 52: 7.4
+  Col 53: 0
+  Col 54: 0.24
+  Col 55: 0.08
+  Col 56: 25
+  Col 57: 25
+  Col 58: 5
+  Col 59: 5
+  Col 60: 5
+  Col 61: 25
+  Col 62: 25
+  Col 63: 192
+  Col 64: 11
+  Col 65: 2
+  Col 66: 0
+  Col 67: 0.5
+  Col 68: 20
+  Col 69: 0
+  Col 70: 1
+  Col 71: 1
+  Col 72: 2
+  Col 73: 20
+  Col 74: 2
+  Col 75: 6
+  Col 76: 0.08
+  Col 77: 0
+  Col 78: 0.1
+  Col 79: 4
+  Col 80: 0
+  Col 81: 0.04
+  Col 82: 0.04
+  Col 83: 25
+  Col 84: 25
+  Col 85: 5
+  Col 86: 5
+  Col 87: 5
+  Col 88: 25
+  Col 89: 25
+  Col 90: 154
+  Col 91: 11
+  Col 92: 1
+  Col 93: 0
+  Col 94: 0
+  Col 95: 15
+  Col 96: 0
+  Col 97: 2
+  Col 98: 1
+  Col 99: 1
+  Col 100: 15
+  Col 101: 3
+  Col 102: 0
+  Col 103: 0.04
+  Col 104: 0
+  Col 105: 0
+  Col 106: 3
+  Col 107: 0
+  Col 108: 0.08
+  Col 109: 0.04
+  Col 110: 25
+  Col 111: 25
+  Col 112: 5
+  Col 113: 5
+  Col 114: 5
+  Col 115: 25
+  Col 116: 25
+  Col 117: 146
+  Col 118: 7
+  Col 119: 0
+  Col 120: 0
+  Col 121: 1
+  Col 122: 78
+  Col 123: 0
+  Col 124: 1
+  Col 125: 0
+  Col 126: 0
+  Col 127: 79
+  Col 128: 1
+  Col 129: 6
+  Col 130: 0
+  Col 131: 0
+  Col 132: 0.2
+  Col 133: 15.6
+  Col 134: 0
+  Col 135: 0.04
+  Col 136: 0
+  Col 137: 25
+  Col 138: 25
+  Col 139: 5
+  Col 140: 5
+  Col 141: 5
+  Col 142: 25
+  Col 143: 25
+  Col 144: 173
+  Col 145: 7
+  Col 146: 1
+  Col 147: 0
+  Col 148: 0
+  Col 149: 0
+  Col 150: 3
+  Col 151: 3
+  Col 152: 1
+  Col 153: 1
+  Col 154: 3
+  Col 155: 4
+  Col 156: 0
+  Col 157: 0.04
+  Col 158: 0
+  Col 159: 0
+  Col 160: 0
+  Col 161: 0.6
+  Col 162: 0.12
+  Col 163: 0.04
+  Col 164: 25
+  Col 165: 25
+  Col 166: 5
+  Col 167: 5
+  Col 168: 5
+  Col 169: 25
+  Col 170: 25
+  Col 171: 158
+  Col 172: 3
+  Col 173: 0
+  Col 174: 0
+  Col 175: 0
+  Col 176: 3
+  Col 177: 0
+  Col 178: 0
+  Col 179: 0
+  Col 180: 0
+  Col 181: 3
+  Col 182: 0
+  Col 183: 0
+  Col 184: 0
+  Col 185: 0
+  Col 186: 0
+  Col 187: 0.6
+  Col 188: 0
+  Col 189: 0
+  Col 190: 0
+  Col 191: 175
+  Col 192: 175
+  Col 193: 35
+  Col 194: 35
+  Col 195: 35
+  Col 196: 175
+  Col 197: 175
+  Col 198: 1204
+  Col 199: 74
+  Col 200: 12
+  Col 201: 0
+  Col 202: 1.5
+  Col 203: 153
+  Col 204: 22
+  Col 205: 18
+  Col 206: 5
+  Col 207: 13
+  Col 208: 176
+  Col 209: 22
+  Col 210: 41
+  Col 211: 0.06857142857142857
+  Col 212: 0
+  Col 213: 0.04285714285714286
+  Col 214: 4.371428571428571
+  Col 215: 0.6285714285714286
+  Col 216: 0.10285714285714286
+  Col 217: 0.02857142857142857
+
+Row 14:
+  [EMPTY]
+
+Row 15:
+  [EMPTY]
+
+Row 16:
+  [EMPTY]
+
+Row 17:
+  [EMPTY]
+
+Row 18:
+  [EMPTY]
+
+Row 19:
+  [EMPTY]
+
+Row 20:
+  [EMPTY]
+
+Row 21:
+  Col 3: 2
+

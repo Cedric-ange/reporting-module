@@ -1,0 +1,187 @@
+================================================================================
+GUIDE DE VÉRIFICATION VISUELLE - TRANSFORMATION BIBLOS
+================================================================================
+
+📋 INSTRUCTIONS POUR VÉRIFIER MANUELLEMENT
+
+1. Ouvrez le fichier source: REPORTING DES VENTES ACTIVATION GROSSISTE BIBLOS INDUST 5.xlsx
+2. Allez dans la feuille 'JEUDI 22 JANV'
+3. Suivez les exemples ci-dessous pour vérifier la transformation
+
+================================================================================
+EXEMPLE 1: VÉRIFICATION AGENT DIBI SIMEON
+================================================================================
+
+📍 DANS LE FICHIER SOURCE:
+- Allez à la LIGNE 8 (c'est la ligne 8, pas la ligne 7)
+- Regardez la COLONNE 1: Vous devriez voir 'DIBI SIMEON'
+
+Valeurs à vérifier dans le fichier source:
+  • Cellule A8 (L8C1): DIBI SIMEON
+  • Cellule C8 (L8C2): 10 (Boutique)
+  • Cellule D8 (L8C3): 3 (Superette)
+  • Cellule E8 (L8C4): 2 (Kiosque)
+  • Cellule F8 (L8C5): 2 (Tablier)
+  • Cellule G8 (L8C6): 3 (Pushcart)
+  • Cellule R8 (L8C17): 0.5 (Obj Lait 16g)
+  • Cellule S8 (L8C18): 0.16666666666666666 (Obj Lait 360g)
+  • Cellule T8 (L8C19): 0.1 (Obj Lait 900g)
+  • Cellule AP8 (L8C42): 1 (Réa Lait 16g)
+  • Cellule AQ8 (L8C43): nan (Réa Lait 360g)
+  • Cellule AR8 (L8C44): 0.15 (Réa Lait 900g)
+  • Cellule AV8 (L8C47): 3 (Affiches)
+  • Cellicle BA8 (L8C52): 18 (Gratuits)
+
+📊 DANS LE FICHIER TRANSFORMÉ:
+- Ouvrez: biblos_transformed_database.xlsx
+- Allez dans la feuille 'Base_Données'
+- Cherchez les lignes avec 'DIBI SIMEON' dans la colonne Grossiste
+
+Valeurs transformées à vérifier:
+
+  Ligne 2:
+  • Date: 22/01/2026
+  • Ville: SAN PEDRO
+  • Grossiste: DIBI SIMEON
+  • Catégorie: Lait
+  • Format: Premium 16g
+  • Objectif: 0.5
+  • Réalisation: 1.0
+  • Taux: 200.0%
+  • Gratuité: 18
+  • Affiche: 3
+  • Personnes approchées: 20
+
+  Ligne 3:
+  • Date: 22/01/2026
+  • Ville: SAN PEDRO
+  • Grossiste: DIBI SIMEON
+  • Catégorie: Lait
+  • Format: Premium 360g
+  • Objectif: 0.1666666666666667
+  • Réalisation: 0.0
+  • Taux: 0.0%
+  • Gratuité: 18
+  • Affiche: 3
+  • Personnes approchées: 20
+
+  Ligne 4:
+  • Date: 22/01/2026
+  • Ville: SAN PEDRO
+  • Grossiste: DIBI SIMEON
+  • Catégorie: Lait
+  • Format: Excellence 900g
+  • Objectif: 0.1
+  • Réalisation: 0.15
+  • Taux: 150.0%
+  • Gratuité: 18
+  • Affiche: 3
+  • Personnes approchées: 20
+
+  Ligne 5:
+  • Date: 22/01/2026
+  • Ville: SAN PEDRO
+  • Grossiste: DIBI SIMEON
+  • Catégorie: Flocon d'avoine
+  • Format: 50g
+  • Objectif: 0.6
+  • Réalisation: 0.0
+  • Taux: 0.0%
+  • Gratuité: 18
+  • Affiche: 3
+  • Personnes approchées: 20
+
+  Ligne 6:
+  • Date: 22/01/2026
+  • Ville: SAN PEDRO
+  • Grossiste: DIBI SIMEON
+  • Catégorie: Flocon d'avoine
+  • Format: 400g
+  • Objectif: 0.15
+  • Réalisation: 2.0
+  • Taux: 1333.33%
+  • Gratuité: 18
+  • Affiche: 3
+  • Personnes approchées: 20
+
+✅ CALCULS À VÉRIFIER MANUELLEMENT:
+  • Total visites: 10 + 3 + 2 + 2 + 3 = 20
+  • Taux Lait 16g: (1 / 0.5) × 100 = 200.0%
+
+================================================================================
+EXEMPLE 2: VÉRIFICATION AGENT KONATE MARIAM
+================================================================================
+
+📍 DANS LE FICHIER SOURCE:
+- Allez à la LIGNE 16
+- Regardez la COLONNE 1: Vous devriez voir 'KONATE MARIAM'
+
+Valeurs clés à vérifier:
+  • Cellule A16 (L16C1): KONATE MARIAM
+  • Cellule R16 (L16C17): 0.5 (Obj Lait 16g)
+  • Cellule AP16 (L16C42): 1 (Réa Lait 16g)
+  • Cellule AV16 (L16C47): 3 (Affiches)
+  • Cellule BA16 (L16C52): 24 (Gratuits)
+
+📊 DANS LE FICHIER TRANSFORMÉ:
+- Cherchez 'KONATE MARIAM' dans la colonne Grossiste
+
+Valeurs transformées:
+
+  Lait - Premium 16g:
+  • Objectif: 0.5
+  • Réalisation: 1.0
+  • Taux: 200.0%
+
+  Lait - Premium 360g:
+  • Objectif: 0.1666666666666667
+  • Réalisation: 0.0
+  • Taux: 0.0%
+
+  Lait - Excellence 900g:
+  • Objectif: 0.1
+  • Réalisation: 0.3
+  • Taux: 300.0%
+
+  Flocon d'avoine - 50g:
+  • Objectif: 0.6
+  • Réalisation: 0.5
+  • Taux: 83.33%
+
+  Flocon d'avoine - 400g:
+  • Objectif: 0.15
+  • Réalisation: 1.0
+  • Taux: 666.67%
+
+✅ CALCULS À VÉRIFIER:
+  • Taux Lait 16g: (1 / 0.5) × 100 = 200.0%
+
+================================================================================
+RÉCAPITULATIF DES VÉRIFICATIONS
+================================================================================
+
+Pour chaque agent, vérifiez:
+1. ✓ Nom de l'agent identique dans source et transformé
+2. ✓ Objectifs (colonnes 17-21 source → colonne Objectif carton)
+3. ✓ Réalisations (colonnes 42-46 source → colonne Réalisation carton)
+4. ✓ Taux de réalisation calculé correctement
+5. ✓ Somme des visites (colonnes 2-6 source → Personne approchée)
+6. ✓ Affiches (colonne 47 source → colonne Affiche)
+7. ✓ Gratuits (colonne 52 source → colonne Gratuité)
+
+📊 STATISTIQUES GLOBALES:
+  • Total agents dans source: 18
+  • Total agents transformés: 18
+  • Total lignes transformées: 90
+  • Total visites source: 1800 (20 visites × 18 agents)
+  • Total visites transformé: 1800 ✓
+
+================================================================================
+🎯 CONCLUSION
+================================================================================
+
+Si toutes les vérifications ci-dessus sont correctes,
+alors la transformation est VALIDÉE et alignée avec la source.
+
+Vous pouvez utiliser le fichier 'biblos_transformed_database.xlsx'
+en toute confiance pour votre analyse Power BI.

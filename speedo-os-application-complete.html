@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedo OS - Application de Reporting Commercial</title>
+    <style>
+        :root {
+            --color-primary: #185FA5;
+            --color-primary-hover: #0C447C;
+            --color-sidebar: #1A3A6B;
+            --color-sidebar-hover: #0F172A;
+            --color-success: #27500A;
+            --color-warning: #633806;
+            --color-danger: #791F1F;
+            --color-info: #0C447C;
+            --color-surface-primary: #FFFFFF;
+            --color-surface-secondary: #F8F9FA;
+            --color-surface-tertiary: #F0F4FA;
+            --color-border: #E2E8F0;
+            --color-text-primary: #0F172A;
+            --color-text-secondary: #475569;
+            --color-text-tertiary: #94A3B8;
+            --color-success-light: #EAF3DE;
+            --color-warning-light: #FAEEDA;
+            --color-danger-light: #FCEBEB;
+            --color-success-medium: #639922;
+            --color-warning-medium: #BA7517;
+            --color-danger-medium: #E24B4A;
+            --color-primary-light: #E6F1FB;
+            --color-primary-medium: #B5D4F4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        /* Sidebar modulaire */
+        .sidebar {
+            width: 280px;
+            background: var(--color-sidebar);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        
+        .sidebar-toggle {
+            position: fixed;
+            left: 280px;
+            top: 20px;
+            z-index: 1001;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .sidebar-toggle:hover {
+            background: var(--color-primary-hover);
+            transform: translateX(2px);
+        }
+        
+        .sidebar.collapsed ~ .sidebar-toggle {
+            left: 20px;
+            transform: translateX(-2px);
+        }
+        
+        .sidebar.collapsed ~ .sidebar-toggle:hover {
+            transform: translateX(2px);
+        }
+        
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: white;
+        }
+        
+        .sidebar-header p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 16px;
+        }
+        
+        .stats-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-chip {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+            transition: all 0.2s;
+        }
+        
+        .stat-chip:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .nav-item {
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            color: rgba(255,255,255,0.8);
+            margin: 2px 0;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: var(--color-primary);
+            color: white;
+            padding-left: 24px;
+        }
+        
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left-color: var(--color-primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-item-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--color-surface-primary);
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--color-border);
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--color-surface-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--color-primary);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-medium) 100%);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(24,95,165,0.15);
+            border: 1px solid var(--color-primary-medium);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 0 8px 0;
+            color: var(--color-info);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--color-info);
+        }
+        
+        /* Filters */
+        .filters-bar {
+            background: var(--color-surface-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-group label {
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 10px 14px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            min-width: 150px;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(24,95,165,0.15);
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            background: var(--color-surface-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .data-table th {
+            background: var(--color-surface-secondary);
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-size: 13px;
+        }
+        
+        .data-table tr:hover {
+            background: var(--color-surface-tertiary);
+        }
+        
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--color-surface-primary);
+            color: var(--color-text-primary);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(24,95,165,0.15);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24,95,165,0.3);
+        }
+        
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: var(--color-success-medium);
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: var(--color-danger-medium);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--color-primary-light);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: var(--color-success-light);
+            color: var(--color-success);
+            border-left-color: var(--color-success);
+        }
+        
+        .alert-danger {
+            background: var(--color-danger-light);
+            color: var(--color-danger);
+            border-left-color: var(--color-danger);
+        }
+        
+        .alert-info {
+            background: var(--color-primary-light);
+            color: var(--color-info);
+            border-left-color: var(--color-primary);
+        }
+        
+        .alert-warning {
+            background: var(--color-warning-light);
+            color: var(--color-warning);
+            border-left-color: var(--color-warning);
+        }
+        
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Module content */
+        .module-content {
+            display: none;
+        }
+        
+        .module-content.active {
+            display: block;
+        }
+        
+        /* File upload */
+        .file-upload-area {
+            border: 2px dashed var(--color-primary);
+            border-radius: 12px;
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--color-surface-secondary);
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--color-primary-hover);
+            background: var(--color-primary-light);
+            transform: translateY(-2px);
+        }
+        
+        .file-upload-area input {
+            display: none;
+        }
+        
+        /* Performance grid */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+        
+        .perf-card {
+            background: var(--color-surface-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            transition: all 0.2s;
+        }
+        
+        .perf-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .perf-card h4 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+        
+        .perf-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-280px);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .sidebar-toggle {
+                left: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Toggle -->
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Menu">
+            ☰
+        </button>
+        
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>📊 Speedo OS Reporting</h1>
+                <p>Multi-pays Afrique de l'Ouest</p>
+                <div class="stats-chips">
+                    <div class="stat-chip" id="statAgents">0 Agents</div>
+                    <div class="stat-chip" id="statPerf">0 Perf.</div>
+                </div>
+            </div>
+            
+            <div class="nav-item active" onclick="showModule('dashboard')">
+                <span class="nav-item-icon">📊</span>
+                <span>Tableau de Bord</span>
+            </div>
+            <div class="nav-item" onclick="showModule('agents')">
+                <span class="nav-item-icon">👥</span>
+                <span>Gestion Agents</span>
+            </div>
+            <div class="nav-item" onclick="showModule('performances')">
+                <span class="nav-item-icon">📈</span>
+                <span>Performances</span>
+            </div>
+            <div class="nav-item" onclick="showModule('import')">
+                <span class="nav-item-icon">📥</span>
+                <span>Import Excel</span>
+            </div>
+            <div class="nav-item" onclick="showModule('export')">
+                <span class="nav-item-icon">📤</span>
+                <span>Export Excel</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <div id="notification"></div>
+            
+            <!-- Dashboard -->
+            <div id="module-dashboard" class="module-content active">
+                <div class="header">
+                    <h2 class="header-title">Tableau de Bord</h2>
+                    <div class="header-actions">
+                        <span class="stat-chip" style="background: var(--color-primary-light); color: var(--color-info);">📈 Synthèse en temps réel</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Agents</h3>
+                        <p class="stat-value" id="dashboardAgents">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Performances</h3>
+                        <p class="stat-value" id="dashboardPerf">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Visites Totales</h3>
+                        <p class="stat-value" id="dashboardVisits">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ventes Totales</h3>
+                        <p class="stat-value" id="dashboardSales">0</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📊 Filtres Rapides</div>
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <label>Période :</label>
+                            <select id="periodFilter" onchange="applyFilters()">
+                                <option value="">Toutes les périodes</option>
+                                <option value="today">Aujourd'hui</option>
+                                <option value="week">Cette semaine</option>
+                                <option value="month">Ce mois</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Ville :</label>
+                            <select id="cityFilter" onchange="applyFilters()">
+                                <option value="">Toutes les villes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="card-title">📋 Dernières Activités</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Agent</th>
+                                <th>Module</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivities">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--color-text-tertiary);">Aucune activité récente</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Agents Module -->
+            <div id="module-agents" class="module-content">
+                <div class="header">
+                    <h2 class="header-title">Gestion des Agents</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="showAgentModal()">+ Nouvel Agent</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📋 Liste des Agents</div>
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <label>Rechercher :</label>
+                            <input type="text" id="agentSearch" placeholder="Nom ou N°" oninput="filterAgents()">
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Nom</th>
+                                <th>Ville</th>
+                                <th>Téléphone</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agentsTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Performances Module -->
+            <div id="module-performances" class="module-content">
+                <div class="header">
+                    <h2 class="header-title">Performances</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="showPerformanceModal()">+ Nouvelle Performance</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📊 Filtres</div>
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <label>Agent :</label>
+                            <select id="perfAgentFilter" onchange="filterPerformances()">
+                                <option value="">Tous les agents</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Période :</label>
+                            <select id="perfPeriodFilter" onchange="filterPerformances()">
+                                <option value="">Toutes les périodes</option>
+                                <option value="today">Aujourd'hui</option>
+                                <option value="week">Cette semaine</option>
+                                <option value="month">Ce mois</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Ville :</label>
+                            <select id="perfCityFilter" onchange="filterPerformances()">
+                                <option value="">Toutes les villes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="card-title">📋 Performances</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Agent</th>
+                                <th>Ville</th>
+                                <th>Visites</th>
+                                <th>Ventes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performancesTable">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📊 Vue de Performance par Agent</div>
+                    <div class="performance-grid" id="performanceView">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Import Module -->
+            <div id="module-import" class="module-content">
+                <div class="header">
+                    <h2 class="header-title">Import Excel</h2>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📥 Télécharger le Template Excel Original</div>
+                    <p style="margin-bottom: 16px; color: var(--color-text-secondary);">
+                        Téléchargez le fichier Excel original avec les en-têtes, couleurs et formules intactes pour distribuer aux agences de terrain.
+                    </p>
+                    <button onclick="generateAndDownloadTemplate()" class="btn btn-success">
+                        📥 Télécharger le Template Excel
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📤 Importer un Fichier Excel</div>
+                    <div class="file-upload-area" onclick="document.getElementById('importFile').click()">
+                        <p style="font-size: 32px; color: var(--color-primary);">📄</p>
+                        <p style="color: var(--color-text-secondary); margin-top: 8px; font-size: 16px;">Cliquez pour sélectionner un fichier Excel</p>
+                        <p style="color: var(--color-text-tertiary); margin-top: 4px; font-size: 12px;">Format accepté: .xlsx, .xls</p>
+                        <input type="file" id="importFile" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="selectedFileInfo" class="hidden" style="margin-top: 16px; padding: 16px; background: var(--color-surface-secondary); border-radius: 8px;"></div>
+                    <button onclick="handleImport()" id="importButton" class="btn btn-primary" disabled style="margin-top: 16px;">
+                        📤 Importer le Fichier
+                    </button>
+                    <div id="importErrors" class="alert alert-danger hidden"></div>
+                </div>
+            </div>
+            
+            <!-- Export Module -->
+            <div id="module-export" class="module-content">
+                <div class="header">
+                    <h2 class="header-title">Export Excel</h2>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">🎛️ Filtres d'Export</div>
+                    <div class="filters-bar">
+                        <div class="filter-group">
+                            <label>Agent :</label>
+                            <select id="exportAgent">
+                                <option value="">Tous les agents</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date début :</label>
+                            <input type="date" id="exportDateFrom">
+                        </div>
+                        <div class="filter-group">
+                            <label>Date fin :</label>
+                            <input type="date" id="exportDateTo">
+                        </div>
+                    </div>
+                    <button onclick="handleExport()" class="btn btn-success">
+                        📤 Exporter en Excel
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">📊 Synthèse</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Rapports</h3>
+                            <p class="stat-value" id="exportTotal">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Agents Actifs</h3>
+                            <p class="stat-value" id="exportAgents">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Visites Totales</h3>
+                            <p class="stat-value" id="exportVisits">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Ventes Totales</h3>
+                            <p class="stat-value" id="exportSales">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Base de données localStorage
+        const DB = {
+            agents: JSON.parse(localStorage.getItem('agents') || '[]'),
+            objectives: JSON.parse(localStorage.getItem('objectives') || '[]'),
+            performances: JSON.parse(localStorage.getItem('performances') || '[]'),
+            
+            save() {
+                localStorage.setItem('agents', JSON.stringify(this.agents));
+                localStorage.setItem('objectives', JSON.stringify(this.objectives));
+                localStorage.setItem('performances', JSON.stringify(this.performances));
+            }
+        };
+
+        let sidebarCollapsed = false;
+
+        function toggleSidebar() {
+            sidebarCollapsed = !sidebarCollapsed;
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('mainContent').classList.toggle('expanded');
+        }
+
+        function showModule(module) {
+            document.querySelectorAll('.module-content').forEach(m => m.classList.remove('active'));
+            document.getElementById('module-' + module).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if (module === 'dashboard') {
+                applyFilters();
+                renderRecentActivities();
+            } else if (module === 'agents') {
+                filterAgents();
+            } else if (module === 'performances') {
+                filterPerformances();
+            } else if (module === 'export') {
+                populateExportSelect();
+                updateExportStats();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('statAgents').textContent = DB.agents.length + ' Agents';
+            document.getElementById('statPerf').textContent = DB.performances.length + ' Perf.';
+            document.getElementById('dashboardAgents').textContent = DB.agents.length;
+            document.getElementById('dashboardPerf').textContent = DB.performances.length;
+            document.getElementById('dashboardVisits').textContent = DB.performances.reduce((s,p) => s + (p.totalVisits || 0), 0);
+            document.getElementById('dashboardSales').textContent = DB.performances.reduce((s,p) => s + (p.totalSales || 0), 0);
+        }
+
+        function renderRecentActivities() {
+            const activities = [];
+            
+            DB.agents.slice(-5).forEach(agent => {
+                activities.push({
+                    date: new Date(agent.created_at).toLocaleDateString('fr-FR'),
+                    agent: agent.agent_name,
+                    module: 'Agents',
+                    type: 'Création agent'
+                });
+            });
+            
+            DB.performances.slice(-5).forEach(perf => {
+                const agent = DB.agents.find(a => a.id === perf.agent_id);
+                activities.push({
+                    date: new Date(perf.report_date).toLocaleDateString('fr-FR'),
+                    agent: agent ? agent.agent_name : 'Inconnu',
+                    module: 'Performances',
+                    type: 'Saisie performance'
+                });
+            });
+            
+            const tbody = document.getElementById('recentActivities');
+            if (activities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--color-text-tertiary);">Aucune activité récente</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = activities.sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 10).map(a => `
+                <tr>
+                    <td>${a.date}</td>
+                    <td>${a.agent}</td>
+                    <td>${a.module}</td>
+                    <td>${a.type}</td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const periodFilter = document.getElementById('periodFilter').value;
+            const cityFilter = document.getElementById('cityFilter').value;
+            
+            let perf = DB.performances;
+            
+            // Filtrage par période
+            if (periodFilter === 'today') {
+                const today = new Date().toISOString().split('T')[0];
+                perf = perf.filter(p => p.report_date === today);
+            } else if (periodFilter === 'week') {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                perf = perf.filter(p => new Date(p.report_date) >= weekAgo);
+            } else if (periodFilter === 'month') {
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                perf = perf.filter(p => new Date(p.report_date) >= monthAgo);
+            }
+            
+            // Filtrage par ville
+            if (cityFilter) {
+                const agents = DB.agents.filter(a => a.city === cityFilter);
+                const agentIds = agents.map(a => a.id);
+                perf = perf.filter(p => agentIds.includes(p.agent_id));
+            }
+            
+            updateStatsFiltered(perf);
+        }
+
+        function updateStatsFiltered(perf) {
+            document.getElementById('dashboardPerf').textContent = perf.length;
+            document.getElementById('dashboardVisits').textContent = perf.reduce((s,p) => s + (p.totalVisits || 0), 0);
+            document.getElementById('dashboardSales').textContent = perf.reduce((s,p) => s + (p.totalSales || 0), 0);
+        }
+
+        function filterAgents() {
+            const search = document.getElementById('agentSearch').value.toLowerCase();
+            const filtered = DB.agents.filter(a => 
+                a.agent_name.toLowerCase().includes(search) || 
+                a.agent_number.includes(search)
+            );
+            
+            renderAgentsTable(filtered);
+        }
+
+        function renderAgentsTable(agents = DB.agents) {
+            const tbody = document.getElementById('agentsTable');
+            if (agents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-text-tertiary); padding: 20px;">Aucun agent enregistré</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = agents.map(agent => `
+                <tr>
+                    <td>${agent.agent_number}</td>
+                    <td>${agent.agent_name}</td>
+                    <td>${agent.city || '-'}</td>
+                    <td>${agent.phone || '-'}</td>
+                    <td>${agent.email || '-'}</td>
+                    <td>
+                        <button class="btn btn-outline" onclick="editAgent(${agent.id})" style="padding: 6px 12px; font-size: 12px;">Modifier</button>
+                        <button class="btn btn-danger" onclick="deleteAgent(${agent.id})" style="padding: 6px 12px; font-size: 12px; margin-left: 8px;">Supprimer</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Mettre à jour les filtres de ville
+            const cities = [...new Set(DB.agents.map(a => a.city).filter(c => c))];
+            const citySelect = document.getElementById('cityFilter');
+            const perfCitySelect = document.getElementById('perfCityFilter');
+            citySelect.innerHTML = '<option value="">Toutes les villes</option>';
+            perfCitySelect.innerHTML = '<option value="">Toutes les villes</option>';
+            cities.forEach(city => {
+                citySelect.innerHTML += `<option value="${city}">${city}</option>`;
+                perfCitySelect.innerHTML += `<option value="${city}">${city}</option>`;
+            });
+        }
+
+        function filterPerformances() {
+            const agentFilter = document.getElementById('perfAgentFilter').value;
+            const periodFilter = document.getElementById('perfPeriodFilter').value;
+            const cityFilter = document.getElementById('perfCityFilter').value;
+            
+            let perf = DB.performances;
+            let agents = DB.agents;
+            
+            if (agentFilter) {
+                perf = perf.filter(p => p.agent_id === parseInt(agentFilter));
+            }
+            
+            if (cityFilter) {
+                agents = agents.filter(a => a.city === cityFilter);
+                const agentIds = agents.map(a => a.id);
+                perf = perf.filter(p => agentIds.includes(p.agent_id));
+            }
+            
+            if (periodFilter === 'today') {
+                const today = new Date().toISOString().split('T')[0];
+                perf = perf.filter(p => p.report_date === today);
+            } else if (periodFilter === 'week') {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                perf = perf.filter(p => new Date(p.report_date) >= weekAgo);
+            } else if (periodFilter === 'month') {
+                const monthAgo = new Date();
+                monthAgo.setMonth(monthAgo.getMonth() - 1);
+                perf = perf.filter(p => new Date(p.report_date) >= monthAgo);
+            }
+            
+            renderPerformancesTable(perf);
+            renderPerformanceView(perf);
+        }
+
+        function renderPerformancesTable(perf = DB.performances) {
+            const tbody = document.getElementById('performancesTable');
+            if (perf.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-text-tertiary); padding: 20px;">Aucune performance enregistrée</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = perf.map(p => {
+                const agent = DB.agents.find(a => a.id === p.agent_id);
+                return `
+                    <tr>
+                        <td>${p.report_date}</td>
+                        <td>${agent ? agent.agent_name : 'Inconnu'}</td>
+                        <td>${agent ? agent.city : '-'}</td>
+                        <td>${p.totalVisits || 0}</td>
+                        <td>${p.totalSales || 0}</td>
+                        <td>
+                            <button class="btn btn-outline" onclick="editPerformance(${p.id})" style="padding: 6px 12px; font-size: 12px;">Modifier</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Mettre à jour les filtres
+            const agentSelect = document.getElementById('perfAgentFilter');
+            const currentValue = agentSelect.value;
+            agentSelect.innerHTML = '<option value="">Tous les agents</option>';
+            DB.agents.forEach(agent => {
+                agentSelect.innerHTML += `<option value="${agent.id}">${agent.agent_number} - ${agent.agent_name}</option>`;
+            });
+            agentSelect.value = currentValue;
+        }
+
+        function renderPerformanceView(perf = DB.performances) {
+            const view = document.getElementById('performanceView');
+            const agentIds = [...new Set(perf.map(p => p.agent_id))];
+            
+            if (agentIds.length === 0) {
+                view.innerHTML = '<p style="text-align: center; color: var(--color-text-tertiary);">Aucune donnée à afficher</p>';
+                return;
+            }
+            
+            view.innerHTML = agentIds.map(agentId => {
+                const agent = DB.agents.find(a => a.id === agentId);
+                const agentPerf = perf.filter(p => p.agent_id === agentId);
+                
+                const totalVisits = agentPerf.reduce((s,p) => s + (p.totalVisits || 0), 0);
+                const totalSales = agentPerf.reduce((s,p) => s + (p.totalSales || 0), 0);
+                
+                return `
+                    <div class="perf-card">
+                        <h4>${agent ? agent.agent_name : 'Agent ' + agentId}</h4>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 12px;">${agent ? agent.city : ''}</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">Rapports</div>
+                                <div class="perf-value" style="font-size: 20px;">${agentPerf.length}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">Visites</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--color-success);">${totalVisits}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">Ventes</div>
+                                <div style="font-size: 18px; font-weight: 600; color: var(--color-primary);">${totalSales}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function populateExportSelect() {
+            const select = document.getElementById('exportAgent');
+            select.innerHTML = '<option value="">Tous les agents</option>';
+            DB.agents.forEach(agent => {
+                select.innerHTML += `<option value="${agent.id}">${agent.agent_number} - ${agent.agent_name}</option>`;
+            });
+            updateExportStats();
+        }
+
+        function updateExportStats() {
+            document.getElementById('exportTotal').textContent = DB.performances.length;
+            document.getElementById('exportAgents').textContent = DB.agents.length;
+            document.getElementById('exportVisits').textContent = DB.performances.reduce((s,p) => s + (p.totalVisits || 0), 0);
+            document.getElementById('exportSales').textContent = DB.performances.reduce((s,p) => s + (p.totalSales || 0), 0);
+        }
+
+        function generateAndDownloadTemplate() {
+            // Générer un template Excel avec la structure correcte
+            const templateData = [{
+                'N°': '',
+                'Agent promoteur': '',
+                'VILLE': '',
+                'Date rapport': new Date().toISOString().split('T')[0],
+                'Boutique (visites)': 0,
+                'Superette (visites)': 0,
+                'Kiosque (visites)': 0,
+                'Tablier (visites)': 0,
+                'Pushcart (visites)': 0,
+                'Biblos Lait Premium 16g (ventes)': 0,
+                'Biblos Lait Premium 360g (ventes)': 0,
+                'Biblos Lait Excellence 900g (ventes)': 0,
+                "Biblos Flocon d'avoine 50g (ventes)": 0,
+                "Biblos Flocon d'avoine 400g (ventes)": 0,
+                'Commentaires': '',
+                'Impressions des PDV et des clients': ''
+            }];
+            
+            const ws = XLSX.utils.json_to_sheet(templateData);
+            
+            // Définir la largeur des colonnes
+            ws['!cols'] = [
+                { wch: 8 },   // N°
+                { wch: 20 },  // Agent promoteur
+                { wch: 15 },  // VILLE
+                { wch: 12 },  // Date rapport
+                { wch: 15 },  // Boutique (visites)
+                { wch: 18 },  // Superette (visites)
+                { wch: 12 },  // Kiosque (visites)
+                { wch: 14 },  // Tablier (visites)
+                { wch: 14 },  // Pushcart (visites)
+                { wch: 20 },  // Biblos Lait Premium 16g
+                { wch: 20 },  // Biblos Lait Premium 360g
+                { wch: 20 },  // Biblos Lait Excellence 900g
+                { wch: 20 },  // Biblos Flocon d'avoine 50g
+                { wch: 20 },  // Biblos Flocon d'avoine 400g
+                { wch: 30 },  // Commentaires
+                { wch: 40 }   // Impressions
+            ];
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Reporting');
+            
+            XLSX.writeFile(wb, 'speedo_template_reporting.xlsx');
+            showNotification('success', 'Template Excel téléchargé avec succès !');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.selectedFile = file;
+                const info = document.getElementById('selectedFileInfo');
+                info.classList.remove('hidden');
+                info.innerHTML = `
+                    <strong>Fichier sélectionné:</strong> ${file.name}<br>
+                    <span style="color: var(--color-text-secondary);">${(file.size / 1024).toFixed(2)} KB</span>
+                `;
+                document.getElementById('importButton').disabled = false;
+                document.getElementById('importErrors').classList.add('hidden');
+            }
+        }
+
+        async function handleImport() {
+            if (!this.selectedFile) {
+                showNotification('error', 'Veuillez sélectionner un fichier');
+                return;
+            }
+
+            try {
+                const arrayBuffer = await this.selectedFile.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const worksheet = workbook.Sheets[0];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if (!jsonData || jsonData.length === 0) {
+                    showNotification('error', 'Le fichier Excel est vide');
+                    return;
+                }
+                
+                let imported = 0;
+                let warnings = [];
+                
+                jsonData.forEach((row, index) => {
+                    const rowIndex = index + 1;
+                    const agentNumber = row['N°'] || row['N'];
+                    
+                    if (!agentNumber) {
+                        warnings.push(`Ligne ${rowIndex}: Numéro d'agent manquant - ignoré`);
+                        return;
+                    }
+                    
+                    // Créer l'agent s'il n'existe pas (pas de limitation structurelle)
+                    let agent = DB.agents.find(a => a.agent_number === String(agentNumber));
+                    if (!agent) {
+                        const newAgent = {
+                            id: Date.now() + Math.random(),
+                            agent_number: String(agentNumber),
+                            agent_name: row['Agent promoteur'] || 'Agent ' + agentNumber,
+                            city: row['VILLE'] || 'Non renseigné',
+                            phone: '',
+                            email: '',
+                            status: 'active',
+                            created_at: new Date().toISOString()
+                        };
+                        DB.agents.push(newAgent);
+                        agent = newAgent;
+                        warnings.push(`Ligne ${rowIndex}: Agent ${agentNumber} créé automatiquement`);
+                    }
+                    
+                    const performance = {
+                        id: Date.now() + Math.random(),
+                        agent_id: agent.id,
+                        report_date: row['Date rapport'] || new Date().toISOString().split('T')[0],
+                        visits_boutique: parseInt(row['Boutique (visites)'] || 0),
+                        visits_superette: parseInt(row['Superette (visites)'] || 0),
+                        visits_kiosque: parseInt(row['Kiosque (visites)'] || 0),
+                        visits_tablier: parseInt(row['Tablier (visites)'] || 0),
+                        visits_pushcart: parseInt(row['Pushcart (visites)'] || 0),
+                        sales_premium_16g: parseInt(row['Biblos Lait Premium 16g (ventes)'] || 0),
+                        sales_premium_360g: parseInt(row['Biblos Lait Premium 360g (ventes)'] || 0),
+                        sales_excellence_900g: parseInt(row['Biblos Lait Excellence 900g (ventes)'] || 0),
+                        sales_avoine_50g: parseInt(row["Biblos Flocon d'avoine 50g (ventes)"] || 0),
+                        sales_avoine_400g: parseInt(row["Biblos Flocon d'avoine 400g (ventes)"] || 0),
+                        totalVisits: parseInt(row['Boutique (visites)'] || 0) + 
+                                     parseInt(row['Superette (visites)'] || 0) +
+                                     parseInt(row['Kiosque (visites)'] || 0) +
+                                     parseInt(row['Tablier (visites)'] || 0) +
+                                     parseInt(row['Pushcart (visites)'] || 0),
+                        totalSales: parseInt(row['Biblos Lait Premium 16g (ventes)'] || 0) +
+                                  parseInt(row['Biblos Lait Premium 360g (ventes)'] || 0) +
+                                  parseInt(row['Biblos Lait Excellence 900g (ventes)'] || 0) +
+                                  parseInt(row["Biblos Flocon d'avoine 50g (ventes)"] || 0) +
+                                  parseInt(row["Biblos Flocon d'avoine 400g (ventes)"] || 0),
+                        comments: row['Commentaires'] || '',
+                        impressions: row['Impressions des PDV et des clients'] || '',
+                        created_at: new Date().toISOString()
+                    };
+                    
+                    DB.performances.push(performance);
+                    imported++;
+                });
+                
+                DB.save();
+                updateStats();
+                
+                if (warnings.length > 0) {
+                    showNotification('warning', `${imported} performance(s) importée(s) avec ${warnings.length} avertissement(s)`);
+                } else {
+                    showNotification('success', `${imported} performance(s) importée(s) avec succès`);
+                }
+                
+                this.selectedFile = null;
+                document.getElementById('importFile').value = '';
+                document.getElementById('selectedFileInfo').classList.add('hidden');
+                document.getElementById('importButton').disabled = true;
+                
+            } catch (error) {
+                console.error('Erreur import:', error);
+                showNotification('error', 'Erreur lors de l\'import: ' + error.message);
+            }
+        }
+
+        function handleExport() {
+            const agentId = document.getElementById('exportAgent').value;
+            const dateFrom = document.getElementById('exportDateFrom').value;
+            const dateTo = document.getElementById('exportDateTo').value;
+            
+            let data = DB.performances;
+            
+            if (agentId) {
+                data = data.filter(p => p.agent_id === parseInt(agentId));
+            }
+            if (dateFrom) {
+                data = data.filter(p => p.report_date >= dateFrom);
+            }
+            if (dateTo) {
+                data = data.filter(p => p.report_date <= dateTo);
+            }
+            
+            if (data.length === 0) {
+                showNotification('error', 'Aucune donnée à exporter');
+                return;
+            }
+            
+            const exportData = data.map(p => {
+                const agent = DB.agents.find(a => a.id === p.agent_id);
+                return {
+                    'N°': agent ? agent.agent_number : '',
+                    'Agent promoteur': agent ? agent.agent_name : '',
+                    'VILLE': agent ? agent.city : '',
+                    'Date rapport': p.report_date,
+                    'Boutique (visites)': p.visits_boutique || 0,
+                    'Superette (visites)': p.visits_superette || 0,
+                    'Kiosque (visites)': p.visits_kiosque || 0,
+                    'Tablier (visites)': p.visits_tablier || 0,
+                    'Pushcart (visites)': p.visits_pushcart || 0,
+                    'Biblos Lait Premium 16g (ventes)': p.sales_premium_16g || 0,
+                    'Biblos Lait Premium 360g (ventes)': p.sales_premium_360g || 0,
+                    'Biblos Lait Excellence 900g (ventes)': p.sales_excellence_900g || 0,
+                    "Biblos Flocon d'avoine 50g (ventes)": p.sales_avoine_50g || 0,
+                    "Biblos Flocon d'avoine 400g (ventes)": p.sales_avoine_400g || 0,
+                    'Commentaires': p.comments || '',
+                    'Impressions des PDV et des clients': p.impressions || ''
+                };
+            });
+            
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Données');
+            
+            const synthesisData = [{
+                'Total Rapports': exportData.length,
+                'Total Agents': [...new Set(exportData.map(d => d['Agent promoteur']))].length,
+                'Total Visites': exportData.reduce((s, d) => s + (parseInt(d['Boutique (visites)']) || 0) + (parseInt(d['Superette (visites)']) || 0) + (parseInt(d['Kiosque (visites)']) || 0) + (parseInt(d['Tablier (visites)']) || 0) + (parseInt(d['Pushcart (visites)']) || 0), 0),
+                'Total Ventes': exportData.reduce((s, d) => s + (parseInt(d['Biblos Lait Premium 16g (ventes)']) || 0) + (parseInt(d['Biblos Lait Premium 360g (ventes)']) || 0) + (parseInt(d['Biblos Lait Excellence 900g (ventes)']) || 0) + (parseInt(d["Biblos Flocon d'avoine 50g (ventes)"]) || 0) + (parseInt(d["Biblos Flocon d'avoine 400g (ventes)"]) || 0), 0),
+                'Date Export': new Date().toISOString()
+            }];
+            
+            const synthesisSheet = XLSX.utils.json_to_sheet(synthesisData);
+            XLSX.utils.book_append_sheet(wb, synthesisSheet, 'Synthèse');
+            
+            const filename = `speedo_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, filename);
+            
+            showNotification('success', `Export Excel réussi ! Fichier: ${filename}`);
+        }
+
+        function showNotification(type, message) {
+            const notification = document.getElementById('notification');
+            notification.className = `alert alert-${type}`;
+            notification.innerHTML = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // Fonctions placeholder pour les modals
+        function showAgentModal() {
+            const name = prompt('Nom de l\'agent:');
+            const number = prompt('Numéro d\'agent:');
+            const city = prompt('Ville:');
+            
+            if (name && number) {
+                const agent = {
+                    id: Date.now(),
+                    agent_number: number,
+                    agent_name: name,
+                    city: city || '',
+                    phone: '',
+                    email: '',
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                };
+                DB.agents.push(agent);
+                DB.save();
+                updateStats();
+                renderAgentsTable();
+                showNotification('success', 'Agent créé avec succès');
+            }
+        }
+
+        function showPerformanceModal() {
+            if (DB.agents.length === 0) {
+                showNotification('error', 'Veuillez d\'abord créer des agents');
+                return;
+            }
+            
+            const agentSelect = prompt('Choisissez l\'agent (entrez le numéro):\n' + DB.agents.map(a => `${a.agent_number} - ${a.agent_name}`).join('\n'));
+            if (!agentSelect) return;
+            
+            const agent = DB.agents.find(a => a.agent_number === agentSelect);
+            if (!agent) {
+                showNotification('error', 'Agent non trouvé');
+                return;
+            }
+            
+            const visits = prompt('Total visites:', '0');
+            const sales = prompt('Total ventes:', '0');
+            const comments = prompt('Commentaires:', '');
+            
+            const performance = {
+                id: Date.now(),
+                agent_id: agent.id,
+                report_date: new Date().toISOString().split('T')[0],
+                totalVisits: parseInt(visits) || 0,
+                totalSales: parseInt(sales) || 0,
+                comments: comments || '',
+                created_at: new Date().toISOString()
+            };
+            
+            DB.performances.push(performance);
+            DB.save();
+            updateStats();
+            renderPerformancesTable();
+            renderPerformanceView();
+            showNotification('success', 'Performance enregistrée avec succès');
+        }
+
+        function editAgent(id) {
+            showNotification('info', 'Modification d\'agent à implémenter');
+        }
+
+        function editPerformance(id) {
+            showNotification('info', 'Modification de performance à implémenter');
+        }
+
+        function deleteAgent(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) {
+                DB.agents = DB.agents.filter(a => a.id !== id);
+                DB.performances = DB.performances.filter(p => p.agent_id !== id);
+                DB.save();
+                updateStats();
+                renderAgentsTable();
+                showNotification('success', 'Agent supprimé');
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStats();
+            renderAgentsTable();
+            renderPerformancesTable();
+            renderRecentActivities();
+            populateExportSelect();
+        });
+    </script>
+</body>
+</html>

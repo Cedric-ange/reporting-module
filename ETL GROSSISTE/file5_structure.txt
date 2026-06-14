@@ -1,0 +1,950 @@
+Shape: (33, 57)
+
+=== ROW BY ROW ANALYSIS ===
+
+Row 0:
+  [EMPTY]
+
+Row 1:
+  Col 1: SAN PEDRO/ 22/01/2026
+  Col 42: 2
+  Col 43: 3
+  Col 44: 4
+  Col 45: 5
+  Col 46: 6
+  Col 47: 7
+  Col 48: 8
+  Col 49: 9
+  Col 50: 10
+  Col 51: 11
+
+Row 2:
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 42: 0.16666666666666666
+  Col 43: 0.25
+  Col 44: 0.3333333333333333
+  Col 45: 0.4166666666666667
+  Col 46: 0.5
+  Col 47: 0.5833333333333334
+  Col 48: 0.6666666666666666
+  Col 49: 0.75
+  Col 50: 0.8333333333333334
+  Col 51: 0.9166666666666666
+
+Row 3:
+  [EMPTY]
+
+Row 4:
+  Col 2: OBJECTIFS JOURNALIERS
+  Col 22: REALISATIONS
+  Col 55: Commentaires
+  Col 56: Impressions des PDV et des clients
+
+Row 5:
+  Col 0: N°
+  Col 1: Agent promoteur
+  Col 2: Nombre de visite / Type de PDV
+  Col 7: Nombre de référencement / Type de PDV
+  Col 12: Pose de matériel de visibilité
+  Col 17: Vente en cartons
+  Col 22: Nombre de visite / Type de PDV
+  Col 27: Présence produits antérieure
+  Col 32: Nombre de référencement / Type de PDV
+  Col 37: Nouveau Référencement par SKU
+  Col 42: Vente en cartons
+  Col 47: Pose de matériel de visibilité
+  Col 52: Gratuits offerts en sachet
+
+Row 6:
+  Col 2: Boutique
+  Col 3: Superette
+  Col 4: Kiosque
+  Col 5: Tablier
+  Col 6: Pushcart
+  Col 7: Boutique
+  Col 8: Superette
+  Col 9: Kiosque
+  Col 10: Tablier
+  Col 11: Pushcart
+  Col 12: Affiche Biblos Lait  Prémium 16g & 360g
+  Col 13: Affiche Biblos Lait Excellence
+  Col 14: Affiche Biblos Flocons d' Avoine
+  Col 15: Hanger
+  Col 16: Wobbler
+  Col 17: Biblos Lait Premium 16g
+  Col 18: Biblos Lait Premium 360g
+  Col 19: Biblos Lait Excellence 900g
+  Col 20: Biblos Flocon d'avoine 50g
+  Col 21: Biblos Flocon d'avoine 400g
+  Col 22: Boutique
+  Col 23: Superette
+  Col 24: Kiosque
+  Col 25: Tablier
+  Col 26: Pushcart
+  Col 27: Biblos Lait Premium 16g
+  Col 28: Biblos Lait Premium 360g
+  Col 29: Biblos Lait Excellence 900g
+  Col 30: Biblos Flocon d'avoine 50g
+  Col 31: Biblos Flocon d'avoine 400g
+  Col 32: Boutique
+  Col 33: Superette
+  Col 34: Kiosque
+  Col 35: Tablier
+  Col 36: Pushcart
+  Col 37: Biblos Lait Premium 16g
+  Col 38: Biblos Lait Premium 360g
+  Col 39: Biblos Lait Excellence 900g
+  Col 40: Biblos Flocon d'avoine 50g
+  Col 41: Biblos Flocon d'avoine 400g
+  Col 42: Biblos Lait Premium 16g
+  Col 43: Biblos Lait Premium 360g
+  Col 44: Biblos Lait Excellence 900g
+  Col 45: Biblos Flocon d'avoine 50g
+  Col 46: Biblos Flocon d'avoine 400g
+  Col 47: Affiche Biblos Lait  Prémium 16g & 360g
+  Col 48: Affiche Biblos Lait Excellence
+  Col 49: Affiche Biblos Flocons d' Avoine
+  Col 50: Hanger
+  Col 51: Wobbler
+  Col 52: Biblos Lait Premium 16g
+  Col 53: Biblos Lait Excellence 900g
+  Col 54: Biblos Flocon d'avoine 50g
+
+Row 7:
+  Col 0: 1
+  Col 1: DIBI SIMEON
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 28
+  Col 32: 6
+  Col 37: 2
+  Col 39: 1
+  Col 41: 3
+  Col 42: 1
+  Col 44: 0.15
+  Col 46: 2
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 18
+  Col 54: 20
+
+Row 8:
+  Col 0: 2
+  Col 1: KRA EVAVARISTE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 27
+  Col 27: 1
+  Col 31: 1
+  Col 32: 7
+  Col 37: 2
+  Col 39: 1
+  Col 41: 2
+  Col 42: 1
+  Col 44: 0.05
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 10
+
+Row 9:
+  Col 0: 3
+  Col 1: DIOMANDE ESTHER
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 28
+  Col 32: 4
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 1
+  Col 42: 0.5
+  Col 44: 0.15
+  Col 45: 0.5
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 15
+
+Row 10:
+  Col 0: 4
+  Col 1: BADA LANDRY
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 27
+  Col 29: 1
+  Col 31: 1
+  Col 32: 7
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 0.42
+  Col 44: 0.15
+  Col 45: 0.5
+  Col 46: 1.5
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 11
+  Col 54: 20
+
+Row 11:
+  Col 0: 5
+  Col 1: KOUAME JOSE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 30
+  Col 32: 3
+  Col 37: 1
+  Col 40: 1
+  Col 41: 1
+  Col 42: 0.5
+  Col 45: 0.5
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 6
+  Col 54: 15
+
+Row 12:
+  Col 0: 6
+  Col 1: FANY BARAKISSA
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 27
+  Col 27: 1
+  Col 31: 1
+  Col 32: 6
+  Col 37: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 0.33
+  Col 45: 0.5
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 4
+  Col 54: 15
+
+Row 13:
+  Col 0: 7
+  Col 1: KONAN IVETTE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 25
+  Col 32: 5
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 0.5
+  Col 44: 0.15
+  Col 45: 1
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 20
+
+Row 14:
+  Col 0: 8
+  Col 1: KRA PACOME
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 26
+  Col 31: 1
+  Col 32: 7
+  Col 37: 1
+  Col 40: 2
+  Col 41: 3
+  Col 42: 0.5
+  Col 45: 1
+  Col 46: 2
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 6
+  Col 54: 30
+
+Row 15:
+  Col 0: 9
+  Col 1: KONATE MARIAM
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 29
+  Col 32: 5
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 1
+  Col 44: 0.3
+  Col 45: 0.5
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 24
+  Col 54: 15
+
+Row 16:
+  Col 0: 10
+  Col 1: KOUAKOU ROSE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 26
+  Col 32: 5
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 0.5
+  Col 44: 0.15
+  Col 45: 0.5
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 15
+
+Row 17:
+  Col 0: 11
+  Col 1: OULAY WILFRIED
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 29
+  Col 27: 1
+  Col 31: 1
+  Col 32: 4
+  Col 37: 1
+  Col 41: 1
+  Col 42: 0.67
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 8
+  Col 54: 10
+
+Row 18:
+  Col 0: 12
+  Col 1: NGUESSAN INNOCENT
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 28
+  Col 31: 2
+  Col 32: 8
+  Col 37: 1
+  Col 40: 2
+  Col 41: 3
+  Col 42: 0.5
+  Col 45: 1
+  Col 46: 1.5
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 6
+  Col 54: 25
+
+Row 19:
+  Col 0: 13
+  Col 1: ARISTIDE KOUAME
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 27
+  Col 27: 1
+  Col 32: 6
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 0.5
+  Col 44: 0.15
+  Col 45: 1
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 20
+
+Row 20:
+  Col 0: 14
+  Col 1: ANGE STEPHANIE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 30
+  Col 32: 4
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 1
+  Col 42: 0.5
+  Col 44: 0.15
+  Col 45: 1
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 20
+
+Row 21:
+  Col 0: 15
+  Col 1: KOUADIO FLORENT
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 30
+  Col 28: 1
+  Col 32: 6
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 2
+  Col 42: 0.5
+  Col 44: 0.15
+  Col 45: 0.5
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 15
+
+Row 22:
+  Col 0: 16
+  Col 1: SERIE ULRICHE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 25
+  Col 32: 4
+  Col 37: 2
+  Col 41: 2
+  Col 42: 1
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 12
+  Col 54: 10
+
+Row 23:
+  Col 0: 17
+  Col 1: KOADIO SARAH
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 25
+  Col 29: 1
+  Col 30: 1
+  Col 32: 9
+  Col 37: 1
+  Col 39: 1
+  Col 40: 1
+  Col 41: 4
+  Col 42: 0.58
+  Col 44: 0.15
+  Col 45: 0.5
+  Col 46: 2
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 13
+  Col 54: 25
+
+Row 24:
+  Col 0: 18
+  Col 1: MLEHI ANGE
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 22: 25
+  Col 31: 2
+  Col 32: 7
+  Col 37: 1
+  Col 38: 2
+  Col 39: 1
+  Col 41: 1
+  Col 42: 0.67
+  Col 43: 0.83
+  Col 44: 0.15
+  Col 46: 1
+  Col 47: 3
+  Col 48: 3
+  Col 49: 3
+  Col 52: 24
+  Col 54: 10
+
+Row 25:
+  Col 0: 19
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+  Col 27: 1
+
+Row 26:
+  Col 0: 20
+  Col 2: 10
+  Col 3: 3
+  Col 4: 2
+  Col 5: 2
+  Col 6: 3
+  Col 7: 3
+  Col 8: 1
+  Col 9: 1
+  Col 10: 1
+  Col 11: 1
+  Col 12: 3
+  Col 13: 1
+  Col 14: 3
+  Col 15: 0
+  Col 16: 0
+  Col 17: 0.5
+  Col 18: 0.16666666666666666
+  Col 19: 0.1
+  Col 20: 0.6
+  Col 21: 0.15
+
+Row 27:
+  Col 1: TOTAL 
+  Col 2: 200
+  Col 3: 60
+  Col 4: 40
+  Col 5: 40
+  Col 6: 60
+  Col 7: 60
+  Col 8: 20
+  Col 9: 20
+  Col 10: 20
+  Col 11: 20
+  Col 12: 60
+  Col 13: 20
+  Col 14: 60
+  Col 15: 0
+  Col 16: 0
+  Col 17: 10
+  Col 18: 3.333333333333332
+  Col 19: 2.0000000000000004
+  Col 20: 11.999999999999996
+  Col 21: 2.999999999999999
+  Col 22: 492
+  Col 23: 0
+  Col 24: 0
+  Col 25: 0
+  Col 26: 0
+  Col 27: 5
+  Col 28: 1
+  Col 29: 2
+  Col 30: 1
+  Col 31: 9
+  Col 32: 103
+  Col 33: 0
+  Col 34: 0
+  Col 35: 0
+  Col 36: 0
+  Col 37: 21
+  Col 38: 2
+  Col 39: 12
+  Col 40: 15
+  Col 41: 36
+  Col 42: 11.17
+  Col 43: 0.83
+  Col 44: 1.8499999999999994
+  Col 45: 9
+  Col 46: 22
+  Col 47: 54
+  Col 48: 54
+  Col 49: 54
+  Col 50: 0
+  Col 51: 0
+  Col 52: 216
+  Col 53: 0
+  Col 54: 310
+  Col 55: 0
+  Col 56: 0
+
+Row 28:
+  [EMPTY]
+
+Row 29:
+  Col 42: 11C 2CH
+  Col 43: 5SACH
+  Col 44: 1C 17SACH
+  Col 45: 9C 1CHA
+  Col 46: 22C
+
+Row 30:
+  [EMPTY]
+
+Row 31:
+  Col 43: 0.8333333333333334
+
+Row 32:
+  Col 44: 1.85
+
