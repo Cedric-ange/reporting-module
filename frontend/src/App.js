@@ -27,6 +27,7 @@ import {
 import AgentsModule from './modules/AgentsModule';
 import CommandoModule from './modules/CommandoModule';
 import GrossisteModule from './modules/GrossisteModule';
+import PromoPaqueModule from './modules/PromoPaqueModule';
 import ImportModule from './modules/ImportModule';
 import ExportModule from './modules/ExportModule';
 import Dashboard from './Dashboard';
@@ -39,7 +40,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [stats, setStats] = useState({ agents: 0, commando: 0, grossiste: 0 });
+  const [stats, setStats] = useState({ agents: 0, commando: 0, grossiste: 0, promoPaque: 0 });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -80,6 +81,7 @@ function App() {
     { text: 'Gestion Agents', icon: <PeopleIcon />, path: '/agents' },
     { text: 'Reporting Commando', icon: <AssessmentIcon />, path: '/commando' },
     { text: 'Activation Grossiste', icon: <AssessmentIcon />, path: '/grossiste' },
+    { text: 'Promo Pâque', icon: <AssessmentIcon />, path: '/promo-paque' },
     { text: 'Import Excel', icon: <CloudUploadIcon />, path: '/import' },
     { text: 'Export Excel', icon: <CloudDownloadIcon />, path: '/export' },
   ];
@@ -115,7 +117,7 @@ function App() {
             }}
           />
           <Chip 
-            label={`${stats.commando + stats.grossiste || 0} Perf.`} 
+            label={`${(stats.commando || 0) + (stats.grossiste || 0) + (stats.promoPaque || 0)} Perf.`} 
             size="small"
             sx={{ 
               bgcolor: 'rgba(255,255,255,0.15)', 
@@ -258,6 +260,7 @@ function App() {
           <Route path="/agents" element={<AgentsModule />} />
           <Route path="/commando" element={<CommandoModule />} />
           <Route path="/grossiste" element={<GrossisteModule />} />
+          <Route path="/promo-paque" element={<PromoPaqueModule />} />
           <Route path="/import" element={<ImportModule />} />
           <Route path="/export" element={<ExportModule />} />
         </Routes>
