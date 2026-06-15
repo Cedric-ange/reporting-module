@@ -55,14 +55,6 @@ function GrossisteModule() {
     comments: ''
   });
 
-  const metrics = [
-    { key: 'personnes_approchees', name: 'Personnes Approchées', color: '#1976d2' },
-    { key: 'realisation_carton', name: 'Réalisation (Carton)', color: '#9c27b0' },
-    { key: 'gratuit_chapelet_sachet', name: 'Gratuit (Chapelet & Sachet)', color: '#4caf50' },
-    { key: 'taux_realisation', name: 'Taux de Réalisation (%)', color: '#ff9800' },
-    { key: 'objectif_vente_carton', name: 'Objectif de Vente (Carton)', color: '#f44336' }
-  ];
-
   useEffect(() => {
     fetchAgents();
     fetchPerformances();
