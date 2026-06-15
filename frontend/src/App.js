@@ -20,9 +20,6 @@ import {
   CloudDownload as CloudDownloadIcon,
   Dashboard as DashboardIcon,
   Menu as MenuIcon,
-  Analytics as AnalyticsIcon,
-  Flag as FlagIcon,
-  CheckCircle as ValidationIcon
 } from '@mui/icons-material';
 import AgentsModule from './modules/AgentsModule';
 import CommandoModule from './modules/CommandoModule';

@@ -6,8 +6,6 @@ import {
   Grid,
   TextField,
   Button,
-  Card,
-  CardContent,
   MenuItem,
   Select,
   InputLabel,
@@ -21,7 +19,6 @@ import {
 } from '@mui/material';
 import {
   CloudDownload as CloudDownloadIcon,
-  Download as DownloadIcon,
   TrendingUp as PowerBIcon
 } from '@mui/icons-material';
 import axios from 'axios';
