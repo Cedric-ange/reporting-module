@@ -17,8 +17,7 @@ yarn-error.log*
 
 # Runtime data
 backend/exports/
-*.xlsx
-*.xls
+backend/data/*.db
 
 # OS files
 .DS_Store
