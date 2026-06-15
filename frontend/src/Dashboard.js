@@ -147,6 +147,38 @@ function Dashboard({ stats }) {
                 transform: 'translateY(-8px)',
                 boxShadow: 6
               },
+              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="body2" component="div" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, fontWeight: 500 }}>
+                    Performances Promo Pâque
+                  </Typography>
+                  <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
+                    {stats.promoPaque || 0}
+                  </Typography>
+                </Box>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
+                  <Assessment sx={{ fontSize: 32, color: 'white' }} />
+                </Avatar>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} lg={3}>
+          <Card 
+            sx={{ 
+              height: '100%', 
+              borderRadius: 3,
+              boxShadow: 3,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': { 
+                transform: 'translateY(-8px)',
+                boxShadow: 6
+              },
               background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
             }}
           >
@@ -157,7 +189,7 @@ function Dashboard({ stats }) {
                     Total Performances
                   </Typography>
                   <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
-                    {(stats.commando || 0) + (stats.grossiste || 0)}
+                    {(stats.commando || 0) + (stats.grossiste || 0) + (stats.promoPaque || 0)}
                   </Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>

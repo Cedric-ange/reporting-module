@@ -115,6 +115,34 @@ function initializeDatabase() {
       });
     });
 
+    // Table des performances Promo Pâque (saisie par jour et par PDV/magasin)
+    db.run(`CREATE TABLE IF NOT EXISTS promo_paque_performances (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      report_date DATE NOT NULL,
+      enseigne VARCHAR(100) NOT NULL,
+      pdv VARCHAR(200) NOT NULL,
+      contacts_objectif INTEGER DEFAULT 0,
+      contacts_realise INTEGER DEFAULT 0,
+      acheteurs_objectif INTEGER DEFAULT 0,
+      acheteurs_realise INTEGER DEFAULT 0,
+      real_premium_16g DECIMAL(10, 2) DEFAULT 0,
+      real_premium_360g DECIMAL(10, 2) DEFAULT 0,
+      real_excellence_900g DECIMAL(10, 2) DEFAULT 0,
+      real_avoine_50g DECIMAL(10, 2) DEFAULT 0,
+      real_avoine_400g DECIMAL(10, 2) DEFAULT 0,
+      real_3en1_cafe DECIMAL(10, 2) DEFAULT 0,
+      gratuite_premium_16g DECIMAL(10, 2) DEFAULT 0,
+      gratuite_avoine DECIMAL(10, 2) DEFAULT 0,
+      gratuite_3en1 DECIMAL(10, 2) DEFAULT 0,
+      goodies1 INTEGER DEFAULT 0,
+      goodies2 INTEGER DEFAULT 0,
+      goodies3 INTEGER DEFAULT 0,
+      goodies4 INTEGER DEFAULT 0,
+      comments TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(report_date, enseigne, pdv)
+    )`);
+
     // Table des imports
     db.run(`CREATE TABLE IF NOT EXISTS import_records (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

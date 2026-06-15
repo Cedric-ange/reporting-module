@@ -275,6 +275,112 @@ const grossisteFunctions = {
   }
 };
 
+// Fonctions pour les performances Promo Pâque
+const promoPaqueFunctions = {
+  createPromoPaquePerformance: (performance) => {
+    return new Promise((resolve, reject) => {
+      const sql = `INSERT INTO promo_paque_performances (report_date, enseigne, pdv, contacts_objectif, contacts_realise, acheteurs_objectif, acheteurs_realise, real_premium_16g, real_premium_360g, real_excellence_900g, real_avoine_50g, real_avoine_400g, real_3en1_cafe, gratuite_premium_16g, gratuite_avoine, gratuite_3en1, goodies1, goodies2, goodies3, goodies4, comments) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      db.run(sql, [
+        performance.report_date,
+        performance.enseigne,
+        performance.pdv,
+        performance.contacts_objectif || 0,
+        performance.contacts_realise || 0,
+        performance.acheteurs_objectif || 0,
+        performance.acheteurs_realise || 0,
+        performance.real_premium_16g || 0,
+        performance.real_premium_360g || 0,
+        performance.real_excellence_900g || 0,
+        performance.real_avoine_50g || 0,
+        performance.real_avoine_400g || 0,
+        performance.real_3en1_cafe || 0,
+        performance.gratuite_premium_16g || 0,
+        performance.gratuite_avoine || 0,
+        performance.gratuite_3en1 || 0,
+        performance.goodies1 || 0,
+        performance.goodies2 || 0,
+        performance.goodies3 || 0,
+        performance.goodies4 || 0,
+        performance.comments
+      ], function(err) {
+        if (err) reject(err);
+        else resolve({ id: this.lastID, ...performance });
+      });
+    });
+  },
+
+  getPromoPaquePerformances: (enseigne = null, dateFrom = null, dateTo = null) => {
+    return new Promise((resolve, reject) => {
+      let sql = 'SELECT * FROM promo_paque_performances';
+      const params = [];
+      const conditions = [];
+
+      if (enseigne) { conditions.push('enseigne = ?'); params.push(enseigne); }
+      if (dateFrom) { conditions.push('report_date >= ?'); params.push(dateFrom); }
+      if (dateTo) { conditions.push('report_date <= ?'); params.push(dateTo); }
+
+      if (conditions.length > 0) sql += ' WHERE ' + conditions.join(' AND ');
+      sql += ' ORDER BY report_date DESC, enseigne, pdv';
+
+      db.all(sql, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  },
+
+  getPromoPaquePerformanceById: (id) => {
+    return new Promise((resolve, reject) => {
+      db.get('SELECT * FROM promo_paque_performances WHERE id = ?', [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  },
+
+  updatePromoPaquePerformance: (id, performance) => {
+    return new Promise((resolve, reject) => {
+      const sql = `UPDATE promo_paque_performances SET report_date = ?, enseigne = ?, pdv = ?, contacts_objectif = ?, contacts_realise = ?, acheteurs_objectif = ?, acheteurs_realise = ?, real_premium_16g = ?, real_premium_360g = ?, real_excellence_900g = ?, real_avoine_50g = ?, real_avoine_400g = ?, real_3en1_cafe = ?, gratuite_premium_16g = ?, gratuite_avoine = ?, gratuite_3en1 = ?, goodies1 = ?, goodies2 = ?, goodies3 = ?, goodies4 = ?, comments = ? WHERE id = ?`;
+      db.run(sql, [
+        performance.report_date,
+        performance.enseigne,
+        performance.pdv,
+        performance.contacts_objectif || 0,
+        performance.contacts_realise || 0,
+        performance.acheteurs_objectif || 0,
+        performance.acheteurs_realise || 0,
+        performance.real_premium_16g || 0,
+        performance.real_premium_360g || 0,
+        performance.real_excellence_900g || 0,
+        performance.real_avoine_50g || 0,
+        performance.real_avoine_400g || 0,
+        performance.real_3en1_cafe || 0,
+        performance.gratuite_premium_16g || 0,
+        performance.gratuite_avoine || 0,
+        performance.gratuite_3en1 || 0,
+        performance.goodies1 || 0,
+        performance.goodies2 || 0,
+        performance.goodies3 || 0,
+        performance.goodies4 || 0,
+        performance.comments,
+        id
+      ], function(err) {
+        if (err) reject(err);
+        else resolve({ id, ...performance });
+      });
+    });
+  },
+
+  deletePromoPaquePerformance: (id) => {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM promo_paque_performances WHERE id = ?', [id], function(err) {
+        if (err) reject(err);
+        else resolve({ deleted: this.changes > 0 });
+      });
+    });
+  }
+};
+
 // Fonctions pour les imports
 const importFunctions = {
   createImportRecord: (record) => {
@@ -311,6 +417,7 @@ module.exports = {
   objectives: objectiveFunctions,
   commando: commandoFunctions,
   grossiste: grossisteFunctions,
+  promoPaque: promoPaqueFunctions,
   imports: importFunctions,
   
   // Fonctions utilitaires
@@ -319,9 +426,10 @@ module.exports = {
       Promise.all([
         new Promise((res, rej) => db.get('SELECT COUNT(*) as count FROM agents', (err, row) => err ? rej(err) : res(row.count))),
         new Promise((res, rej) => db.get('SELECT COUNT(*) as count FROM commando_performances', (err, row) => err ? rej(err) : res(row.count))),
-        new Promise((res, rej) => db.get('SELECT COUNT(*) as count FROM grossiste_performances', (err, row) => err ? rej(err) : res(row.count)))
-      ]).then(([agents, commando, grossiste]) => {
-        resolve({ agents, commando, grossiste, total: commando + grossiste });
+        new Promise((res, rej) => db.get('SELECT COUNT(*) as count FROM grossiste_performances', (err, row) => err ? rej(err) : res(row.count))),
+        new Promise((res, rej) => db.get('SELECT COUNT(*) as count FROM promo_paque_performances', (err, row) => err ? rej(err) : res(row.count)))
+      ]).then(([agents, commando, grossiste, promoPaque]) => {
+        resolve({ agents, commando, grossiste, promoPaque, total: commando + grossiste + promoPaque });
       }).catch(reject);
     });
   }

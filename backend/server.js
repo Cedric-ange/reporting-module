@@ -75,7 +75,8 @@ app.get('/api/health', async (req, res) => {
         agents: stats.agents,
         performances: stats.total,
         commando: stats.commando,
-        grossiste: stats.grossiste
+        grossiste: stats.grossiste,
+        promoPaque: stats.promoPaque
       }
     });
   } catch (error) {
@@ -727,6 +728,94 @@ app.delete('/api/grossiste-performances/:id', async (req, res) => {
   } catch (error) {
     console.error('Erreur suppression performance grossiste:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de la suppression de la performance grossiste' });
+  }
+});
+
+// ==================== MODULE PROMO PÂQUE ====================
+
+app.get('/api/promo-paque-performances', async (req, res) => {
+  try {
+    const { enseigne, date_from, date_to } = req.query;
+    const performances = await database.promoPaque.getPromoPaquePerformances(enseigne, date_from, date_to);
+    res.json({ success: true, data: performances, count: performances.length });
+  } catch (error) {
+    console.error('Erreur récupération performances promo pâque:', error);
+    res.status(500).json({ success: false, error: 'Erreur lors de la récupération des performances promo pâque' });
+  }
+});
+
+app.post('/api/promo-paque-performances', async (req, res) => {
+  try {
+    const performance = await database.promoPaque.createPromoPaquePerformance(req.body);
+    res.json({ success: true, data: performance, message: 'Performance promo pâque créée avec succès' });
+  } catch (error) {
+    console.error('Erreur création performance promo pâque:', error);
+    res.status(500).json({ success: false, error: 'Erreur lors de la création de la performance promo pâque' });
+  }
+});
+
+app.put('/api/promo-paque-performances/:id', async (req, res) => {
+  try {
+    const performance = await database.promoPaque.updatePromoPaquePerformance(req.params.id, req.body);
+    res.json({ success: true, data: performance, message: 'Performance promo pâque mise à jour avec succès' });
+  } catch (error) {
+    console.error('Erreur mise à jour performance promo pâque:', error);
+    res.status(500).json({ success: false, error: 'Erreur lors de la mise à jour de la performance promo pâque' });
+  }
+});
+
+app.delete('/api/promo-paque-performances/:id', async (req, res) => {
+  try {
+    await database.promoPaque.deletePromoPaquePerformance(req.params.id);
+    res.json({ success: true, message: 'Performance promo pâque supprimée avec succès' });
+  } catch (error) {
+    console.error('Erreur suppression performance promo pâque:', error);
+    res.status(500).json({ success: false, error: 'Erreur lors de la suppression de la performance promo pâque' });
+  }
+});
+
+// Export Excel des performances Promo Pâque
+app.get('/api/promo-paque-performances/export/excel', async (req, res) => {
+  try {
+    const { enseigne, date_from, date_to } = req.query;
+    const performances = await database.promoPaque.getPromoPaquePerformances(enseigne, date_from, date_to);
+
+    const excelData = performances.map(p => ({
+      'Date': p.report_date,
+      'Enseigne': p.enseigne,
+      'PDV': p.pdv,
+      'Contacts objectif': p.contacts_objectif,
+      'Contacts réalisé': p.contacts_realise,
+      'Acheteurs objectif': p.acheteurs_objectif,
+      'Acheteurs réalisé': p.acheteurs_realise,
+      'Biblos Lait Premium 16g': p.real_premium_16g,
+      'Biblos Lait Premium 360g': p.real_premium_360g,
+      'Biblos Lait Excellence 900g': p.real_excellence_900g,
+      "Biblos Avoine 50g": p.real_avoine_50g,
+      "Biblos Avoine 400g": p.real_avoine_400g,
+      'Biblos 3 en 1 Café au lait': p.real_3en1_cafe,
+      'Gratuité Premium 16g': p.gratuite_premium_16g,
+      'Gratuité Avoine': p.gratuite_avoine,
+      'Gratuité 3 en 1': p.gratuite_3en1,
+      'Goodies 1': p.goodies1,
+      'Goodies 2': p.goodies2,
+      'Goodies 3': p.goodies3,
+      'Goodies 4': p.goodies4,
+      'Commentaires': p.comments
+    }));
+
+    const workbook = xlsx.utils.book_new();
+    const worksheet = xlsx.utils.json_to_sheet(excelData);
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Promo Paque');
+
+    const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    res.setHeader('Content-Disposition', `attachment; filename="promo-paque-export-${timestamp}.xlsx"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+  } catch (error) {
+    console.error('Erreur export Excel promo pâque:', error);
+    res.status(500).json({ success: false, error: 'Erreur lors de l\'export Excel promo pâque' });
   }
 });
 
