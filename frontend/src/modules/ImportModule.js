@@ -9,7 +9,6 @@ import {
   AlertTitle,
   LinearProgress,
   Chip,
-  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -18,19 +17,11 @@ import {
   TableRow,
   ToggleButton,
   ToggleButtonGroup,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Divider
 } from '@mui/material';
 import {
   CloudDownload as CloudDownloadIcon,
-  CloudUpload as CloudUploadIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Validation as ValidationIcon
+  CloudUpload as CloudUploadIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
