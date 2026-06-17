@@ -4,6 +4,9 @@ const xlsx = require('xlsx');
 const path = require('path');
 const fs = require('fs');
 
+// Détection de l'environnement Vercel
+const IS_VERCEL = process.env.NODE_ENV === 'production';
+
 /**
  * Exportateur Power BI avec transformations ETL intégrées
  * Basé sur les scripts Power Query générés dans l'analyse ETL Python
@@ -11,15 +14,25 @@ const fs = require('fs');
 class PowerBIExporter {
   
   constructor() {
-    this.exportDir = path.join(__dirname, '../../exports/powerbi');
+    // Utilise /tmp/powerbi sur Vercel, sinon le dossier local
+    this.exportDir = IS_VERCEL 
+      ? '/tmp/powerbi' 
+      : path.join(__dirname, '../../exports/powerbi');
+      
     this.ensureExportDirectory();
   }
 
   ensureExportDirectory() {
-    if (!fs.existsSync(this.exportDir)) {
-      fs.mkdirSync(this.exportDir, { recursive: true });
+    try {
+      if (!fs.existsSync(this.exportDir)) {
+        fs.mkdirSync(this.exportDir, { recursive: true });
+      }
+    } catch (error) {
+      console.warn("⚠️ Création du dossier PowerBI ignorée (Comportement normal sur Vercel)");
     }
   }
+
+  // ... (GARDER LE RESTE DU FICHIER INTACT À PARTIR D'ICI)
 
   /**
    * Exporter les données avec transformations ETL pour Power BI

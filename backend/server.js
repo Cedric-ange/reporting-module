@@ -5,7 +5,7 @@ const xlsx = require('xlsx');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const database = require('./src/database/database-functions');
+const database = require('./src/database/database');
 
 // Importer les nouveaux modules ETL et KPI
 const GrossisteETLTransformer = require('./src/etl/grossiste-etl-transformer');
