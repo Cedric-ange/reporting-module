@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 
 // Connexion à Supabase via la chaîne de connexion PostgreSQL
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || "postgresql://postgres:@ngeToure1201@db.ididzabqgmnfgruryuev.supabase.co:5432/postgres",
+  connectionString: process.env.DATABASE_URL || "postgresql://postgres:%40ngeToure1201@db.ididzabqgmnfgruryuev.supabase.co:5432/postgres",
   ssl: {
     rejectUnauthorized: false // Obligatoire pour Supabase
   }

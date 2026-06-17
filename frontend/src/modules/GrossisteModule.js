@@ -62,7 +62,7 @@ function GrossisteModule() {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('http:///api/agents');
+      const response = await axios.get('/api/agents');
       setAgents(response.data.data);
     } catch (error) {
       console.error('Erreur récupération agents:', error);
@@ -71,7 +71,7 @@ function GrossisteModule() {
 
   const fetchPerformances = async () => {
     try {
-      const response = await axios.get('http:///api/grossiste-performances');
+      const response = await axios.get('/api/grossiste-performances');
       setPerformances(response.data.data);
     } catch (error) {
       console.error('Erreur récupération performances:', error);
@@ -117,7 +117,7 @@ function GrossisteModule() {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette performance ?')) {
       try {
-        await axios.delete(`http:///api/grossiste-performances/${id}`);
+        await axios.delete(`/api/grossiste-performances/${id}`);
         fetchPerformances();
       } catch (error) {
         console.error('Erreur suppression performance:', error);
@@ -138,9 +138,9 @@ function GrossisteModule() {
       };
 
       if (editingPerformance) {
-        await axios.put(`http:///api/grossiste-performances/${editingPerformance.id}`, dataToSave);
+        await axios.put(`/api/grossiste-performances/${editingPerformance.id}`, dataToSave);
       } else {
-        await axios.post('http:///api/grossiste-performances', dataToSave);
+        await axios.post('/api/grossiste-performances', dataToSave);
       }
       fetchPerformances();
       setDialogOpen(false);

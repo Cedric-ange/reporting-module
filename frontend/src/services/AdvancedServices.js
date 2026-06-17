@@ -1,7 +1,7 @@
 // Service pour les nouvelles fonctionnalités ETL et KPIs
 import axios from 'axios';
 
-const API_BASE_URL = 'http:///api';
+const API_BASE_URL = '/api';
 
 export const ETLService = {
   // Transformation ETL avancée

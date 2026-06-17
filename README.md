@@ -142,7 +142,7 @@ L'application supporte :
 Créer un fichier `.env` dans le dossier frontend :
 
 ```
-REACT_APP_API_URL=http:///api
+REACT_APP_API_URL=/api
 ```
 
 ## 🤝 Contribution

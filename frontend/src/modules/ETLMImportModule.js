@@ -62,7 +62,7 @@ function ETLMImportModule() {
     formData.append('type', type);
 
     try {
-      const response = await axios.post('http:///api/etl/validate', formData, {
+      const response = await axios.post('/api/etl/validate', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setPreview(response.data);
@@ -85,7 +85,7 @@ function ETLMImportModule() {
     formData.append('file', file);
 
     try {
-      const response = await axios.post(`http:///api/etl/import/${type}`, formData, {
+      const response = await axios.post(`/api/etl/import/${type}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setResult(response.data);

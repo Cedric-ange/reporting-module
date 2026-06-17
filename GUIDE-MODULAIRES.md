@@ -97,18 +97,18 @@ ls backend/data/
 ### Étape 4 : Tester l'API
 ```bash
 # Health check avec statistiques de la base de données
-curl http:///api/health
+curl /api/health
 
 # Créer un agent
-curl -X POST http:///api/agents \
+curl -X POST /api/agents \
   -H "Content-Type: application/json" \
   -d '{"agent_number":"001","agent_name":"Jean Dupont","city":"Abidjan"}'
 
 # Lister les agents
-curl http:///api/agents
+curl /api/agents
 
 # Télécharger le template
-curl http:///api/template/download --output template.xlsx
+curl /api/template/download --output template.xlsx
 ```
 
 ## 📊 Structure de la Base de Données
