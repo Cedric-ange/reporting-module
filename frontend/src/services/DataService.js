@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Détection automatique de l'environnement (Local vs Vercel)
-const API_URL = window.location.hostname === 'localhost' 
+// CORRECTION ICI : On utilise le nom API_BASE_URL
+const API_BASE_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5000/api' 
   : '/api';
 
