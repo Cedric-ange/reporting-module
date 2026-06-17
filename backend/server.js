@@ -5,7 +5,7 @@ const xlsx = require('xlsx');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const database = require('./src/database/database');
+const database = require('./src/database/database-functions');
 
 // Importer les nouveaux modules ETL et KPI
 const GrossisteETLTransformer = require('./src/etl/grossiste-etl-transformer');
@@ -1248,4 +1248,4 @@ if (!IS_VERCEL) {
 }
 
 // Obligatoire pour que Vercel puisse lire le fichier
-module.exports = app
+module.exports = app;
