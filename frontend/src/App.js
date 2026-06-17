@@ -31,6 +31,11 @@ import Dashboard from './Dashboard';
 import BiblosLogo from './components/BiblosLogo';
 import axios from 'axios';
 
+// Détection automatique de l'environnement (Local vs Vercel)
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api' 
+  : '/api';
+
 const drawerWidth = 280;
 
 function App() {
@@ -62,7 +67,8 @@ function App() {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/health');
+      // CORRECTION ICI : Utilisation de l'URL dynamique
+      const response = await axios.get(`${API_BASE_URL}/health`);
       setStats(response.data.statistics);
     } catch (error) {
       console.log('Backend non disponible, utilisation du mode hors ligne');
