@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? '/api' 
-  : 'http://localhost:5000/api';
+// Détection automatique de l'environnement (Local vs Vercel)
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api' 
+  : '/api';
 
 class DataService {
   // Exporter les données en Excel
