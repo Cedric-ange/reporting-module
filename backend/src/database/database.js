@@ -1,79 +1,88 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const fs = require('fs');
+const { Pool } = require('pg');
 
-// Chemin vers la base de données
-const DB_PATH = path.join(__dirname, '../../data/reporting.db');
-const DATA_DIR = path.join(__dirname, '../../data');
+// Connexion à Supabase via la chaîne de connexion PostgreSQL
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || "postgresql://postgres:@ngeToure1201@db.ididzabqgmnfgruryuev.supabase.co:5432/postgres",
+  ssl: {
+    rejectUnauthorized: false // Obligatoire pour Supabase
+  }
+});
 
-// Créer le dossier data s'il n'existe pas
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
+// Tester la connexion
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('❌ Erreur de connexion à Supabase :', err.message);
+  } else {
+    console.log('✅ Connecté avec succès à Supabase PostgreSQL !');
+  }
+});
 
 class Database {
   constructor() {
-    this.db = new sqlite3.Database(DB_PATH, (err) => {
-      if (err) {
-        console.error('Erreur connexion base de données:', err);
-      } else {
-        console.log('Base de données connectée avec succès');
-        this.initializeDatabase();
-      }
-    });
+    this.initializeDatabase();
   }
 
-  initializeDatabase() {
-    // Activer les clés étrangères
-    this.run("PRAGMA foreign_keys = ON");
-    
-    // Créer les tables
-    this.createTables();
-    
-    console.log('Base de données initialisée avec succès');
+  async initializeDatabase() {
+    try {
+      await this.createTables();
+      console.log('✅ Tables PostgreSQL initialisées avec succès');
+    } catch (err) {
+      console.error('❌ Erreur initialisation tables :', err);
+    }
   }
 
-  run(sql, params = []) {
-    return new Promise((resolve, reject) => {
-      this.db.run(sql, params, function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ lastID: this.lastID, changes: this.changes });
-        }
-      });
-    });
+  // === TRADUCTEUR SQLITE -> POSTGRESQL ===
+  // Cette fonction convertit vos requêtes avec "?" en "$1, $2" et gère les identifiants
+  _convertSql(sql) {
+    let i = 0;
+    let pgSql = sql.replace(/\?/g, () => `$${++i}`);
+
+    // PostgreSQL a besoin de "RETURNING id" pour récupérer l'ID après un INSERT
+    if (pgSql.trim().toUpperCase().startsWith('INSERT') && !pgSql.toUpperCase().includes('RETURNING')) {
+      pgSql += ' RETURNING id';
+    }
+    return pgSql;
   }
 
-  get(sql, params = []) {
-    return new Promise((resolve, reject) => {
-      this.db.get(sql, params, (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
-        }
-      });
-    });
+  async run(sql, params = []) {
+    try {
+      const pgSql = this._convertSql(sql);
+      const res = await pool.query(pgSql, params);
+      return { 
+        lastID: res.rows.length > 0 ? res.rows[0].id : null, 
+        changes: res.rowCount 
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  all(sql, params = []) {
-    return new Promise((resolve, reject) => {
-      this.db.all(sql, params, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
-    });
+  async get(sql, params = []) {
+    try {
+      const pgSql = this._convertSql(sql);
+      const res = await pool.query(pgSql, params);
+      return res.rows[0];
+    } catch (error) {
+      throw error;
+    }
   }
 
-  createTables() {
+  async all(sql, params = []) {
+    try {
+      const pgSql = this._convertSql(sql);
+      const res = await pool.query(pgSql, params);
+      return res.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createTables() {
+    // Note : AUTOINCREMENT est remplacé par SERIAL pour PostgreSQL
     const tables = [
       // Table agents
       `CREATE TABLE IF NOT EXISTS agents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         agent_number VARCHAR(20) UNIQUE NOT NULL,
         agent_name VARCHAR(100) NOT NULL,
         city VARCHAR(100),
@@ -86,7 +95,7 @@ class Database {
       
       // Table objectifs
       `CREATE TABLE IF NOT EXISTS objectives (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         agent_id INTEGER NOT NULL,
         period_start DATE NOT NULL,
         period_end DATE NOT NULL,
@@ -109,79 +118,68 @@ class Database {
       
       // Table performances
       `CREATE TABLE IF NOT EXISTS performances (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         agent_id INTEGER NOT NULL,
         report_date DATE NOT NULL,
         
-        -- Visites par type PDV
         visits_boutique INTEGER DEFAULT 0,
         visits_superette INTEGER DEFAULT 0,
         visits_kiosque INTEGER DEFAULT 0,
         visits_tablier INTEGER DEFAULT 0,
         visits_pushcart INTEGER DEFAULT 0,
         
-        -- Référencement
         ref_boutique INTEGER DEFAULT 0,
         ref_superette INTEGER DEFAULT 0,
         ref_kiosque INTEGER DEFAULT 0,
         ref_tablier INTEGER DEFAULT 0,
         ref_pushcart INTEGER DEFAULT 0,
         
-        -- Matériel visibilité
         poster_premium INTEGER DEFAULT 0,
         poster_excellence INTEGER DEFAULT 0,
         poster_avoine INTEGER DEFAULT 0,
         hanger INTEGER DEFAULT 0,
         wobbler INTEGER DEFAULT 0,
         
-        -- Ventes par produit
         sales_premium_16g INTEGER DEFAULT 0,
         sales_premium_360g INTEGER DEFAULT 0,
         sales_excellence_900g INTEGER DEFAULT 0,
         sales_avoine_50g INTEGER DEFAULT 0,
         sales_avoine_400g INTEGER DEFAULT 0,
         
-        -- Présence produits
         presence_premium_16g INTEGER DEFAULT 0,
         presence_premium_360g INTEGER DEFAULT 0,
         presence_excellence_900g INTEGER DEFAULT 0,
         presence_avoine_50g INTEGER DEFAULT 0,
         presence_avoine_400g INTEGER DEFAULT 0,
         
-        -- Nouveau référencement
         new_ref_premium_16g INTEGER DEFAULT 0,
         new_ref_premium_360g INTEGER DEFAULT 0,
         new_ref_excellence_900g INTEGER DEFAULT 0,
         new_ref_avoine_50g INTEGER DEFAULT 0,
         new_ref_avoine_400g INTEGER DEFAULT 0,
         
-        -- Référencement réalisé
         real_ref_boutique INTEGER DEFAULT 0,
         real_ref_superette INTEGER DEFAULT 0,
         real_ref_kiosque INTEGER DEFAULT 0,
         real_ref_tablier INTEGER DEFAULT 0,
         real_ref_pushcart INTEGER DEFAULT 0,
         
-        -- Ventes réalisées
         real_sales_premium_16g INTEGER DEFAULT 0,
         real_sales_premium_360g INTEGER DEFAULT 0,
         real_sales_excellence_900g INTEGER DEFAULT 0,
         real_sales_avoine_50g INTEGER DEFAULT 0,
         real_sales_avoine_400g INTEGER DEFAULT 0,
         
-        -- Matériel réalisé
         real_poster_premium INTEGER DEFAULT 0,
         real_poster_excellence INTEGER DEFAULT 0,
         real_poster_avoine INTEGER DEFAULT 0,
         real_hanger INTEGER DEFAULT 0,
         real_wobbler INTEGER DEFAULT 0,
         
-        -- Gratuits
         free_premium_16g INTEGER DEFAULT 0,
         free_excellence_900g INTEGER DEFAULT 0,
         free_avoine_50g INTEGER DEFAULT 0,
         
-        -- Commentaires
         comments TEXT,
         impressions TEXT,
         
@@ -194,7 +192,7 @@ class Database {
       
       // Table imports
       `CREATE TABLE IF NOT EXISTS imports (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         file_name VARCHAR(255) NOT NULL,
         import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         total_rows INTEGER DEFAULT 0,
@@ -206,41 +204,37 @@ class Database {
       )`
     ];
 
-    tables.forEach(tableSQL => {
-      this.run(tableSQL).catch(err => console.error('Erreur création table:', err));
-    });
+    for (let tableSQL of tables) {
+      await this.run(tableSQL);
+    }
 
-    // Créer des index pour optimiser les performances
+    // Index pour optimiser les requêtes
     const indexes = [
       'CREATE INDEX IF NOT EXISTS idx_performances_agent_date ON performances(agent_id, report_date)',
       'CREATE INDEX IF NOT EXISTS idx_objectives_agent_period ON objectives(agent_id, period_start, period_end)'
     ];
 
-    indexes.forEach(indexSQL => {
-      this.run(indexSQL).catch(err => console.error('Erreur création index:', err));
-    });
+    for (let indexSQL of indexes) {
+      await this.run(indexSQL);
+    }
   }
 
   // === MÉTHODES AGENTS ===
 
   async createAgent(agentData) {
-    try {
-      const result = await this.run(
-        `INSERT INTO agents (agent_number, agent_name, city, phone, email, status)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          agentData.agent_number,
-          agentData.agent_name,
-          agentData.city || null,
-          agentData.phone || null,
-          agentData.email || null,
-          agentData.status || 'active'
-        ]
-      );
-      return this.getAgentById(result.lastID);
-    } catch (error) {
-      throw error;
-    }
+    const result = await this.run(
+      `INSERT INTO agents (agent_number, agent_name, city, phone, email, status)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        agentData.agent_number,
+        agentData.agent_name,
+        agentData.city || null,
+        agentData.phone || null,
+        agentData.email || null,
+        agentData.status || 'active'
+      ]
+    );
+    return this.getAgentById(result.lastID);
   }
 
   async getAgentById(id) {
@@ -252,7 +246,7 @@ class Database {
   }
 
   async getAllAgents() {
-    return this.all('SELECT * FROM agents WHERE status = "active" ORDER BY agent_name');
+    return this.all('SELECT * FROM agents WHERE status = \'active\' ORDER BY agent_name');
   }
 
   async updateAgent(id, agentData) {
@@ -273,7 +267,7 @@ class Database {
   }
 
   async deleteAgent(id) {
-    await this.run('UPDATE agents SET status = "deleted" WHERE id = ?', [id]);
+    await this.run('UPDATE agents SET status = \'deleted\' WHERE id = ?', [id]);
   }
 
   // === MÉTHODES OBJECTIFS ===
@@ -288,7 +282,7 @@ class Database {
         weekly_sales_avoine_50g, weekly_sales_avoine_400g,
         monthly_references, status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         objectiveData.agent_id,
         objectiveData.period_start,
@@ -375,7 +369,7 @@ class Database {
           free_premium_16g, free_excellence_900g, free_avoine_50g,
           comments, impressions
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           performanceData.agent_id,
           performanceData.report_date,
@@ -433,8 +427,7 @@ class Database {
       );
       return this.getPerformanceById(result.lastID);
     } catch (error) {
-      if (error.message.includes('UNIQUE constraint')) {
-        // Mise à jour si existe déjà
+      if (error.message.includes('unique constraint') || error.message.includes('UNIQUE constraint')) {
         const existing = await this.getPerformanceByAgentAndDate(
           performanceData.agent_id, 
           performanceData.report_date
@@ -597,18 +590,25 @@ class Database {
       performances_this_month: 0
     };
     
-    stats.total_agents = (await this.get('SELECT COUNT(*) as count FROM agents WHERE status = "active"')).count;
-    stats.active_objectives = (await this.get('SELECT COUNT(*) as count FROM objectives WHERE status = "active"')).count;
-    stats.total_performances = (await this.get('SELECT COUNT(*) as count FROM performances')).count;
+    // PostgreSQL retourne les COUNT(*) sous forme de chaîne de caractères, donc on convertit en INTEGER
+    const agentsRes = await this.get('SELECT CAST(COUNT(*) AS INTEGER) as count FROM agents WHERE status = \'active\'');
+    stats.total_agents = agentsRes ? agentsRes.count : 0;
+    
+    const objRes = await this.get('SELECT CAST(COUNT(*) AS INTEGER) as count FROM objectives WHERE status = \'active\'');
+    stats.active_objectives = objRes ? objRes.count : 0;
+    
+    const perfRes = await this.get('SELECT CAST(COUNT(*) AS INTEGER) as count FROM performances');
+    stats.total_performances = perfRes ? perfRes.count : 0;
     
     const currentMonth = new Date().toISOString().slice(0, 7);
-    stats.performances_this_month = (await this.get('SELECT COUNT(*) as count FROM performances WHERE report_date LIKE ?', [currentMonth + '%'])).count;
+    const monthRes = await this.get('SELECT CAST(COUNT(*) AS INTEGER) as count FROM performances WHERE CAST(report_date AS TEXT) LIKE ?', [currentMonth + '%']);
+    stats.performances_this_month = monthRes ? monthRes.count : 0;
     
     return stats;
   }
 
   close() {
-    this.db.close();
+    pool.end();
   }
 }
 
