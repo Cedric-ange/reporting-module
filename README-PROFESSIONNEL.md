@@ -51,7 +51,7 @@ cd backend
 npm run dev
 ```
 
-Le serveur démarrera sur **http://localhost:5000**
+Le serveur démarrera sur **http://**
 - Base de données SQLite automatiquement initialisée
 - Template Excel original copié depuis Downloads
 - 4 modules API opérationnels

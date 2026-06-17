@@ -17,7 +17,7 @@ echo.
 echo [2/3] Demarrage du backend (port 5000)...
 start "Backend Server" cmd /k "npm run dev"
 timeout /t 5 /nobreak > nul
-echo Backend demarre sur http://localhost:5000
+echo Backend demarre sur http://
 echo.
 
 echo [3/3] Verification dependances frontend...
@@ -38,7 +38,7 @@ echo ========================================
 echo Application en cours de demarrage...
 echo ========================================
 echo.
-echo Backend: http://localhost:5000
+echo Backend: http://
 echo Frontend: http://localhost:3000
 echo.
 echo Appuyez sur une touche pour fermer cette fenetre...

@@ -68,7 +68,7 @@ function AgentsModule() {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/agents');
+      const response = await axios.get('http:///api/agents');
       setAgents(response.data.data);
     } catch (error) {
       console.error('Erreur récupération agents:', error);
@@ -102,7 +102,7 @@ function AgentsModule() {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet agent ?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/agents/${id}`);
+        await axios.delete(`http:///api/agents/${id}`);
         fetchAgents();
       } catch (error) {
         console.error('Erreur suppression agent:', error);
@@ -113,9 +113,9 @@ function AgentsModule() {
   const handleSave = async () => {
     try {
       if (editingAgent) {
-        await axios.put(`http://localhost:5000/api/agents/${editingAgent.id}`, formData);
+        await axios.put(`http:///api/agents/${editingAgent.id}`, formData);
       } else {
-        await axios.post('http://localhost:5000/api/agents', formData);
+        await axios.post('http:///api/agents', formData);
       }
       fetchAgents();
       setDialogOpen(false);
@@ -131,7 +131,7 @@ function AgentsModule() {
     
     // Récupérer les objectifs existants de l'agent
     try {
-      const response = await axios.get(`http://localhost:5000/api/agents/${agent.id}/objectives`);
+      const response = await axios.get(`http:///api/agents/${agent.id}/objectives`);
       if (response.data.data && response.data.data.length > 0) {
         const latestObjective = response.data.data[0];
         setObjectiveForm({
@@ -165,7 +165,7 @@ function AgentsModule() {
 
   const handleSaveObjectives = async () => {
     try {
-      await axios.post('http://localhost:5000/api/objectives', {
+      await axios.post('http:///api/objectives', {
         agent_id: selectedAgent.id,
         ...objectiveForm
       });

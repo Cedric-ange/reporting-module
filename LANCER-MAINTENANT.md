@@ -53,7 +53,7 @@ npm start
 ## Étape 3 : Accès à l'Application
 
 Une fois lancée :
-- **Backend API** : http://localhost:5000
+- **Backend API** : http://
 - **Application React** : http://localhost:3000
 
 ## ✅ Ce qui a été créé

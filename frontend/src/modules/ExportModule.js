@@ -40,7 +40,7 @@ function ExportModule() {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/agents');
+      const response = await axios.get('http:///api/agents');
       setAgents(response.data.data || []);
     } catch (error) {
       console.error('Erreur récupération agents:', error);
@@ -67,7 +67,7 @@ function ExportModule() {
       if (filters.date_from) params.dateFrom = filters.date_from;
       if (filters.date_to) params.dateTo = filters.date_to;
 
-      const response = await axios.get(`http://localhost:5000/api/etl/export/${filters.type}`, {
+      const response = await axios.get(`http:///api/etl/export/${filters.type}`, {
         params,
         responseType: 'blob'
       });

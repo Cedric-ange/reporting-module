@@ -14,7 +14,7 @@ Start-Process -FilePath "cmd" -ArgumentList "/k cd frontend && npm start" -PassT
 
 Write-Host "Application démarrée!" -ForegroundColor Green
 Write-Host "Frontend: http://localhost:3000" -ForegroundColor Cyan
-Write-Host "Backend: http://localhost:5000" -ForegroundColor Cyan
+Write-Host "Backend: http://" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Appuyez sur Ctrl+C pour arrêter les serveurs" -ForegroundColor Yellow
 

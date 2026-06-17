@@ -64,13 +64,13 @@ Les nouveaux composants sont intégrés dans `App.js` avec le menu de navigation
 ### Tester les nouveaux endpoints sans frontend:
 ```bash
 # Tester le health check
-curl http://localhost:5000/api/health
+curl http:///api/health
 
 # Tester les KPIs globaux
-curl http://localhost:5000/api/grossiste/kpi/global
+curl http:///api/grossiste/kpi/global
 
 # Tester la validation de la base de données
-curl http://localhost:5000/api/validation/etl/check-database
+curl http:///api/validation/etl/check-database
 ```
 
 ### Tester avec l'interface frontend:

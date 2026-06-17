@@ -61,7 +61,7 @@ function ImportModule() {
 
     try {
       // Utiliser l'endpoint ETL de validation
-      const response = await axios.post('http://localhost:5000/api/etl/validate', formData, {
+      const response = await axios.post('http:///api/etl/validate', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -91,7 +91,7 @@ function ImportModule() {
 
     try {
       // Utiliser l'endpoint ETL d'import
-      const response = await axios.post(`http://localhost:5000/api/etl/import/${importType}`, formData, {
+      const response = await axios.post(`http:///api/etl/import/${importType}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -110,8 +110,8 @@ function ImportModule() {
 
   const downloadTemplate = () => {
     const templateUrl = importType === 'commando' 
-      ? 'http://localhost:5000/api/export/excel' 
-      : 'http://localhost:5000/api/etl/export/grossiste';
+      ? 'http:///api/export/excel' 
+      : 'http:///api/etl/export/grossiste';
     
     window.open(templateUrl, '_blank');
   };

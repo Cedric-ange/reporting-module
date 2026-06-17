@@ -48,8 +48,8 @@ function Dashboard({ stats }) {
     const fetchData = async () => {
       try {
         const [cmdRes, groRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/commando-performances').catch(() => ({ data: { data: [] } })),
-          axios.get('http://localhost:5000/api/grossiste-performances').catch(() => ({ data: { data: [] } }))
+          axios.get('http:///api/commando-performances').catch(() => ({ data: { data: [] } })),
+          axios.get('http:///api/grossiste-performances').catch(() => ({ data: { data: [] } }))
         ]);
         setCommandoData(cmdRes.data.data || []);
         setGrossisteData(groRes.data.data || []);

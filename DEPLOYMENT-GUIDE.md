@@ -124,7 +124,7 @@ npm install
 cd backend
 npm run dev
 ```
-Le serveur démarrera sur http://localhost:5000
+Le serveur démarrera sur http://
 
 ### Frontend
 ```bash

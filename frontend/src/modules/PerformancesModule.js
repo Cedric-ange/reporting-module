@@ -45,7 +45,7 @@ function PerformancesModule() {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/agents');
+      const response = await axios.get('http:///api/agents');
       setAgents(response.data.data);
     } catch (error) {
       console.error('Erreur récupération agents:', error);
@@ -54,7 +54,7 @@ function PerformancesModule() {
 
   const handleSave = async () => {
     try {
-      await axios.post('http://localhost:5000/api/performances', {
+      await axios.post('http:///api/performances', {
         ...formData,
         agent_id: parseInt(formData.agent_id)
       });

@@ -280,7 +280,7 @@ Le serveur démarrera sur le port 5000 avec :
 
 ### Étape 3 : Vérifier la base de données
 ```bash
-curl http://localhost:5000/api/health
+curl http:///api/health
 ```
 
 Réponse attendue :
@@ -371,14 +371,14 @@ npm run dev
 
 ### 2. Créer des Agents de Test
 ```bash
-curl -X POST http://localhost:5000/api/agents \
+curl -X POST http:///api/agents \
   -H "Content-Type: application/json" \
   -d '{"agent_number":"001","agent_name":"Agent Test 1","city":"Abidjan"}'
 ```
 
 ### 3. Télécharger le Template
 ```bash
-curl http://localhost:5000/api/template/download --output template.xlsx
+curl http:///api/template/download --output template.xlsx
 ```
 
 ### 4. GitHub (Versionnement)

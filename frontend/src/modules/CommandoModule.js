@@ -66,7 +66,7 @@ function CommandoModule() {
 
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/agents');
+      const response = await axios.get('http:///api/agents');
       setAgents(response.data.data);
     } catch (error) {
       console.error('Erreur récupération agents:', error);
@@ -75,7 +75,7 @@ function CommandoModule() {
 
   const fetchPerformances = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/commando-performances');
+      const response = await axios.get('http:///api/commando-performances');
       setPerformances(response.data.data);
     } catch (error) {
       console.error('Erreur récupération performances:', error);
@@ -126,11 +126,11 @@ function CommandoModule() {
     
     // Charger les données de l'agent
     try {
-      const agentResponse = await axios.get(`http://localhost:5000/api/agents/${performance.agent_id}`);
+      const agentResponse = await axios.get(`http:///api/agents/${performance.agent_id}`);
       setSelectedAgent(agentResponse.data.data);
       
       // Charger les objectifs de l'agent
-      const objectivesResponse = await axios.get(`http://localhost:5000/api/agents/${performance.agent_id}/objectives`);
+      const objectivesResponse = await axios.get(`http:///api/agents/${performance.agent_id}/objectives`);
       if (objectivesResponse.data.data && objectivesResponse.data.data.length > 0) {
         setAgentObjectives(objectivesResponse.data.data[0]);
       }
@@ -144,7 +144,7 @@ function CommandoModule() {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette performance ?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/commando-performances/${id}`);
+        await axios.delete(`http:///api/commando-performances/${id}`);
         fetchPerformances();
       } catch (error) {
         console.error('Erreur suppression performance:', error);
@@ -158,11 +158,11 @@ function CommandoModule() {
     
     if (agentId) {
       try {
-        const agentResponse = await axios.get(`http://localhost:5000/api/agents/${agentId}`);
+        const agentResponse = await axios.get(`http:///api/agents/${agentId}`);
         setSelectedAgent(agentResponse.data.data);
         
         // Charger les objectifs de l'agent
-        const objectivesResponse = await axios.get(`http://localhost:5000/api/agents/${agentId}/objectives`);
+        const objectivesResponse = await axios.get(`http:///api/agents/${agentId}/objectives`);
         if (objectivesResponse.data.data && objectivesResponse.data.data.length > 0) {
           setAgentObjectives(objectivesResponse.data.data[0]);
         } else {
@@ -182,9 +182,9 @@ function CommandoModule() {
   const handleSave = async () => {
     try {
       if (editingPerformance) {
-        await axios.put(`http://localhost:5000/api/commando-performances/${editingPerformance.id}`, formData);
+        await axios.put(`http:///api/commando-performances/${editingPerformance.id}`, formData);
       } else {
-        await axios.post('http://localhost:5000/api/commando-performances', formData);
+        await axios.post('http:///api/commando-performances', formData);
       }
       fetchPerformances();
       setDialogOpen(false);

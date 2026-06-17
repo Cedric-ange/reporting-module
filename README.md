@@ -80,7 +80,7 @@ npm run dev:frontend
 
 L'application sera accessible sur :
 - Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- Backend: http://
 
 ### Mode production
 
@@ -142,7 +142,7 @@ L'application supporte :
 Créer un fichier `.env` dans le dossier frontend :
 
 ```
-REACT_APP_API_URL=http://localhost:5000/api
+REACT_APP_API_URL=http:///api
 ```
 
 ## 🤝 Contribution

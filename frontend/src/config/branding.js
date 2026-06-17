@@ -56,7 +56,7 @@ export const branding = {
   
   // URLs
   api: {
-    baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+    baseUrl: process.env.REACT_APP_API_URL || 'http://',
     health: '/api/health',
     agents: '/api/agents',
     commando: '/api/commando-performances',

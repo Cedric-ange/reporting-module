@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
-const API = 'http://localhost:5000';
+const API = 'http://';
 
 const emptyForm = {
   report_date: new Date().toISOString().split('T')[0],

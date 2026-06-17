@@ -41,7 +41,7 @@ function ETLMExportModule() {
     if (dateTo) params.dateTo = dateTo;
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/etl/export/${type}`, {
+      const response = await axios.get(`http:///api/etl/export/${type}`, {
         params,
         responseType: 'blob'
       });
