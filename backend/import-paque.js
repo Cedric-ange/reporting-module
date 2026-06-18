@@ -12,7 +12,7 @@ const pool = new Pool({
 
 async function runPromoPaqueETL() {
   // ⚠️ REMPLACE PAR LE NOM EXACT DE TON FICHIER EXCEL PRÉSENT DANS LE BACKEND
-  const excelName = 'BDD_PROMO_PAQUE.xlsx'; 
+  const excelName = 'BDD_PROMO_DYNAMIQUE.xlsx'; 
   const excelPath = path.join(__dirname, excelName);
 
   if (!fs.existsSync(excelPath)) {
