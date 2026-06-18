@@ -102,29 +102,39 @@ function Dashboard({ stats = {} }) {
     return Object.values(citiesGroup).slice(0, 6);
   }, [grossisteData]);
 
-  // --- PARSE DYNAMIQUE DES VISITES PAR TYPE DE PDV ---
+// --- PARSE DYNAMIQUE ET SÉCURISÉ DES TYPOLOGIES DE PDV ---
   const visitsData = useMemo(() => {
     if (!Array.isArray(commandoData) || commandoData.length === 0) return [];
     
-    const pdvCounters = { Boutique: 0, Superette: 0, Kiosque: 0, Tablier: 0, Pushcart: 0 };
+    // Initialisation des compteurs pour chaque type de point de vente de ton Excel
+    const pdvCounters = {
+      'Boutique': 0,
+      'Superette': 0,
+      'Kiosque': 0,
+      'Tablier': 0,
+      'Pushcart': 0
+    };
     
     commandoData.forEach(p => {
       if (!p || !p.metric_category || !p.type_pdv_ou_produit) return;
+      
       const category = p.metric_category.trim().toLowerCase();
       
-      if (category.includes('visite')) {
+      // Cette condition capte à la fois "Nombre de visite..." et "Nombre de référencement..."
+      if (category.includes('visite') || category.includes('référencement') || category.includes('pdv')) {
         const pdvType = p.type_pdv_ou_produit.trim();
+        
         if (pdvCounters[pdvType] !== undefined) {
           pdvCounters[pdvType] += parseFloat(p.realise) || 0;
         }
       }
     });
 
+    // Transformation au format attendu par le graphique PieChart de Recharts
     return Object.entries(pdvCounters)
       .map(([name, value]) => ({ name, value: Math.round(value) }))
-      .filter(d => d.value > 0);
+      .filter(d => d.value > 0); // On n'affiche que les PDV qui ont eu au moins une visite
   }, [commandoData]);
-
   // --- PARSE DYNAMIQUE DES VENTES PAR SKU ---
   const salesData = useMemo(() => {
     if (!Array.isArray(commandoData) || commandoData.length === 0) return [];
