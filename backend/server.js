@@ -201,7 +201,7 @@ app.get('/api/commando-performances', async (req, res) => {
 });
 
 // ROUTE D'IMPORTATION AUTOMATIQUE DEPUIS LE FICHIER EXCEL LOCAL VERS SUPABASE
-app.post('/api/commando/import-local', async (req, res) => {
+app.get('/api/commando/import-local', async (req, res) => {
   try {
     const excelPath = path.join(__dirname, 'BDD_COMMANDO_DYNAMIQUE.xlsx');
 
