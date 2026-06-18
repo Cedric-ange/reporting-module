@@ -200,7 +200,7 @@ app.get('/api/commando-performances', async (req, res) => {
   }
 });
 
-// ROUTE D'IMPORTATION AUTOMATIQUE DEPUIS LE FICHIER EXCEL LOCAL VERS SUPABASE
+// ROUTE D'IMPORTATION AUTOMATIQUE BULK (OPTIMISÉE CONTRE LES TIMEOUTS 504)
 app.get('/api/commando/import-local', async (req, res) => {
   try {
     const excelPath = path.join(__dirname, 'BDD_COMMANDO_DYNAMIQUE.xlsx');
@@ -212,16 +212,27 @@ app.get('/api/commando/import-local', async (req, res) => {
       });
     }
 
+    console.log('🔄 Lecture de l\'Excel Commando local...');
     const workbook = xlsx.readFile(excelPath, { cellDates: true });
     const sheetName = workbook.SheetNames[0];
     const rawData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
+    if (rawData.length === 0) {
+      return res.json({ success: true, message: "Le fichier Excel sélectionné est vide." });
+    }
+
     const client = await pool.connect();
-    let insertedRows = 0;
 
     try {
       await client.query('BEGIN');
+      // Nettoyage de la table cible
       await client.query('TRUNCATE TABLE commando_performances');
+
+      console.log(`🚀 Préparation de l'import par lot (Bulk Insert) pour ${rawData.length} lignes...`);
+
+      const values = [];
+      let valueIndex = 1;
+      const valueLines = [];
 
       for (const row of rawData) {
         if (!row['Metric_Category'] || !row['Type de PDV']) continue;
@@ -234,13 +245,8 @@ app.get('/api/commando/import-local', async (req, res) => {
           }
         }
 
-        const queryText = `
-          INSERT INTO commando_performances 
-          (numero_agent, agent_promoteur, ville, date_rapport, jour_semaine, metric_category, type_pdv_ou_produit, objectif, realise, taux_realisation, commentaires, impressions)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        `;
-
-        const values = [
+        // Collecte ordonnée des variables d'insertion
+        values.push(
           row['N°'] ? String(row['N°']) : 'N/A',
           row['Agent promoteur'] || 'Inconnu',
           row['Ville'] || 'Inconnu',
@@ -253,14 +259,30 @@ app.get('/api/commando/import-local', async (req, res) => {
           parseFloat(row['Taux de réalisation']) || 0,
           row['Commentaires'] ? String(row['Commentaires']) : null,
           row['Impressions des PDV et des clients'] ? String(row['Impressions des PDV et des clients']) : null
-        ];
+        );
 
-        await client.query(queryText, values);
-        insertedRows++;
+        // Liaison séquentielle des marqueurs SQL ($1, $2, etc.)
+        valueLines.push(`($${valueIndex}, $${valueIndex+1}, $${valueIndex+2}, $${valueIndex+3}, $${valueIndex+4}, $${valueIndex+5}, $${valueIndex+6}, $${valueIndex+7}, $${valueIndex+8}, $${valueIndex+9}, $${valueIndex+10}, $${valueIndex+11})`);
+        valueIndex += 12;
+      }
+
+      if (valueLines.length > 0) {
+        const bulkQuery = `
+          INSERT INTO commando_performances 
+          (numero_agent, agent_promoteur, ville, date_rapport, jour_semaine, metric_category, type_pdv_ou_produit, objectif, realise, taux_realisation, commentaires, impressions)
+          VALUES ${valueLines.join(', ')}
+        `;
+        
+        await client.query(bulkQuery, values);
       }
 
       await client.query('COMMIT');
-      res.json({ success: true, message: `${insertedRows} lignes Commando synchronisées avec succès depuis l'Excel local.` });
+      console.log(`✅ Synchronisation globale accomplie avec succès !`);
+      
+      res.json({ 
+        success: true, 
+        message: `${valueLines.length} lignes Commando synchronisées avec succès en un temps record depuis l'Excel local.` 
+      });
 
     } catch (transactionError) {
       await client.query('ROLLBACK');
