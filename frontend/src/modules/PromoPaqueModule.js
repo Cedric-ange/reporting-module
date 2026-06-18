@@ -25,12 +25,9 @@ import {
   Delete as DeleteIcon,
   Assessment as AssessmentIcon,
   Add as AddIcon,
-  Store as StoreIcon,
-  CloudDownload as CloudDownloadIcon
+  Store as StoreIcon
 } from '@mui/icons-material';
 import axios from 'axios';
-
-const API = 'http://';
 
 const emptyForm = {
   report_date: new Date().toISOString().split('T')[0],
@@ -88,8 +85,10 @@ function PromoPaqueModule() {
 
   const fetchPerformances = async () => {
     try {
-      const response = await axios.get(`${API}/api/promo-paque-performances`);
-      setPerformances(response.data.data);
+      const response = await axios.get('/api/promo-paque-performances');
+      if (response.data && Array.isArray(response.data.data)) {
+        setPerformances(response.data.data);
+      }
     } catch (error) {
       console.error('Erreur récupération performances promo pâque:', error);
     }
@@ -114,7 +113,7 @@ function PromoPaqueModule() {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette ligne ?')) {
       try {
-        await axios.delete(`${API}/api/promo-paque-performances/${id}`);
+        await axios.delete(`/api/promo-paque-performances/${id}`);
         fetchPerformances();
       } catch (error) {
         console.error('Erreur suppression:', error);
@@ -130,9 +129,9 @@ function PromoPaqueModule() {
     }
     try {
       if (editingPerformance) {
-        await axios.put(`${API}/api/promo-paque-performances/${editingPerformance.id}`, formData);
+        await axios.put(`/api/promo-paque-performances/${editingPerformance.id}`, formData);
       } else {
-        await axios.post(`${API}/api/promo-paque-performances`, formData);
+        await axios.post('/api/promo-paque-performances', formData);
       }
       fetchPerformances();
       setDialogOpen(false);
@@ -142,55 +141,41 @@ function PromoPaqueModule() {
     }
   };
 
-  const handleExport = () => {
-    window.open(`${API}/api/promo-paque-performances/export/excel`, '_blank');
-  };
-
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Reporting Promo Pâque
+      <Typography variant="h5" fontWeight="bold" sx={{ color: '#1a237e', mb: 3 }}>
+        Reporting Campagne Promo Pâque
       </Typography>
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, borderRadius: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">
+              <Typography variant="h6" fontWeight="bold">
                 Lignes Promo Pâque enregistrées ({performances.length})
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<CloudDownloadIcon />}
-                  onClick={handleExport}
-                  disabled={performances.length === 0}
-                >
-                  Export Excel
-                </Button>
-                <Fab color="primary" aria-label="Ajouter" onClick={handleDialogOpen} size="medium">
-                  <AddIcon />
-                </Fab>
-              </Box>
+              <Fab color="primary" aria-label="Ajouter" onClick={handleDialogOpen} size="medium">
+                <AddIcon />
+              </Fab>
             </Box>
 
             <TableContainer>
-              <Table>
-                <TableHead>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#f5f5f5' }}>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Enseigne</TableCell>
-                    <TableCell>PDV</TableCell>
-                    <TableCell>Contacts (réal./obj.)</TableCell>
-                    <TableCell>Acheteurs (réal./obj.)</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Enseigne</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>PDV</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Contacts (réal./obj.)</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Acheteurs (réal./obj.)</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {performances.map((performance) => (
-                    <TableRow key={performance.id}>
+                    <TableRow key={performance.id} hover>
                       <TableCell>{performance.report_date}</TableCell>
-                      <TableCell>{performance.enseigne}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>{performance.enseigne}</TableCell>
                       <TableCell>{performance.pdv}</TableCell>
                       <TableCell>
                         {performance.contacts_realise || 0} / {performance.contacts_objectif || 0}
@@ -205,10 +190,10 @@ function PromoPaqueModule() {
                       </TableCell>
                       <TableCell>
                         <IconButton onClick={() => handleEdit(performance)} color="primary" size="small">
-                          <EditIcon />
+                          <EditIcon fontSize="small" />
                         </IconButton>
                         <IconButton onClick={() => handleDelete(performance.id)} color="error" size="small">
-                          <DeleteIcon />
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -233,7 +218,7 @@ function PromoPaqueModule() {
       </Grid>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold', color: '#1a237e' }}>
           {editingPerformance ? 'Modifier la ligne Promo Pâque' : 'Nouvelle ligne Promo Pâque'}
         </DialogTitle>
         <DialogContent>
