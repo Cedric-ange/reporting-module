@@ -96,7 +96,7 @@ app.post('/api/grossiste/import', upload.single('file'), async (req, res) => {
 
         const queryText = `
           INSERT INTO grossiste_performances 
-          (date_vente, ville, grossiste, format_produit, objectif_carton, realisation_carton, taux_realisation)
+          (date_vente, ville, grossiste, format_produit, objective_carton, realisation_carton, taux_realisation)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
         `;
 
@@ -135,28 +135,39 @@ app.post('/api/grossiste/import', upload.single('file'), async (req, res) => {
 });
 
 // =========================================================================
-// 2. ENDPOINTS ET PIVOT ANALYTIQUE COMMANDO (SÉCURISÉ SUPABASE)
+// 2. ENDPOINTS ET PIVOT ANALYTIQUE COMMANDO (SÉCURISÉ SUPABASE CORRIGÉ)
 // =========================================================================
 
 app.get('/api/commando-performances', async (req, res) => {
   try {
     const client = await pool.connect();
-    const queryResult = await client.query('SELECT * FROM commando_performances ORDER BY date_rapport DESC');
+    const queryResult = await client.query('SELECT numero_agent, agent_promoteur, ville, date_rapport, jour_semaine, metric_category, type_pdv_ou_produit, realise FROM commando_performances');
     client.release();
 
     const rawRows = queryResult.rows;
     const aggregated = {};
 
     rawRows.forEach(row => {
-      const formattedDate = row.date_rapport ? new Date(row.date_rapport).toISOString().split('T')[0] : 'N/A';
-      const key = `${formattedDate}_${row.ville}`;
+      let formattedDate = 'N/A';
+      if (row.date_rapport) {
+        const d = new Date(row.date_rapport);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          formattedDate = `${year}-${month}-${day}`;
+        }
+      }
+
+      const city = row.ville ? String(row.ville).trim() : 'Inconnu';
+      const key = `${formattedDate}_${city}`;
 
       if (!aggregated[key]) {
         aggregated[key] = {
-          id: row.id,
+          id: key,
           date: formattedDate,
-          ville: row.ville,
-          commune: row.ville,
+          ville: city,
+          commune: city,
           secteur: 'Terrain',
           visits_boutique: 0,
           visits_superette: 0,
@@ -171,10 +182,11 @@ app.get('/api/commando-performances', async (req, res) => {
         };
       }
 
-      const category = row.metric_category;
-      const item = row.type_pdv_ou_produit;
+      const category = row.metric_category ? String(row.metric_category).trim() : '';
+      const item = row.type_pdv_ou_produit ? String(row.type_pdv_ou_produit).trim() : '';
       const valRealise = parseFloat(row.realise) || 0;
 
+      // Agrégation des Visites
       if (category === 'Nombre de visite / Type de PDV') {
         if (item === 'Boutique') aggregated[key].visits_boutique += valRealise;
         if (item === 'Superette') aggregated[key].visits_superette += valRealise;
@@ -183,6 +195,7 @@ app.get('/api/commando-performances', async (req, res) => {
         if (item === 'Pushcart') aggregated[key].visits_pushcart += valRealise;
       }
 
+      // Agrégation des Ventes
       if (category === 'Vente en cartons') {
         if (item === 'Biblos Lait Premium 16g') aggregated[key].sales_premium_16g += valRealise;
         if (item === 'Biblos Lait Premium 360g') aggregated[key].sales_premium_360g += valRealise;
@@ -200,7 +213,7 @@ app.get('/api/commando-performances', async (req, res) => {
   }
 });
 
-// ROUTE D'IMPORTATION AUTOMATIQUE BULK (OPTIMISÉE CONTRE LES TIMEOUTS 504)
+// ROUTE D'IMPORTATION AUTOMATIQUE BULK (OPTIMISÉE)
 app.get('/api/commando/import-local', async (req, res) => {
   try {
     const excelPath = path.join(__dirname, 'BDD_COMMANDO_DYNAMIQUE.xlsx');
@@ -225,7 +238,6 @@ app.get('/api/commando/import-local', async (req, res) => {
 
     try {
       await client.query('BEGIN');
-      // Nettoyage de la table cible
       await client.query('TRUNCATE TABLE commando_performances');
 
       console.log(`🚀 Préparation de l'import par lot (Bulk Insert) pour ${rawData.length} lignes...`);
@@ -245,7 +257,6 @@ app.get('/api/commando/import-local', async (req, res) => {
           }
         }
 
-        // Collecte ordonnée des variables d'insertion
         values.push(
           row['N°'] ? String(row['N°']) : 'N/A',
           row['Agent promoteur'] || 'Inconnu',
@@ -261,7 +272,6 @@ app.get('/api/commando/import-local', async (req, res) => {
           row['Impressions des PDV et des clients'] ? String(row['Impressions des PDV et des clients']) : null
         );
 
-        // Liaison séquentielle des marqueurs SQL ($1, $2, etc.)
         valueLines.push(`($${valueIndex}, $${valueIndex+1}, $${valueIndex+2}, $${valueIndex+3}, $${valueIndex+4}, $${valueIndex+5}, $${valueIndex+6}, $${valueIndex+7}, $${valueIndex+8}, $${valueIndex+9}, $${valueIndex+10}, $${valueIndex+11})`);
         valueIndex += 12;
       }
@@ -277,12 +287,7 @@ app.get('/api/commando/import-local', async (req, res) => {
       }
 
       await client.query('COMMIT');
-      console.log(`✅ Synchronisation globale accomplie avec succès !`);
-      
-      res.json({ 
-        success: true, 
-        message: `${valueLines.length} lignes Commando synchronisées avec succès en un temps record depuis l'Excel local.` 
-      });
+      res.json({ success: true, message: `${valueLines.length} lignes Commando synchronisées avec succès depuis l'Excel local.` });
 
     } catch (transactionError) {
       await client.query('ROLLBACK');
