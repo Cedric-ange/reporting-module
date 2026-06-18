@@ -1,54 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, Select, MenuItem, FormControl, InputLabel, Alert, CircularProgress } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, Typography, Alert, CircularProgress } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from 'axios';
 
 export default function GrossisteImport() {
-  const [agents, setAgents] = useState([]);
-  const [selectedAgent, setSelectedAgent] = useState('');
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
-  // 1. Récupérer la liste des agents au chargement
-  useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const response = await axios.get('/api/agents');
-        setAgents(response.data);
-      } catch (error) {
-        console.error("Erreur de récupération des agents", error);
-      }
-    };
-    fetchAgents();
-  }, []);
-
-  // 2. Gérer la sélection du fichier
+  // 1. Gérer la sélection du fichier Excel
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-    setResult(null); // On réinitialise le message précédent
+    if (event.target.files && event.target.files[0]) {
+      setFile(event.target.files[0]);
+      setResult(null); // Réinitialise les anciens messages d'erreur ou succès
+    }
   };
 
-  // 3. Envoyer le fichier et l'agent au Backend
+  // 2. Envoyer le fichier de manière indépendante au Backend
   const handleImport = async () => {
-    if (!file || !selectedAgent) return;
+    if (!file) return;
 
     setLoading(true);
     setResult(null);
 
-    // Pour envoyer un fichier + du texte, on utilise un objet FormData
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('agentId', selectedAgent);
 
     try {
-      const response = await axios.post('/api/import/grossiste', formData, {
+      // Endpoint mis en conformité avec l'architecture dédiée aux Grossistes
+      const response = await axios.post('/api/grossiste/import', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setResult({ type: 'success', message: response.data.message });
-      setFile(null); // On vide le champ fichier après succès
+
+      // Gestion dynamique du nombre de lignes insérées renvoyé par le serveur
+      const insertedCount = response.data.insertedCount ?? response.data.count ?? 0;
+
+      setResult({ 
+        type: 'success', 
+        message: `✅ Importation réussie ! ${insertedCount} lignes d'activité grossiste insérées avec succès.` 
+      });
+      setFile(null); // Vide le sélecteur de fichier après le succès
     } catch (error) {
-      const errorMsg = error.response?.data?.error || error.response?.data?.message || "Erreur lors de l'importation";
+      console.error("Erreur lors de l'importation ETL Grossiste :", error);
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || "Une erreur est survenue lors du traitement du fichier.";
       setResult({ type: 'error', message: errorMsg });
     } finally {
       setLoading(false);
@@ -56,50 +51,45 @@ export default function GrossisteImport() {
   };
 
   return (
-    <Box sx={{ p: 3, border: '1px dashed grey', borderRadius: 2, bgcolor: 'background.paper', maxWidth: 500, mt: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Importer des Performances Grossiste
+    <Box sx={{ p: 4, border: '1px dashed #1976d2', borderRadius: 3, bgcolor: '#fbfcfd', maxWidth: 500, mt: 3, mx: 'auto', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.05)' }}>
+      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2', textAlign: 'center' }}>
+        Espace Importation Grossiste
+      </Typography>
+      
+      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 4, textAlign: 'center' }}>
+        Sélectionnez et chargez votre fichier consolidé d'activité commerciale Grossiste directement dans Supabase.
       </Typography>
 
-      <FormControl fullWidth sx={{ mt: 2, mb: 3 }}>
-        <InputLabel id="agent-select-label">Sélectionner l'Agent</InputLabel>
-        <Select
-          labelId="agent-select-label"
-          value={selectedAgent}
-          label="Sélectionner l'Agent"
-          onChange={(e) => setSelectedAgent(e.target.value)}
-        >
-          {agents.map((agent) => (
-            <MenuItem key={agent.id} value={agent.id}>
-              {agent.agent_name} ({agent.agent_number})
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
+      {/* Bouton de sélection de fichier personnalisé */}
       <Button
         variant="outlined"
         component="label"
         fullWidth
         startIcon={<UploadFileIcon />}
-        sx={{ mb: 2 }}
+        sx={{ mb: 3, textTransform: 'none', py: 1.5, borderStyle: file ? 'solid' : 'dashed' }}
       >
-        {file ? file.name : "Choisir le fichier Excel Grossiste"}
+        <Box component="span" sx={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+          {file ? file.name : "Choisir le fichier Excel Grossiste"}
+        </Box>
         <input type="file" hidden accept=".xlsx, .xls" onChange={handleFileChange} />
       </Button>
 
+      {/* Bouton de soumission */}
       <Button 
         variant="contained" 
         color="primary" 
         fullWidth 
         onClick={handleImport}
-        disabled={!file || !selectedAgent || loading}
+        disabled={!file || loading}
+        startIcon={loading ? null : <CloudUploadIcon />}
+        sx={{ textTransform: 'none', py: 1.2, fontWeight: 'bold' }}
       >
-        {loading ? <CircularProgress size={24} color="inherit" /> : "Lancer l'Importation ETL"}
+        {loading ? <CircularProgress size={24} color="inherit" /> : "Lancer l'Importation sur Supabase"}
       </Button>
 
+      {/* Affichage des retours utilisateurs */}
       {result && (
-        <Alert severity={result.type} sx={{ mt: 2 }}>
+        <Alert severity={result.type} sx={{ mt: 3, borderRadius: 2 }}>
           {result.message}
         </Alert>
       )}

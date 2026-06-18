@@ -1,12 +1,14 @@
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');
 const { Pool } = require('pg');
 
+// REMPLACEZ DIRECTEMENT PAR VOTRE CHAÎNE SUPABASE ICI :
+const CONFIG_DATABASE_URL = "postgresql://postgres.ididzabqgmnfgruryuev:Welcome$$12345!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres";
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  connectionString: CONFIG_DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // Supabase exige généralement le SSL en direct
 });
 
 async function runMigration() {
@@ -20,13 +22,13 @@ async function runMigration() {
   console.log("⚡ Lecture du fichier Master Grossiste...");
   const workbook = xlsx.readFile(filePath);
   
-  // Cherche l'onglet d'activité commerciale
   const sheetName = workbook.SheetNames.find(n => /ACTIVITE/i.test(n)) || workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
   
   const rows = xlsx.utils.sheet_to_json(worksheet);
   console.log(`📊 ${rows.length} lignes détectées dans l'onglet "${sheetName}".`);
 
+  // Connexion directe
   const client = await pool.connect();
   
   try {
@@ -37,11 +39,10 @@ async function runMigration() {
 
     for (const row of rows) {
       const dateRaw = row['Date'];
-      if (!dateRaw) continue; // On passe les lignes sans date
+      if (!dateRaw) continue;
 
       let formattedDate;
       if (typeof dateRaw === 'number') {
-        // Conversion du format de date sériel d'Excel
         formattedDate = new Date((dateRaw - 25569) * 86400 * 1000).toISOString().split('T')[0];
       } else {
         formattedDate = new Date(dateRaw).toISOString().split('T')[0];
@@ -61,7 +62,6 @@ async function runMigration() {
       const touche = parseInt(row['Personne touché (Client acheteur)']) || 0;
       const source = row['Fichier_Source'] || 'BDD_GROSSISTE_MASTER.xlsx';
 
-      // Noms des colonnes alignés avec la nouvelle table SQL
       const queryText = `
         INSERT INTO grossiste_performances 
         (date_vente, ville, grossiste, categorie_produit, format_produit, objectif_carton, realisation_carton, taux_realisation, gratuite, affiche, personne_approchee, personne_touche, fichier_source)
@@ -77,7 +77,7 @@ async function runMigration() {
       insertedCount++;
 
       if (insertedCount % 100 === 0) {
-        console.log(`⏳ En cours : ${insertedCount} lignes synchronisées...`);
+        console.log(`⏳ En cours : ${insertedCount} lignes insérées...`);
       }
     }
 
