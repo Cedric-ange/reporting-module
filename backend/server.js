@@ -14,6 +14,7 @@ const PowerBIExporter = require('./src/export/powerbi-exporter');
 const ObjectiveTracker = require('./src/analytics/objective-tracker');
 const BatchExcelProcessor = require('./src/etl/batch-processor');
 const ETLDataValidator = require('./src/validation/etl-data-validator');
+const grossisteImporter = require('./src/etl/grossiste-etl-importer');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -195,6 +196,37 @@ app.put('/api/objectives/:id', async (req, res) => {
   } catch (error) {
     console.error('Erreur mise à jour objectif:', error);
     res.status(500).json({ success: false, error: 'Erreur lors de la mise à jour de l\'objectif' });
+  }
+});
+
+
+// ==================== ROUTE IMPORT ETL GROSSISTE ====================
+app.post('/api/import/grossiste', upload.single('file'), async (req, res) => {
+  try {
+    // 1. Vérification du fichier
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Aucun fichier n'a été envoyé." });
+    }
+
+    // 2. Vérification de l'agent
+    const agentId = req.body.agentId;
+    if (!agentId) {
+      return res.status(400).json({ success: false, message: "Vous devez sélectionner un agent." });
+    }
+
+    console.log(`📥 Réception d'un fichier Grossiste pour l'agent ID: ${agentId}`);
+
+    // 3. Traitement ETL
+    const result = await grossisteImporter.processAndImport(req.file.buffer, { agentId: parseInt(agentId) });
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error("❌ Erreur critique route import:", error);
+    res.status(500).json({ success: false, message: "Erreur serveur lors de l'import", error: error.message });
   }
 });
 
