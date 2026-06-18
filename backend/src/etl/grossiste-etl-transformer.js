@@ -107,4 +107,4 @@ class GrossisteETLTransformer {
   }
 }
 
-module.exports = new GrossisteETLTransformer();
+module.exports = GrossisteETLTransformer;
