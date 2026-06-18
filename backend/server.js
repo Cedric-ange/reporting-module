@@ -832,7 +832,7 @@ grossisteExcelEndpoints.registerEndpoints(app, database, { TEMPLATE_DIR: TEMPLAT
 
 // ==================== NOUVEAUX ENDPOINTS ETL ET KPI ====================
 
-const etlTransformer = new GrossisteETLTransformer();
+const etlTransformer = GrossisteETLTransformer;
 const kpiCalculator = new GrossisteKPICalculator();
 const powerBIExporter = new PowerBIExporter();
 const objectiveTracker = new ObjectiveTracker();
