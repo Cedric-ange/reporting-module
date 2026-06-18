@@ -2,11 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { 
   Box, Typography, Grid, Card, CardContent, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Paper, CircularProgress, Alert, 
-  TextField, MenuItem, Button, Divider, InputAdornment
+  TextField, MenuItem, Button, InputAdornment
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, 
-  ResponsiveContainer, Cell, PieChart, Pie, Legend
+  ResponsiveContainer, Cell
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { CommandoService } from '../services/AdvancedServices';

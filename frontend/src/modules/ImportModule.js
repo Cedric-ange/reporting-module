@@ -1,337 +1,189 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Alert,
-  AlertTitle,
-  LinearProgress,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  ToggleButton,
-  ToggleButtonGroup,
-  Divider
-} from '@mui/material';
-import {
-  CloudDownload as CloudDownloadIcon,
-  CloudUpload as CloudUploadIcon
-} from '@mui/icons-material';
-import axios from 'axios';
+const { Pool } = require('pg');
+const xlsx = require('xlsx');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
-function ImportModule() {
-  const [file, setFile] = useState(null);
-  const [importType, setImportType] = useState('commando');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [validationErrors, setValidationErrors] = useState([]);
-  const [previewMode, setPreviewMode] = useState(false);
+// Configuration de la connexion directe à Supabase
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || "TA_CHAINE_DE_CONNEXION_SUPABASE",
+  ssl: { rejectUnauthorized: false }
+});
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    setResult(null);
-    setValidationErrors([]);
-    setPreviewMode(false);
-  };
+async function runTransactionelETL() {
+  const excelPath = path.join(__dirname, 'BDD_COMMANDO_DYNAMIQUE.xlsx');
 
-  const handleTypeChange = (event, newType) => {
-    setImportType(newType);
-    setResult(null);
-    setValidationErrors([]);
-    setPreviewMode(false);
-  };
+  if (!fs.existsSync(excelPath)) {
+    console.error(`❌ Erreur : Le fichier '${excelPath}' est introuvable.`);
+    process.exit(1);
+  }
 
-  const handleValidate = async () => {
-    if (!file) {
-      alert('Veuillez sélectionner un fichier Excel');
-      return;
+  console.log('🔄 1. Lecture de l\'Excel Source...');
+  const workbook = xlsx.readFile(excelPath, { cellDates: true });
+  const sheetName = workbook.SheetNames[0];
+  const rawData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+  console.log(`📊 ${rawData.length} entrées brutes détectées.`);
+
+  // --- ALGORITHME DE PIVOT TRANSACTIONNEL (STYLE GROSSISTE) ---
+  console.log('🧠 2. Transformation et regroupement des dimensions terrain...');
+  
+  // Clé unique de regroupement : Date + Agent + Ville
+  const dailyRegistry = {};
+
+  for (const row of rawData) {
+    if (!row['Metric_Category'] || !row['Type de PDV']) continue;
+
+    let formattedDate = new Date().toISOString().split('T')[0];
+    if (row['Date']) {
+      const parsedDate = new Date(row['Date']);
+      if (!isNaN(parsedDate.getTime())) {
+        formattedDate = parsedDate.toISOString().split('T')[0];
+      }
     }
 
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', importType);
-
-    try {
-      // Utiliser l'endpoint ETL de validation
-      const response = await axios.post('/api/etl/validate', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      setResult(response.data);
-      setValidationErrors(response.data.errors || []);
-      setPreviewMode(true);
-    } catch (error) {
-      console.error('Erreur validation:', error);
-      setValidationErrors([{
-        row: 'Global',
-        error: error.response?.data?.error || error.message || 'Erreur lors de la validation'
-      }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleImport = async () => {
-    if (!file) {
-      alert('Veuillez sélectionner un fichier Excel');
-      return;
-    }
-
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      // Utiliser l'endpoint ETL d'import
-      const response = await axios.post(`/api/etl/import/${importType}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      setResult(response.data);
-      setPreviewMode(false);
-    } catch (error) {
-      console.error('Erreur import:', error);
-      setValidationErrors([{
-        row: 'Global',
-        error: error.response?.data?.error || error.message || 'Erreur lors de l\'import'
-      }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const downloadTemplate = () => {
-    const templateUrl = importType === 'commando' 
-      ? '/api/export/excel' 
-      : '/api/etl/export/grossiste';
+    const agent = row['Agent promoteur'] || 'Inconnu';
+    const ville = row['Ville'] || 'Inconnu';
+    const jour = row['JOUR'] || '';
+    const numAgent = row['N°'] ? String(row['N°']) : 'N/A';
     
-    window.open(templateUrl, '_blank');
-  };
+    const key = `${formattedDate}_${agent}_${ville}`;
 
-  return (
-    <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, fontWeight: 'bold', color: '#1a237e' }}>
-        Import Excel - Normalisation Automatique
-      </Typography>
+    if (!dailyRegistry[key]) {
+      dailyRegistry[key] = {
+        metadata: { numAgent, agent, ville, date: formattedDate, jour },
+        visites: 0,
+        plv: 0,
+        transactions: [] // Contiendra la liste des ventes et gratuités uniques
+      };
+    }
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CloudUploadIcon sx={{ color: '#4caf50' }} />
-              Import de Données Excel
-            </Typography>
+    const category = String(row['Metric_Category']).trim();
+    const item = String(row['Type de PDV']).trim();
+    const valRealise = parseFloat(row['Réalisé']) || 0;
+    const valObjectif = parseFloat(row['Objectif']) || 0;
+    const valTaux = parseFloat(row['Taux de réalisation']) || 0;
+    const comment = row['Commentaires'] ? String(row['Commentaires']) : null;
+    const impression = row['Impressions des PDV et des clients'] ? String(row['Impressions des PDV et des clients']) : null;
 
-            <ToggleButtonGroup
-              value={importType}
-              exclusive
-              onChange={handleTypeChange}
-              sx={{ mb: 3 }}
-            >
-              <ToggleButton value="commando" sx={{ px: 3 }}>
-                Commando
-              </ToggleButton>
-              <ToggleButton value="grossiste" sx={{ px: 3 }}>
-                Grossiste
-              </ToggleButton>
-            </ToggleButtonGroup>
+    // A. Si c'est une visite terrain, on la cumule globalement pour la journée de cet agent
+    if (category.includes('Nombre de visite')) {
+      dailyRegistry[key].visites += valRealise;
+    } 
+    // B. Si c'est de la PLV ou du Matériel, on le cumule globalement pour la journée
+    else if (category.includes('Matériel') || category.includes('Visibilité')) {
+      dailyRegistry[key].plv += valRealise;
+    }
+    // C. Si c'est de la vente ou de la gratuité, on crée un enregistrement produit dédié
+    else {
+      dailyRegistry[key].transactions.push({
+        category,
+        item,
+        objectif: valObjectif,
+        realise: valRealise,
+        taux: valTaux,
+        commentaires: comment || impression
+      });
+    }
+  }
 
-            <Button
-              variant="outlined"
-              component="label"
-              fullWidth
-              sx={{ mb: 2 }}
-            >
-              Sélectionner un Fichier Excel (.xlsx/.xls)
-              <input
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </Button>
+  // --- PRÉPARATION DES LIGNES FINALES À INJECTER ---
+  const finalRowsToInsert = [];
 
-            {file && (
-              <Box sx={{ mb: 2 }}>
-                <Chip label={file.name} color="primary" size="small" />
-                <Typography variant="body2" sx={{ mt: 1, color: '#757575' }}>
-                  {(file.size / 1024).toFixed(2)} KB
-                </Typography>
-              </Box>
-            )}
+  Object.values(dailyRegistry).forEach(({ metadata, visites, plv, transactions }) => {
+    // Si l'agent n'a fait que des visites ou de la PLV sans ventes ce jour-là
+    if (transactions.length === 0) {
+      finalRowsToInsert.push({
+        ...metadata,
+        category: 'Visites / Activations Générales',
+        item: 'Synthèse Terrain',
+        objectif: 0,
+        realise: 0,
+        taux: 0,
+        visites,
+        plv,
+        commentaires: null
+      });
+    } else {
+      // On boucle sur ses ventes de produits
+      transactions.forEach((tx, idx) => {
+        finalRowsToInsert.push({
+          ...metadata,
+          category: tx.category,
+          item: tx.item,
+          objectif: tx.objectif,
+          realise: tx.realise,
+          taux: tx.taux,
+          // CRUCIAL : On met la donnée globale UNIQUEMENT sur la 1ère ligne de l'agent, et 0 sur les autres !
+          visites: idx === 0 ? visites : 0,
+          plv: idx === 0 ? plv : 0,
+          commentaires: tx.commentaires
+        });
+      });
+    }
+  });
 
-            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-              <Button
-                variant="contained"
-                onClick={handleValidate}
-                disabled={!file || loading}
-                sx={{ flex: 1, bgcolor: '#ff9800', '&:hover': { bgcolor: '#f57c00' } }}
-              >
-                Valider
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleImport}
-                disabled={!file || loading || (previewMode && validationErrors.length > 0)}
-                sx={{ flex: 1, bgcolor: '#4caf50', '&:hover': { bgcolor: '#388e3c' } }}
-              >
-                Importer
-              </Button>
-            </Box>
+  console.log(`✨ Transformation terminée : Réduction intelligente à ${finalRowsToInsert.length} lignes transactionnelles.`);
 
-            <Button
-              variant="outlined"
-              onClick={downloadTemplate}
-              startIcon={<CloudDownloadIcon />}
-              fullWidth
-              sx={{ mb: 2 }}
-            >
-              Télécharger Template Excel
-            </Button>
+  // --- INJECTION DIRECTE DANS POSTGRESQL ---
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    console.log('🗑️ 3. Vidage de la table...');
+    await client.query('TRUNCATE TABLE commando_performances');
 
-            {loading && <LinearProgress sx={{ mb: 2 }} />}
-          </Paper>
-        </Grid>
+    console.log('🚀 4. Lancement de l\'insertion par paquets de 500...');
+    const chunkSize = 500;
+    
+    for (let i = 0; i < finalRowsToInsert.length; i += chunkSize) {
+      const chunk = finalRowsToInsert.slice(i, i + chunkSize);
+      const values = [];
+      const valueLines = [];
+      let valueIndex = 1;
 
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-              Instructions d'Import
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1, color: '#757575' }}>
-              1. Sélectionnez le type (Commando ou Grossiste)
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1, color: '#757575' }}>
-              2. Téléchargez le template Excel correspondant
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1, color: '#757575' }}>
-              3. Remplissez le fichier avec vos données
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1, color: '#757575' }}>
-              4. Cliquez sur "Valider" pour vérifier
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: '#757575' }}>
-              5. Cliquez sur "Importer" pour sauvegarder
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Alert severity="info" sx={{ mb: 2 }}>
-              <AlertTitle>Normalisation ETL</AlertTitle>
-              <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                Les données sont automatiquement normalisées : numéros, pourcentages, dates
-              </Typography>
-            </Alert>
-          </Paper>
-        </Grid>
+      for (const row of chunk) {
+        values.push(
+          row.numAgent,
+          row.agent,
+          row.ville,
+          row.date,
+          row.jour,
+          row.category,
+          row.item,
+          row.objectif,
+          row.realise,
+          row.taux,
+          row.commentaires,
+          row.visites, // Écrit comme un entier direct en base
+          row.plv      // Écrit comme un entier direct en base
+        );
 
-        {previewMode && result && (
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3 }}>
-              <Alert severity={result.invalid === 0 ? 'success' : 'warning'} sx={{ mb: 2 }}>
-                <AlertTitle>
-                  Prévisualisation de Validation
-                </AlertTitle>
-                <Typography variant="body2">
-                  Total: {result.total} | Valides: {result.valid} | Invalides: {result.invalid}
-                </Typography>
-              </Alert>
+        valueLines.push(`($${valueIndex}, $${valueIndex+1}, $${valueIndex+2}, $${valueIndex+3}, $${valueIndex+4}, $${valueIndex+5}, $${valueIndex+6}, $${valueIndex+7}, $${valueIndex+8}, $${valueIndex+9}, $${valueIndex+10}, $${valueIndex+11}, $${valueIndex+12})`);
+        valueIndex += 13;
+      }
 
-              {validationErrors && validationErrors.length > 0 && (
-                <Box>
-                  <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 2, color: '#f44336' }}>
-                    Erreurs Détectées ({validationErrors.length})
-                  </Typography>
-                  <TableContainer sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                          <TableCell sx={{ fontWeight: 'bold' }}>Ligne</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold' }}>Erreur</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {validationErrors.map((error, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell sx={{ fontWeight: 'bold', color: '#d32f2f' }}>
-                              Ligne {error.row}
-                            </TableCell>
-                            <TableCell sx={{ color: '#d32f2f' }}>
-                              {error.error}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
+      if (valueLines.length > 0) {
+        // ATTENTION : Pour exécuter ce script, assure-toi d'avoir préalablement ajouté les deux colonnes 
+        // 'visites_terrain' et 'plv_posee' dans ta table via l'éditeur SQL de Supabase (ALTER TABLE)
+        const bulkQuery = `
+          INSERT INTO commando_performances 
+          (numero_agent, agent_promoteur, ville, date_rapport, jour_semaine, metric_category, type_pdv_ou_produit, objectif, realise, taux_realisation, commentaires, visites_terrain, plv_posee)
+          VALUES ${valueLines.join(', ')}
+        `;
+        await client.query(bulkQuery, values);
+      }
+    }
 
-              {result.invalid === 0 && (
-                <Alert severity="success" sx={{ mt: 2 }}>
-                  <AlertTitle>Validation Réussie</AlertTitle>
-                  <Typography variant="body2">
-                    Toutes les données sont valides. Cliquez sur "Importer" pour procéder.
-                  </Typography>
-                </Alert>
-              )}
-            </Paper>
-          </Grid>
-        )}
+    await client.query('COMMIT');
+    console.log(`\n✅ TOUT EST ALIGNÉ : Base de données mise à jour au format Transactionnel !`);
 
-        {result && !previewMode && (
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3 }}>
-              <Alert severity={result.summary?.inserted > 0 ? 'success' : 'error'} sx={{ mb: 2 }}>
-                <AlertTitle>
-                  Import Terminé
-                </AlertTitle>
-                <Typography variant="body2">
-                  Total: {result.summary?.total || 0} | Insertés: {result.summary?.inserted || 0} | Échoués: {result.summary?.failed || 0}
-                </Typography>
-              </Alert>
-
-              {result.insertionErrors && result.insertionErrors.length > 0 && (
-                <Box>
-                  <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 2, color: '#f44336' }}>
-                    Erreurs d'Insertion ({result.insertionErrors.length})
-                  </Typography>
-                  <TableContainer sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                          <TableCell sx={{ fontWeight: 'bold' }}>Donnée</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold' }}>Erreur</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {result.insertionErrors.map((error, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                              {JSON.stringify(error.data).substring(0, 50)}...
-                            </TableCell>
-                            <TableCell sx={{ color: '#d32f2f' }}>
-                              {error.error}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        )}
-      </Grid>
-    </Box>
-  );
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Erreur critique d\'injection :', error);
+  } finally {
+    client.release();
+    await pool.end();
+  }
 }
 
-export default ImportModule;
+runTransactionelETL();
