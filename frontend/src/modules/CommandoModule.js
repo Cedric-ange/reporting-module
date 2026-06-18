@@ -2,12 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Box, Typography, Grid, Card, CardContent, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Paper, CircularProgress, Alert, 
-  TextField, MenuItem, Button, Chip 
-} from '@mui/material';
+  TextField, MenuItem, Button 
+} from '@mui/material'; // <-- Le composant "Chip" inutile a été retiré ici
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, 
-  Legend, ResponsiveContainer, Cell, PieChart, Pie
-} from 'recharts';
+  ResponsiveContainer, Cell, PieChart, Pie
+} from 'recharts'; // <-- L'import "Legend" inutile a été retiré ici
 import { useQuery } from '@tanstack/react-query';
 import { CommandoService } from '../services/AdvancedServices';
 import { Storefront as StoreIcon, Assessment as AssessmentIcon, LocalMall as ProductIcon } from '@mui/icons-material';
