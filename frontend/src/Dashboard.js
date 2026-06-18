@@ -143,7 +143,6 @@ function Dashboard({ stats = {} }) {
       
       if (category.includes('vente')) {
         const product = p.type_pdv_ou_produit.trim();
-        // Mappage sémantique flexible des libellés du fichier Excel
         if (product.includes('16g')) skus['Premium 16g'] += parseFloat(p.realise) || 0;
         else if (product.includes('360g')) skus['Premium 360g'] += parseFloat(p.realise) || 0;
         else if (product.includes('900g')) skus['Excellence 900g'] += parseFloat(p.realise) || 0;
@@ -269,12 +268,12 @@ function Dashboard({ stats = {} }) {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
               Distribution Proportionnelle des Rapports
             </Typography>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={performancesChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="name" />
                 <YAxis allowDecimals={false} />
-                <Tooltip formatter={(value) => [value.toLocaleString(), 'Entrées']} />
+                <Tooltip formatter={(value) => [Number(value).toLocaleString(), 'Entrées']} />
                 <Bar dataKey="value" name="Lignes actives" radius={[6, 6, 0, 0]}>
                   {performancesChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -291,7 +290,7 @@ function Dashboard({ stats = {} }) {
               Ventes par SKU (Canal Commando)
             </Typography>
             {salesData.some(d => d.ventes > 0) ? (
-              <ResponsiveContainer width="100%" height="300}>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={salesData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="name" angle={-10} textAnchor="end" height={50} style={{ fontSize: 11 }} />
