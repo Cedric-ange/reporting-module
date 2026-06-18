@@ -37,8 +37,8 @@ import {
 import BiblosLogo from './components/BiblosLogo';
 import axios from 'axios';
 
-const PIE_COLORS = ['#667eea', '#f5576c', '#4facfe', '#43e97b', '#fa709a'];
-const PRODUCT_COLORS = ['#1976d2', '#9c27b0', '#ff9800', '#4caf50', '#f44336'];
+const PIE_COLORS = ['#1976d2', '#ff9800', '#4caf50', '#9c27b0', '#00bcd4'];
+const PRODUCT_COLORS = ['#1a237e', '#1565c0', '#42a5f5', '#66bb6a', '#e53935'];
 
 function Dashboard({ stats }) {
   const [commandoData, setCommandoData] = useState([]);
@@ -49,10 +49,10 @@ function Dashboard({ stats }) {
       try {
         const [cmdRes, groRes] = await Promise.all([
           axios.get('/api/commando-performances').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/grossiste-performances').catch(() => ({ data: { data: [] } }))
+          axios.get('/api/grossiste-performances').catch(() => ({ data: [] }))
         ]);
         setCommandoData(cmdRes.data.data || []);
-        setGrossisteData(groRes.data.data || []);
+        setGrossisteData(groRes.data || []); // Lecture directe du tableau Supabase
       } catch (err) {
         console.error('Erreur chargement données dashboard:', err);
       }
@@ -62,9 +62,23 @@ function Dashboard({ stats }) {
 
   const performancesChartData = [
     { name: 'Commando', value: stats.commando || 0, fill: '#f5576c' },
-    { name: 'Grossiste', value: stats.grossiste || 0, fill: '#4facfe' },
+    { name: 'Grossiste', value: grossisteData.length || stats.grossiste || 0, fill: '#1976d2' },
     { name: 'Promo Pâque', value: stats.promoPaque || 0, fill: '#43e97b' }
   ];
+
+  // Extraction et agrégation macro de la réalisation grossiste par Ville
+  const grossisteChartData = (() => {
+    const citiesGroup = {};
+    grossisteData.forEach(g => {
+      const city = g.ville || 'INCONNU';
+      if (!citiesGroup[city]) {
+        citiesGroup[city] = { name: city, objectif: 0, realisation: 0 };
+      }
+      citiesGroup[city].objectif += Math.round(Number(g.objectif_carton) || 0);
+      citiesGroup[city].realisation += Math.round(Number(g.realisation_carton) || 0);
+    });
+    return Object.values(citiesGroup).slice(0, 6); // Top 6 des villes majeures
+  })();
 
   const visitsData = (() => {
     if (commandoData.length === 0) return [];
@@ -104,169 +118,74 @@ function Dashboard({ stats }) {
     ];
   })();
 
-  const grossisteChartData = grossisteData.map(g => ({
-    name: g.grossiste_name || `ID ${g.id}`,
-    realisation: g.realisation_carton || 0,
-    objectif: g.objectif_vente_carton || 0
-  }));
-
   const recentActivities = [
-    { id: 1, type: 'Système', description: 'Base de données opérationnelle', date: 'Maintenant' },
-    { id: 2, type: 'Backend', description: 'API fonctionnelle sur port 5000', date: 'Maintenant' },
-    { id: 3, type: 'Modules', description: '5 modules actifs', date: 'Maintenant' },
+    { id: 1, type: 'Base Supabase', description: `Vues grossistes opérationnelles (${grossisteData.length} lignes)`, date: 'Maintenant' },
+    { id: 2, type: 'Sécurité SSL', description: 'Connexion chiffrée établie sur port 6543', date: 'Maintenant' },
+    { id: 3, type: 'Canal Indépendant', description: 'Module Grossiste découplé de la contrainte agents', date: 'Maintenant' },
   ];
 
   return (
-    <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
         <BiblosLogo size={36} showText={true} />
       </Box>
-      <Typography variant="subtitle1" gutterBottom sx={{ mb: 3, color: '#757575' }}>
-        Tableau de bord de reporting commercial
+      <Typography variant="body2" sx={{ mb: 4, color: '#666' }}>
+        Suivi analytique en temps réel des performances commerciales et d'activation.
       </Typography>
 
       {/* KPI Cards */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} mb={4}>
         <Grid item xs={12} sm={6} lg={3}>
-          <Card 
-            sx={{ 
-              height: '100%', 
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-            }}
-          >
+          <Card sx={{ borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                  <Typography variant="body2" component="div" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, fontWeight: 500 }}>
-                    Total Agents
-                  </Typography>
-                  <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
-                    {stats.agents || 0}
-                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Effectif Commercial</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.agents || 0} <span style={{ fontSize: 14 }}>Agents</span></Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <People sx={{ fontSize: 32, color: 'white' }} />
-                </Avatar>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><People /></Avatar>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} lg={3}>
-          <Card 
-            sx={{ 
-              height: '100%', 
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
-              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-            }}
-          >
+          <Card sx={{ borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', background: 'linear-gradient(135deg, #f5576c 0%, #d81b60 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                  <Typography variant="body2" component="div" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, fontWeight: 500 }}>
-                    Performances Commando
-                  </Typography>
-                  <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
-                    {stats.commando || 0}
-                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Rapports Commando</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.commando || 0}</Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <Assessment sx={{ fontSize: 32, color: 'white' }} />
-                </Avatar>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><Assessment /></Avatar>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} lg={3}>
-          <Card 
-            sx={{ 
-              height: '100%', 
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
-              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-            }}
-          >
+          <Card sx={{ borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', background: 'linear-gradient(135deg, #4facfe 0%, #0288d1 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                  <Typography variant="body2" component="div" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, fontWeight: 500 }}>
-                    Performances Grossiste
-                  </Typography>
-                  <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
-                    {stats.grossiste || 0}
-                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Enregistrements Grossistes</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{grossisteData.length || stats.grossiste || 0}</Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <CloudUpload sx={{ fontSize: 32, color: 'white' }} />
-                </Avatar>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><CloudUpload /></Avatar>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} lg={3}>
-          <Card 
-            sx={{ 
-              height: '100%', 
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
-              background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
-            }}
-          >
+          <Card sx={{ borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', background: 'linear-gradient(135deg, #43e97b 0%, #2e7d32 100%)', color: 'white' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                  <Typography variant="body2" component="div" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, fontWeight: 500 }}>
-                    Performances Promo Pâque
-                  </Typography>
-                  <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
-                    {stats.promoPaque || 0}
-                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Volume Total Injecté</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{(stats.commando || 0) + grossisteData.length}</Typography>
                 </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <Assessment sx={{ fontSize: 32, color: 'white' }} />
-                </Avatar>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card 
-            sx={{ 
-              height: '100%', 
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': { transform: 'translateY(-8px)', boxShadow: 6 },
-              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-            }}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="body2" component="div" sx={{ color: 'rgba(255,255,255,0.8)', mb: 1, fontWeight: 500 }}>
-                    Total Performances
-                  </Typography>
-                  <Typography variant="h3" component="div" sx={{ color: 'white', fontWeight: 'bold', fontSize: '2.5rem' }}>
-                    {(stats.commando || 0) + (stats.grossiste || 0) + (stats.promoPaque || 0)}
-                  </Typography>
-                </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <TrendingUp sx={{ fontSize: 32, color: 'white' }} />
-                </Avatar>
+                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><TrendingUp /></Avatar>
               </Box>
             </CardContent>
           </Card>
@@ -274,23 +193,46 @@ function Dashboard({ stats }) {
       </Grid>
 
       {/* Charts Section */}
-      <Grid container spacing={3} sx={{ mt: 1 }}>
-        {/* Performances distribution bar chart */}
+      <Grid container spacing={3}>
+        {/* Grossiste performance vs objective */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
-              Répartition des Performances
+              Canal Grossistes — Volumes par Région (Cartons)
+            </Typography>
+            {grossisteChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={grossisteChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="objectif" name="Objectif total" fill="#90caf9" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="realisation" name="Réalisation réelle" fill="#1976d2" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="body2" color="textSecondary">En attente de chargement des données...</Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* Core Distribution bar chart */}
+        <Grid item xs={12} lg={6}>
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
+              Distribution Proportionnelle des Rapports
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={performancesChartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+              <BarChart data={performancesChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value) => [value, 'Entrées']}
-                />
-                <Bar dataKey="value" name="Performances" radius={[8, 8, 0, 0]}>
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip formatter={(value) => [value, 'Entrées']} />
+                <Bar dataKey="value" name="Lignes actives" radius={[6, 6, 0, 0]}>
                   {performancesChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
@@ -300,11 +242,39 @@ function Dashboard({ stats }) {
           </Paper>
         </Grid>
 
-        {/* Visits by PDV type pie chart */}
+        {/* Product sales (Commando) */}
         <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
-              Visites par Type de PDV
+              Ventes par SKU (Canal Commando)
+            </Typography>
+            {salesData.some(d => d.ventes > 0) ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={salesData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" angle={-10} textAnchor="end" height={50} />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="ventes" name="Unités" radius={[4, 4, 0, 0]}>
+                    {salesData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PRODUCT_COLORS[index % PRODUCT_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="body2" color="textSecondary">Aucune vente commando enregistrée</Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* PDV distribution */}
+        <Grid item xs={12} lg={6}>
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
+              Visites Établies par Typologie PDV
             </Typography>
             {visitsData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
@@ -314,8 +284,8 @@ function Dashboard({ stats }) {
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={4}
+                    outerRadius={90}
+                    paddingAngle={3}
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
@@ -323,110 +293,41 @@ function Dashboard({ stats }) {
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{ borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    formatter={(value) => [value, 'Visites']}
-                  />
+                  <Tooltip />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
               <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body1" sx={{ color: '#9e9e9e' }}>
-                  Aucune donnée de visites disponible
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-
-        {/* Sales by product bar chart */}
-        <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
-              Ventes par Produit (Commando)
-            </Typography>
-            {salesData.some(d => d.ventes > 0) ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={salesData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-15} textAnchor="end" height={60} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    formatter={(value) => [value, 'Unités vendues']}
-                  />
-                  <Bar dataKey="ventes" name="Ventes" radius={[8, 8, 0, 0]}>
-                    {salesData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PRODUCT_COLORS[index % PRODUCT_COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body1" sx={{ color: '#9e9e9e' }}>
-                  Aucune donnée de ventes disponible
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-
-        {/* Grossiste: Objectif vs Réalisation */}
-        <Grid item xs={12} lg={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
-              Grossiste — Objectif vs Réalisation
-            </Typography>
-            {grossisteChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={grossisteChartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                  <Tooltip contentStyle={{ borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                  <Legend />
-                  <Bar dataKey="objectif" name="Objectif (cartons)" fill="#90caf9" radius={[8, 8, 0, 0]} />
-                  <Bar dataKey="realisation" name="Réalisation (cartons)" fill="#1976d2" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body1" sx={{ color: '#9e9e9e' }}>
-                  Aucune donnée grossiste disponible
-                </Typography>
+                <Typography variant="body2" color="textSecondary">Aucune visite répertoriée</Typography>
               </Box>
             )}
           </Paper>
         </Grid>
       </Grid>
 
-      {/* Activities & System Status */}
+      {/* Logs de validation en tâche de fond */}
       <Grid container spacing={3} sx={{ mt: 1 }}>
         <Grid item xs={12} lg={8}>
-          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, background: 'white' }}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, fontWeight: 'bold', color: '#1a237e' }}>
-              Activités Récentes
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 2, fontWeight: 'bold', color: '#1a237e' }}>
+              État Récent des Synchronisations
             </Typography>
-            <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
-              <Table>
+            <TableContainer>
+              <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Module</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Description</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Date</TableCell>
+                  <TableRow sx={{ bgcolor: '#fdfdfd' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Canal de flux</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Action effectuée</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Statut</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {recentActivities.map((activity) => (
-                    <TableRow 
-                      key={activity.id}
-                      sx={{ '&:hover': { bgcolor: '#f5f5f5' }, transition: 'bgcolor 0.2s' }}
-                    >
+                    <TableRow key={activity.id} hover>
                       <TableCell sx={{ fontWeight: 600, color: '#1976d2' }}>{activity.type}</TableCell>
-                      <TableCell sx={{ color: '#616161' }}>{activity.description}</TableCell>
-                      <TableCell sx={{ color: '#757575', fontSize: '0.875rem' }}>{activity.date}</TableCell>
+                      <TableCell sx={{ color: '#555' }}>{activity.description}</TableCell>
+                      <TableCell sx={{ color: '#4caf50', fontWeight: 'bold' }}>{activity.date}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -436,62 +337,23 @@ function Dashboard({ stats }) {
         </Grid>
 
         <Grid item xs={12} lg={4}>
-          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, background: 'white' }}>
-            <Typography variant="h6" gutterBottom sx={{ mb: 3, fontWeight: 'bold', color: '#1a237e' }}>
-              Statut du Système
+          <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 2, fontWeight: 'bold', color: '#1a237e' }}>
+              Intégrité Infrastructure
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 4, height: 40, borderRadius: 2, bgcolor: '#4caf50' }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#757575', fontSize: '0.75rem', mb: 0.5 }}>
-                    Base de données
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#2e7d32' }}>
-                    Opérationnelle
-                  </Typography>
-                  <LinearProgress variant="determinate" value={100} sx={{ mt: 1, height: 4, borderRadius: 2, bgcolor: '#e8f5e9', '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: '#4caf50' } }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {['Base de données', 'Backend Server', 'Canaux API', 'Frontend Engine'].map((title, i) => (
+                <Box key={title} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 4, height: 32, borderRadius: 1, bgcolor: i === 2 ? '#ff9800' : '#4caf50' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" sx={{ color: '#777', display: 'block' }}>{title}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: i === 2 ? '#ef6c00' : '#2e7d32' }}>
+                      {i === 2 ? "Ajusté (SSL Requise)" : "Opérationnel"}
+                    </Typography>
+                    <LinearProgress variant="determinate" value={100} sx={{ mt: 0.5, height: 3, borderRadius: 1, bgcolor: '#eee', '& .MuiLinearProgress-bar': { bgcolor: i === 2 ? '#ff9800' : '#4caf50' } }} />
+                  </Box>
                 </Box>
-              </Box>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 4, height: 40, borderRadius: 2, bgcolor: '#2196f3' }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#757575', fontSize: '0.75rem', mb: 0.5 }}>
-                    Backend
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#1565c0' }}>
-                    Prêt
-                  </Typography>
-                  <LinearProgress variant="determinate" value={100} sx={{ mt: 1, height: 4, borderRadius: 2, bgcolor: '#e3f2fd', '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: '#2196f3' } }} />
-                </Box>
-              </Box>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 4, height: 40, borderRadius: 2, bgcolor: '#ff9800' }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#757575', fontSize: '0.75rem', mb: 0.5 }}>
-                    Modules
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#ef6c00' }}>
-                    5 actifs
-                  </Typography>
-                  <LinearProgress variant="determinate" value={100} sx={{ mt: 1, height: 4, borderRadius: 2, bgcolor: '#fff3e0', '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: '#ff9800' } }} />
-                </Box>
-              </Box>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 4, height: 40, borderRadius: 2, bgcolor: '#9c27b0' }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#757575', fontSize: '0.75rem', mb: 0.5 }}>
-                    Frontend
-                  </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#7b1fa2' }}>
-                    React + Recharts
-                  </Typography>
-                  <LinearProgress variant="determinate" value={100} sx={{ mt: 1, height: 4, borderRadius: 2, bgcolor: '#f3e5f5', '& .MuiLinearProgress-bar': { borderRadius: 2, bgcolor: '#9c27b0' } }} />
-                </Box>
-              </Box>
+              ))}
             </Box>
           </Paper>
         </Grid>

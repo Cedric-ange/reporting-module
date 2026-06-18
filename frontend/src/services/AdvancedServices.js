@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const API_BASE_URL = '/api';
 
+// ==========================================
+// 1. SERVICE ETL
+// ==========================================
 export const ETLService = {
   // Transformation ETL avancée
   async transformExcelFile(file) {
@@ -10,11 +13,8 @@ export const ETLService = {
     formData.append('file', file);
     
     const response = await axios.post(`${API_BASE_URL}/grossiste/etl/transform`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
-    
     return response.data;
   },
 
@@ -24,11 +24,8 @@ export const ETLService = {
     formData.append('file', file);
     
     const response = await axios.post(`${API_BASE_URL}/validation/etl/validate-file`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
-    
     return response.data;
   },
 
@@ -37,11 +34,8 @@ export const ETLService = {
     formData.append('file', file);
     
     const response = await axios.post(`${API_BASE_URL}/validation/quick`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
-    
     return response.data;
   },
 
@@ -51,6 +45,9 @@ export const ETLService = {
   }
 };
 
+// ==========================================
+// 2. SERVICE KPIs & ANALYTICS
+// ==========================================
 export const KPIService = {
   // KPIs globaux
   async getGlobalKPIs() {
@@ -77,6 +74,26 @@ export const KPIService = {
   }
 };
 
+// ==========================================
+// 3. SERVICE GROSSISTE dédié (Nettoyé et Unique)
+// ==========================================
+export const GrossisteService = {
+  // Récupère l'ensemble des 735 lignes ou applique des filtres macro (Ville, Grossiste, Date)
+  getPerformances: async (filters = {}) => {
+    try {
+      // Interroge l'endpoint du backend que nous avons stabilisé en SSL
+      const response = await axios.get(`${API_BASE_URL}/grossiste-performances`, { params: filters });
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des performances Grossiste:", error);
+      throw error;
+    }
+  }
+};
+
+// ==========================================
+// 4. SERVICE OBJECTIFS
+// ==========================================
 export const ObjectiveService = {
   // Analyse performance vs objectifs
   async getObjectivesAnalysis() {
@@ -110,6 +127,9 @@ export const ObjectiveService = {
   }
 };
 
+// ==========================================
+// 5. SERVICE TRAITEMENT PAR LOTS (BATCH)
+// ==========================================
 export const BatchProcessingService = {
   // Traitement d'un dossier
   async processFolder(folderPath, options = {}) {
@@ -147,6 +167,9 @@ export const BatchProcessingService = {
   }
 };
 
+// ==========================================
+// 6. SERVICE EXPORT POWER BI
+// ==========================================
 export const PowerBIService = {
   // Export Power BI
   async exportToPowerBI(filters = {}) {

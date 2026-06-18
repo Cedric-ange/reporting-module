@@ -11,7 +11,8 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
-  IconButton
+  IconButton,
+  CssBaseline
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -31,12 +32,8 @@ import Dashboard from './Dashboard';
 import BiblosLogo from './components/BiblosLogo';
 import axios from 'axios';
 
-// Détection automatique de l'environnement (Local vs Vercel)
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? '/api' 
-  : '/api';
-
-const drawerWidth = 280;
+const API_BASE_URL = '/api';
+const drawerWidth = 280; // Largeur fixe contrôlée de la barre latérale
 
 function App() {
   const navigate = useNavigate();
@@ -47,8 +44,6 @@ function App() {
 
   useEffect(() => {
     fetchStats();
-    
-    // Naviguer vers le dashboard au démarrage
     if (location.pathname === '/') {
       navigate('/dashboard');
     }
@@ -67,7 +62,6 @@ function App() {
 
   const fetchStats = async () => {
     try {
-      // CORRECTION ICI : Utilisation de l'URL dynamique
       const response = await axios.get(`${API_BASE_URL}/health`);
       setStats(response.data.statistics);
     } catch (error) {
@@ -90,16 +84,17 @@ function App() {
   ];
 
   const drawer = (
-    <Box>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Toolbar sx={{ 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
         px: 2, 
-        bgcolor: 'linear-gradient(135deg, #1976d2 0%, #4caf50 100%)', 
+        background: 'linear-gradient(135deg, #1976d2 0%, #4caf50 100%)', 
         color: 'white',
         height: 64,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        zIndex: 1
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <BiblosLogo size={28} showText={false} />
@@ -107,71 +102,38 @@ function App() {
             Biblos Track
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1.5 }}>
-          <Chip 
-            label={`${stats.agents || 0} Agents`} 
-            size="small"
-            sx={{ 
-              bgcolor: 'rgba(255,255,255,0.15)', 
-              color: 'white',
-              fontWeight: 600,
-              border: '1px solid rgba(255,255,255,0.3)',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' }
-            }}
-          />
-          <Chip 
-            label={`${(stats.commando || 0) + (stats.grossiste || 0) + (stats.promoPaque || 0)} Perf.`} 
-            size="small"
-            sx={{ 
-              bgcolor: 'rgba(255,255,255,0.15)', 
-              color: 'white',
-              fontWeight: 600,
-              border: '1px solid rgba(255,255,255,0.3)',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' }
-            }}
-          />
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Chip label={`${stats.agents || 0} Ag.`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 600, fontSize: '0.75rem' }} />
+          <Chip label={`${(stats.commando || 0) + (stats.grossiste || 0)} Perf.`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 600, fontSize: '0.75rem' }} />
         </Box>
       </Toolbar>
-      <List sx={{ px: 1, py: 2 }}>
+      <List sx={{ px: 1, py: 2, flexGrow: 1, overflowY: 'auto' }}>
         {menuItems.map((item) => (
           <ListItem
             button
             key={item.text}
             selected={location.pathname === item.path}
-            onClick={() => navigate(item.path)}
+            onClick={() => { navigate(item.path); setMobileOpen(false); }}
             sx={{
               mx: 1,
               my: 0.5,
+              width: 'auto',
               borderRadius: 2,
               transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                bgcolor: 'rgba(25, 118, 210, 0.08)',
-                transform: 'translateX(4px)'
-              },
+              '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.08)', transform: 'translateX(4px)' },
               '&.Mui-selected': {
-                bgcolor: 'linear-gradient(90deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.05) 100%)',
+                bgcolor: 'rgba(25, 118, 210, 0.12)',
                 borderLeft: '4px solid #1976d2',
-                '&:hover': {
-                  bgcolor: 'linear-gradient(90deg, rgba(25, 118, 210, 0.2) 0%, rgba(25, 118, 210, 0.1) 100%)',
-                  transform: 'translateX(4px)'
-                }
+                '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.18)', transform: 'translateX(4px)' }
               }
             }}
           >
-            <ListItemIcon sx={{ 
-              color: location.pathname === item.path ? '#1976d2' : '#616161',
-              minWidth: 40
-            }}>
+            <ListItemIcon sx={{ color: location.pathname === item.path ? '#1976d2' : '#616161', minWidth: 40 }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText 
               primary={item.text} 
-              sx={{ 
-                '& .MuiTypography-root': {
-                  fontWeight: location.pathname === item.path ? 600 : 500,
-                  color: location.pathname === item.path ? '#1a237e' : '#424242'
-                }
-              }} 
+              sx={{ '& .MuiTypography-root': { fontWeight: location.pathname === item.path ? 600 : 500, color: location.pathname === item.path ? '#1a237e' : '#424242' } }} 
             />
           </ListItem>
         ))}
@@ -180,19 +142,23 @@ function App() {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f5f5f5' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f4f6f8' }}>
+      <CssBaseline />
+      
+      {/* Barre supérieure principale */}
       <AppBar
         position="fixed"
         sx={{
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          bgcolor: 'linear-gradient(90deg, #1976d2 0%, #4caf50 100%)',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-          zIndex: 1200
+          background: 'linear-gradient(90deg, #1976d2 0%, #4caf50 100%)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          zIndex: (theme) => theme.zIndex.drawer + 1
         }}
       >
         <Toolbar>
           <IconButton
+            color="inherit"
             edge="start"
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { md: 'none' } }}
@@ -205,39 +171,23 @@ function App() {
           <Chip 
             label={isOnline ? "En ligne" : "Hors ligne"}
             color={isOnline ? "success" : "error"}
-            variant="outlined"
             size="small"
-            sx={{ 
-              borderColor: isOnline ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)',
-              color: isOnline ? '#2e7d32' : '#c62828',
-              fontWeight: 500,
-              bgcolor: 'white'
-            }}
+            sx={{ fontWeight: 600, bgcolor: 'white', px: 1 }}
           />
         </Toolbar>
       </AppBar>
       
+      {/* Conteneur Navigation Latérale */}
       <Box
         component="nav"
         sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
       >
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
+        {/* Mobile Sidebar */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
@@ -245,16 +195,30 @@ function App() {
         >
           {drawer}
         </Drawer>
+        
+        {/* Desktop Sidebar (Fixe et stable) */}
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: '1px solid #e0e0e0' },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
       </Box>
       
+      {/* CONTENEUR PRINCIPAL DU CORPS (Espacement ajusté chirurgicalement) */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          mt: '80px',
-          bgcolor: '#f5f5f5',
-          ml: { md: `${drawerWidth}px` }
+          p: 4,
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          minHeight: '100vh',
+          mt: '64px', // Aligné précisément sur la hauteur du header
+          overflowX: 'hidden'
         }}
       >
         <Routes>
