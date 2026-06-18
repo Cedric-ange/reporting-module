@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
   Box, Drawer, AppBar, Toolbar, List, Typography, Divider, IconButton, 
   ListItem, ListItemButton, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
-} from '@mui/material'; // <-- 'Lands' a été retiré proprement ici
+} from '@mui/material';
 import { 
   Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon, 
   Assessment as AssessmentIcon, Storefront as StoreIcon, Campaign as CampaignIcon,
@@ -11,7 +11,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
-// Importation des composants modules
+// Importation des modules analytiques unifiés
 import Dashboard from './Dashboard';
 import GrossisteModule from './modules/GrossisteModule';
 import CommandoModule from './modules/CommandoModule';
@@ -68,8 +68,11 @@ function App() {
 
         let cmdLength = 0;
         if (commandoRes && commandoRes.data) {
-          if (Array.isArray(commandoRes.data)) cmdLength = commandoRes.data.length;
-          else if (Array.isArray(commandoRes.data.data)) cmdLength = commandoRes.data.data.length;
+          if (Array.isArray(commandoRes.data)) {
+            cmdLength = commandoRes.data.length;
+          } else if (Array.isArray(commandoRes.data.data)) {
+            cmdLength = commandoRes.data.data.length;
+          }
         }
 
         let grossisteLength = Array.isArray(grossisteRes.data) ? grossisteRes.data.length : 0;
