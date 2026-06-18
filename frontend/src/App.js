@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
   Box, Drawer, AppBar, Toolbar, List, Typography, Divider, IconButton, 
-  ListItem, ListItemButton, Lands, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
-} from '@mui/material';
+  ListItem, ListItemButton, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
+} from '@mui/material'; // <-- 'Lands' a été retiré proprement ici
 import { 
   Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon, 
   Assessment as AssessmentIcon, Storefront as StoreIcon, Campaign as CampaignIcon,
