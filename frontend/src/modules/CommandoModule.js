@@ -1,594 +1,269 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  TextField,
-  Button,
-  Fab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Box, Typography, Grid, Card, CardContent, Table, TableBody, TableCell, 
+  TableContainer, TableHead, TableRow, Paper, CircularProgress, Alert, 
+  TextField, MenuItem, Button, Chip 
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Assessment as AssessmentIcon,
-  Add as AddIcon,
-  Store as StoreIcon
-} from '@mui/icons-material';
-import axios from 'axios';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, 
+  Legend, ResponsiveContainer, Cell, PieChart, Pie
+} from 'recharts';
+import { useQuery } from '@tanstack/react-query';
+import { CommandoService } from '../services/AdvancedServices';
+import { Storefront as StoreIcon, Assessment as AssessmentIcon, LocalMall as ProductIcon } from '@mui/icons-material';
 
-function CommandoModule() {
-  const [agents, setAgents] = useState([]);
-  const [performances, setPerformances] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingPerformance, setEditingPerformance] = useState(null);
-  const [selectedAgent, setSelectedAgent] = useState(null);
-  const [agentObjectives, setAgentObjectives] = useState(null);
-  const [formData, setFormData] = useState({
-    agent_id: '',
-    report_date: new Date().toISOString().split('T')[0],
-    visits_boutique: 0,
-    visits_superette: 0,
-    visits_kiosque: 0,
-    visits_tablier: 0,
-    visits_pushcart: 0,
-    sales_premium_16g: 0,
-    sales_premium_360g: 0,
-    sales_excellence_900g: 0,
-    sales_avoine_50g: 0,
-    sales_avoine_400g: 0,
-    comments: '',
-    impressions: ''
+const PIE_COLORS = ['#1976d2', '#ff9800', '#4caf50', '#9c27b0', '#00bcd4'];
+const PRODUCT_COLORS = ['#1a237e', '#1565c0', '#42a5f5', '#66bb6a', '#e53935'];
+
+export default function CommandoModule() {
+  // --- ÉTATS DES FILTRES ---
+  const [villeFilter, setVilleFilter] = useState('');
+  const [communeFilter, setCommuneFilter] = useState('');
+  const [temporelFilter, setTemporelFilter] = useState('Tous');
+
+  const [filteredData, setFilteredData] = useState([]);
+
+  // --- CONNECTEUR CACHE REACT QUERY VIA LE SERVICE CENTRALISÉ ---
+  const { data: rawResponse, isLoading, error } = useQuery({
+    queryKey: ['commandoPerformances'],
+    queryFn: () => CommandoService.getPerformances(),
   });
-
   useEffect(() => {
-    fetchAgents();
-    fetchPerformances();
-  }, []);
+  if (rawResponse) {
+    console.log("📊 Structure brute reçue pour Commando :", rawResponse);
+    console.log("Est-ce un tableau ? :", Array.isArray(rawResponse));
+  }
+}, [rawResponse]);
 
-  const fetchAgents = async () => {
-    try {
-      const response = await axios.get('/api/agents');
-      setAgents(response.data.data);
-    } catch (error) {
-      console.error('Erreur récupération agents:', error);
+  // Sécurisation structurelle du retour API
+  const data = useMemo(() => {
+    if (!rawResponse) return [];
+    if (Array.isArray(rawResponse)) return rawResponse;
+    if (rawResponse && Array.isArray(rawResponse.data)) return rawResponse.data;
+    if (rawResponse && Array.isArray(rawResponse.performances)) return rawResponse.performances;
+    return [];
+  }, [rawResponse]);
+
+  // --- MOTEUR DE FILTRAGE RÉACTIF ---
+  useEffect(() => {
+    if (!Array.isArray(data) || data.length === 0) {
+      setFilteredData([]);
+      return;
     }
-  };
 
-  const fetchPerformances = async () => {
-    try {
-      const response = await axios.get('/api/commando-performances');
-      setPerformances(response.data.data);
-    } catch (error) {
-      console.error('Erreur récupération performances:', error);
+    let result = [...data];
+
+    // 1. Filtre par Ville
+    if (villeFilter) {
+      result = result.filter(r => r && r.ville && r.ville.toLowerCase().includes(villeFilter.toLowerCase()));
     }
-  };
-
-  const handleDialogOpen = () => {
-    setEditingPerformance(null);
-    setFormData({
-      agent_id: '',
-      report_date: new Date().toISOString().split('T')[0],
-      visits_boutique: 0,
-      visits_superette: 0,
-      visits_kiosque: 0,
-      visits_tablier: 0,
-      visits_pushcart: 0,
-      sales_premium_16g: 0,
-      sales_premium_360g: 0,
-      sales_excellence_900g: 0,
-      sales_avoine_50g: 0,
-      sales_avoine_400g: 0,
-      comments: '',
-      impressions: ''
-    });
-    setSelectedAgent(null);
-    setAgentObjectives(null);
-    setDialogOpen(true);
-  };
-
-  const handleEdit = async (performance) => {
-    setEditingPerformance(performance);
-    setFormData({
-      agent_id: performance.agent_id,
-      report_date: performance.report_date,
-      visits_boutique: performance.visits_boutique || 0,
-      visits_superette: performance.visits_superette || 0,
-      visits_kiosque: performance.visits_kiosque || 0,
-      visits_tablier: performance.visits_tablier || 0,
-      visits_pushcart: performance.visits_pushcart || 0,
-      sales_premium_16g: performance.sales_premium_16g || 0,
-      sales_premium_360g: performance.sales_premium_360g || 0,
-      sales_excellence_900g: performance.sales_excellence_900g || 0,
-      sales_avoine_50g: performance.sales_avoine_50g || 0,
-      sales_avoine_400g: performance.sales_avoine_400g || 0,
-      comments: performance.comments || '',
-      impressions: performance.impressions || ''
-    });
-    
-    // Charger les données de l'agent
-    try {
-      const agentResponse = await axios.get(`/api/agents/${performance.agent_id}`);
-      setSelectedAgent(agentResponse.data.data);
-      
-      // Charger les objectifs de l'agent
-      const objectivesResponse = await axios.get(`/api/agents/${performance.agent_id}/objectives`);
-      if (objectivesResponse.data.data && objectivesResponse.data.data.length > 0) {
-        setAgentObjectives(objectivesResponse.data.data[0]);
-      }
-    } catch (error) {
-      console.error('Erreur chargement données agent:', error);
+    // 2. Filtre par Commune
+    if (communeFilter) {
+      result = result.filter(r => r && r.commune && r.commune.toLowerCase().includes(communeFilter.toLowerCase()));
     }
-    
-    setDialogOpen(true);
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette performance ?')) {
-      try {
-        await axios.delete(`/api/commando-performances/${id}`);
-        fetchPerformances();
-      } catch (error) {
-        console.error('Erreur suppression performance:', error);
-        alert('Erreur lors de la suppression');
-      }
-    }
-  };
-
-  const handleAgentChange = async (agentId) => {
-    setFormData({ ...formData, agent_id: agentId });
-    
-    if (agentId) {
-      try {
-        const agentResponse = await axios.get(`/api/agents/${agentId}`);
-        setSelectedAgent(agentResponse.data.data);
+    // 3. Filtre Temporel
+    if (temporelFilter !== 'Tous') {
+      const now = new Date();
+      result = result.filter(r => {
+        if (!r) return false;
+        const recordDate = new Date(r.date_vente || r.date);
+        const diffTime = Math.abs(now - recordDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        // Charger les objectifs de l'agent
-        const objectivesResponse = await axios.get(`/api/agents/${agentId}/objectives`);
-        if (objectivesResponse.data.data && objectivesResponse.data.data.length > 0) {
-          setAgentObjectives(objectivesResponse.data.data[0]);
-        } else {
-          setAgentObjectives(null);
-        }
-      } catch (error) {
-        console.error('Erreur chargement données agent:', error);
-        setSelectedAgent(null);
-        setAgentObjectives(null);
-      }
-    } else {
-      setSelectedAgent(null);
-      setAgentObjectives(null);
+        if (temporelFilter === '7j') return diffDays <= 7;
+        if (temporelFilter === '30j') return diffDays <= 30;
+        return true;
+      });
     }
-  };
 
-  const handleSave = async () => {
-    try {
-      if (editingPerformance) {
-        await axios.put(`/api/commando-performances/${editingPerformance.id}`, formData);
-      } else {
-        await axios.post('/api/commando-performances', formData);
-      }
-      fetchPerformances();
-      setDialogOpen(false);
-    } catch (error) {
-      console.error('Erreur sauvegarde performance:', error);
-      alert('Erreur lors de la sauvegarde');
-    }
-  };
+    setFilteredData(result);
+  }, [villeFilter, communeFilter, temporelFilter, data]);
 
-  const calculateTotalVisits = () => {
-    return (formData.visits_boutique || 0) + (formData.visits_superette || 0) + (formData.visits_kiosque || 0) + (formData.visits_tablier || 0) + (formData.visits_pushcart || 0);
-  };
+  // --- CALCULS DES INDICES GLOBAUX SUR LES DONNÉES FILTRÉES ---
+  const totals = useMemo(() => {
+    return filteredData.reduce((acc, r) => {
+      // Somme Visites
+      acc.boutique += Number(r.visits_boutique) || 0;
+      acc.superette += Number(r.visits_superette) || 0;
+      acc.kiosque += Number(r.visits_kiosque) || 0;
+      acc.tablier += Number(r.visits_tablier) || 0;
+      acc.pushcart += Number(r.visits_pushcart) || 0;
+      
+      // Somme Ventes
+      acc.p16 += Number(r.sales_premium_16g) || 0;
+      acc.p360 += Number(r.sales_premium_360g) || 0;
+      acc.e900 += Number(r.sales_excellence_900g) || 0;
+      acc.a50 += Number(r.sales_avoine_50g) || 0;
+      acc.a400 += Number(r.sales_avoine_400g) || 0;
 
-  const calculateTotalSales = () => {
-    return (formData.sales_premium_16g || 0) + (formData.sales_premium_360g || 0) + (formData.sales_excellence_900g || 0) + (formData.sales_avoine_50g || 0) + (formData.sales_avoine_400g || 0);
-  };
+      return acc;
+    }, { boutique: 0, superette: 0, kiosque: 0, tablier: 0, pushcart: 0, p16: 0, p360: 0, e900: 0, a50: 0, a400: 0 });
+  }, [filteredData]);
+
+  const totalVisitsGlobal = totals.boutique + totals.superette + totals.kiosque + totals.tablier + totals.pushcart;
+  const totalSalesGlobal = totals.p16 + totals.p360 + totals.e900 + totals.a50 + totals.a400;
+
+  // Formater les données des graphiques
+  const pieVisitsData = [
+    { name: 'Boutique', value: totals.boutique },
+    { name: 'Superette', value: totals.superette },
+    { name: 'Kiosque', value: totals.kiosque },
+    { name: 'Tablier', value: totals.tablier },
+    { name: 'Pushcart', value: totals.pushcart }
+  ].filter(d => d.value > 0);
+
+  const barSalesData = [
+    { name: 'Premium 16g', ventes: totals.p16 },
+    { name: 'Premium 360g', ventes: totals.p360 },
+    { name: 'Excellence 900g', ventes: totals.e900 },
+    { name: 'Avoine 50g', ventes: totals.a50 },
+    { name: 'Avoine 400g', ventes: totals.a400 }
+  ];
+
+  if (isLoading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh"><CircularProgress /></Box>;
+  if (error) return <Box p={3}><Alert severity="error">Erreur de chargement: {error.message}</Alert></Box>;
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, fontWeight: 'bold', color: '#1a237e' }}>
-        Reporting Commando - Référents Détaillants
-      </Typography>
+    <Box p={1}>
+      <Box mb={3}>
+        <Typography variant="h5" fontWeight="bold" sx={{ color: '#1a237e', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <AssessmentIcon fontSize="large" /> Module Reporting Commando Field
+        </Typography>
+      </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, background: 'white' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#1a237e', mb: 1 }}>
-                  Performances enregistrées
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#757575' }}>
-                  {performances.length} performance(s)
-                </Typography>
-              </Box>
-              <Fab
-                color="primary"
-                aria-label="Ajouter"
-                onClick={handleDialogOpen}
-                size="medium"
-                sx={{
-                  bgcolor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                  '&:hover': {
-                    bgcolor: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
-                    transform: 'scale(1.05)'
-                  },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: 3
-                }}
-              >
-                <AddIcon />
-              </Fab>
+      {/* Barre de filtrage multi-critères */}
+      <Card sx={{ mb: 4, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={4}><TextField fullWidth size="small" label="Filtrer par Ville" value={villeFilter} onChange={(e) => setVilleFilter(e.target.value)} /></Grid>
+            <Grid item xs={12} sm={4}><TextField fullWidth size="small" label="Filtrer par Commune" value={communeFilter} onChange={(e) => setCommuneFilter(e.target.value)} /></Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField fullWidth size="small" select label="Période" value={temporelFilter} onChange={(e) => setTemporelFilter(e.target.value)}>
+                <MenuItem value="Tous">Tout l'historique</MenuItem>
+                <MenuItem value="7j">7 derniers jours</MenuItem>
+                <MenuItem value="30j">30 derniers jours</MenuItem>
+              </TextField>
+            </Grid>
+          </Grid>
+          {(villeFilter || communeFilter || temporelFilter !== 'Tous') && (
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button size="small" color="secondary" onClick={() => { setVilleFilter(''); setCommuneFilter(''); setTemporelFilter('Tous'); }}>
+                Réinitialiser les filtres
+              </Button>
             </Box>
+          )}
+        </CardContent>
+      </Card>
 
-            <TableContainer sx={{ borderRadius: 2, overflow: 'hidden' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Agent</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Ville</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Total Visites</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Total Ventes</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', color: '#424242' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {performances.map((performance) => (
-                    <TableRow 
-                      key={performance.id}
-                      sx={{ 
-                        '&:hover': { bgcolor: '#f5f5f5' },
-                        transition: 'bgcolor 0.2s'
-                      }}
-                    >
-                      <TableCell>{performance.report_date}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <StoreIcon sx={{ color: '#1976d2', fontSize: 20 }} />
-                          <Typography variant="body2" fontWeight={500}>{performance.agent_name}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>{performance.city || '-'}</TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={
-                            (performance.visits_boutique || 0) + 
-                            (performance.visits_superette || 0) + 
-                            (performance.visits_kiosque || 0) + 
-                            (performance.visits_tablier || 0) + 
-                            (performance.visits_pushcart || 0)
-                          } 
-                          size="small" 
-                          color="primary"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={
-                            (performance.sales_premium_16g || 0) + 
-                            (performance.sales_premium_360g || 0) + 
-                            (performance.sales_excellence_900g || 0) + 
-                            (performance.sales_avoine_50g || 0) + 
-                            (performance.sales_avoine_400g || 0)
-                          } 
-                          size="small" 
-                          color="success"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => handleEdit(performance)} color="primary" size="small">
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton onClick={() => handleDelete(performance.id)} color="error" size="small">
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {performances.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center">
-                        <Box sx={{ py: 6 }}>
-                          <AssessmentIcon sx={{ fontSize: 64, color: '#bdbdbd', mb: 2 }} />
-                          <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                            Aucune performance enregistrée
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Sélectionnez un agent et créez une nouvelle performance
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+      {/* Cartes KPI */}
+      <Grid container spacing={3} mb={4}>
+        <Grid item xs={12} sm={4}>
+          <Card sx={{ borderLeft: '5px solid #1976d2', bgcolor: '#f0f7ff' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="caption" fontWeight="bold" color="textSecondary">TOTAL DES VISITES TERRAIN</Typography>
+                <Typography variant="h4" fontWeight="bold" color="#0d47a1" mt={1}>{totalVisitsGlobal.toLocaleString()}</Typography>
+              </Box>
+              <StoreIcon sx={{ fontSize: 40, color: '#1976d2', opacity: 0.5 }} />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Card sx={{ borderLeft: '5px solid #2e7d32', bgcolor: '#f3fbf4' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="caption" fontWeight="bold" color="textSecondary">TOTAL DES UNITÉS VENDUES</Typography>
+                <Typography variant="h4" fontWeight="bold" color="#1b5e20" mt={1}>{totalSalesGlobal.toLocaleString()}</Typography>
+              </Box>
+              <ProductIcon sx={{ fontSize: 40, color: '#2e7d32', opacity: 0.5 }} />
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Card sx={{ borderLeft: '5px solid #ff9800', bgcolor: '#fffdf3' }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="caption" fontWeight="bold" color="textSecondary">LIGNES DE RAPPORT ACTIVES</Typography>
+                <Typography variant="h4" fontWeight="bold" color="#e65100" mt={1}>{filteredData.length}</Typography>
+              </Box>
+              <AssessmentIcon sx={{ fontSize: 40, color: '#ff9800', opacity: 0.5 }} />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Section des Graphiques analytiques */}
+      <Grid container spacing={3} mb={4}>
+        <Grid item xs={12} lg={6}>
+          <Paper sx={{ p: 3, borderRadius: 3 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ color: '#1a237e', mb: 2 }}>🏪 Typologie des Points de Vente Visités</Typography>
+            <Box sx={{ width: '100%', height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              {pieVisitsData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieVisitsData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                      {pieVisitsData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                    </Pie>
+                    <ChartTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : <Typography variant="body2" color="textSecondary">Aucune donnée disponible</Typography>}
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} lg={6}>
+          <Paper sx={{ p: 3, borderRadius: 3 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ color: '#1a237e', mb: 2 }}>📦 Volumes de Ventes par SKU Produit</Typography>
+            <Box sx={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barSalesData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" style={{ fontSize: 11 }} angle={-10} textAnchor="end" height={45} />
+                  <YAxis />
+                  <ChartTooltip formatter={(v) => v.toLocaleString()} />
+                  <Bar dataKey="ventes" name="Unités vendues">
+                    {barSalesData.map((entry, index) => <Cell key={`cell-${index}`} fill={PRODUCT_COLORS[index % PRODUCT_COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
           </Paper>
         </Grid>
       </Grid>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>
-          {editingPerformance ? 'Modifier la Performance Commando' : 'Nouvelle Performance Commando'}
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Agent *</InputLabel>
-                <Select
-                  value={formData.agent_id}
-                  onChange={(e) => handleAgentChange(e.target.value)}
-                  label="Agent *"
-                  required
-                >
-                  {agents.map((agent) => (
-                    <MenuItem key={agent.id} value={agent.id}>
-                      {agent.agent_number} - {agent.agent_name} ({agent.city || 'Ville non définie'})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {selectedAgent && (
-              <Grid item xs={12}>
-                <Box sx={{ 
-                  p: 2, 
-                  borderRadius: 2, 
-                  bgcolor: '#f5f5f5',
-                  mb: 2
-                }}>
-                  <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e' }}>
-                    Informations de l'agent : {selectedAgent.agent_name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                    <Chip label={`Ville: ${selectedAgent.city || 'Non définie'}`} size="small" />
-                    <Chip label={`Tél: ${selectedAgent.phone || 'Non défini'}`} size="small" />
-                    <Chip label={`Email: ${selectedAgent.email || 'Non défini'}`} size="small" />
-                  </Box>
-                  {agentObjectives && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 500, color: '#757575', fontSize: '0.875rem' }}>
-                        Objectifs définis : {agentObjectives.period_start} au {agentObjectives.period_end}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                        <Chip label={`Boutique: ${agentObjectives.daily_visits_boutique || 0}`} size="small" color="info" />
-                        <Chip label={`Superette: ${agentObjectives.daily_visits_superette || 0}`} size="small" color="info" />
-                        <Chip label={`Kiosque: ${agentObjectives.daily_visits_kiosque || 0}`} size="small" color="info" />
-                        <Chip label={`Tablier: ${agentObjectives.daily_visits_tablier || 0}`} size="small" color="info" />
-                        <Chip label={`Pushcart: ${agentObjectives.daily_visits_pushcart || 0}`} size="small" color="info" />
-                        <Chip label={`Ventes: ${agentObjectives.weekly_sales_premium_16g || 0}`} size="small" color="info" />
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-              </Grid>
-            )}
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="date"
-                label="Date du rapport *"
-                InputLabelProps={{ shrink: true }}
-                value={formData.report_date}
-                onChange={(e) => setFormData({...formData, report_date: e.target.value})}
-                required
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <StoreIcon />
-                Visites du Jour
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Boutique"
-                value={formData.visits_boutique}
-                onChange={(e) => setFormData({...formData, visits_boutique: parseInt(e.target.value) || 0})}
-                InputProps={{ startAdornment: <Box sx={{ mr: 1, color: '#1976d2' }}>🏪</Box> }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Superette"
-                value={formData.visits_superette}
-                onChange={(e) => setFormData({...formData, visits_superette: parseInt(e.target.value) || 0})}
-                InputProps={{ startAdornment: <Box sx={{ mr: 1, color: '#9c27b0' }}>🏬</Box> }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Kiosque"
-                value={formData.visits_kiosque}
-                onChange={(e) => setFormData({...formData, visits_kiosque: parseInt(e.target.value) || 0})}
-                InputProps={{ startAdornment: <Box sx={{ mr: 1, color: '#4caf50' }}>🏚️</Box> }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Tablier"
-                value={formData.visits_tablier}
-                onChange={(e) => setFormData({...formData, visits_tablier: parseInt(e.target.value) || 0})}
-                InputProps={{ startAdornment: <Box sx={{ mr: 1, color: '#ff9800' }}>👕</Box> }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Pushcart"
-                value={formData.visits_pushcart}
-                onChange={(e) => setFormData({...formData, visits_pushcart: parseInt(e.target.value) || 0})}
-                InputProps={{ startAdornment: <Box sx={{ mr: 1, color: '#f44336' }}>🛒</Box> }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Total Visites"
-                value={calculateTotalVisits()}
-                disabled
-                InputProps={{ startAdornment: <Box sx={{ mr: 1, color: '#666' }}>📊</Box> }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AssessmentIcon />
-                Ventes de Produits
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Biblos Lait Premium 16g"
-                value={formData.sales_premium_16g}
-                onChange={(e) => setFormData({...formData, sales_premium_16g: parseInt(e.target.value) || 0})}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Biblos Lait Premium 360g"
-                value={formData.sales_premium_360g}
-                onChange={(e) => setFormData({...formData, sales_premium_360g: parseInt(e.target.value) || 0})}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Biblos Excellence 900g"
-                value={formData.sales_excellence_900g}
-                onChange={(e) => setFormData({...formData, sales_excellence_900g: parseInt(e.target.value) || 0})}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Flocons Avoine 50g"
-                value={formData.sales_avoine_50g}
-                onChange={(e) => setFormData({...formData, sales_avoine_50g: parseInt(e.target.value) || 0})}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Flocons Avoine 400g"
-                value={formData.sales_avoine_400g}
-                onChange={(e) => setFormData({...formData, sales_avoine_400g: parseInt(e.target.value) || 0})}
-              />
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <TextField
-                fullWidth
-                label="Total Ventes"
-                value={calculateTotalSales()}
-                disabled
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Commentaires"
-                value={formData.comments}
-                onChange={(e) => setFormData({...formData, comments: e.target.value})}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Impressions des PDV et des clients"
-                value={formData.impressions}
-                onChange={(e) => setFormData({...formData, impressions: e.target.value})}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, bgcolor: '#f5f5f5' }}>
-          <Button 
-            onClick={() => setDialogOpen(false)}
-            sx={{ 
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 500,
-              px: 3
-            }}
-          >
-            Annuler
-          </Button>
-          <Button 
-            onClick={handleSave} 
-            variant="contained"
-            startIcon={<SaveIcon />}
-            sx={{
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 4,
-              bgcolor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              '&:hover': {
-                bgcolor: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: 3
-              },
-              transition: 'all 0.2s'
-            }}
-          >
-            {editingPerformance ? 'Modifier' : 'Enregistrer'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Registre exhaustif Commando */}
+      <Paper sx={{ p: 2, borderRadius: 2 }}>
+        <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>Registre des Rapports de Visite Commando (Top 50)</Typography>
+        <TableContainer>
+          <Table size="small">
+            <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Ville</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Commune / Secteur</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total Visites</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total Ventes</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData.slice(0, 50).map((row, index) => {
+                const subVisits = (row.visits_boutique || 0) + (row.visits_superette || 0) + (row.visits_kiosque || 0) + (row.visits_tablier || 0) + (row.visits_pushcart || 0);
+                const subSales = (row.sales_premium_16g || 0) + (row.sales_premium_360g || 0) + (row.sales_excellence_900g || 0) + (row.sales_avoine_50g || 0) + (row.sales_avoine_400g || 0);
+                return (
+                  <TableRow key={row.id || index} hover>
+                    <TableCell>{row.date ? new Date(row.date).toLocaleDateString('fr-FR') : 'N/A'}</TableCell>
+                    <TableCell>{row.ville || 'N/A'}</TableCell>
+                    <TableCell>{row.commune || 'N/A'} {row.secteur ? ` - ${row.secteur}` : ''}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>{subVisits}</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold', color: '#2e7d32' }}>{subSales}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
     </Box>
   );
 }
-
-export default CommandoModule;

@@ -1,4 +1,4 @@
-// Service pour les nouvelles fonctionnalités ETL et KPIs
+// Service unifié pour les fonctionnalités ETL, KPIs et Analytics de Biblos Track
 import axios from 'axios';
 
 const API_BASE_URL = '/api';
@@ -75,13 +75,11 @@ export const KPIService = {
 };
 
 // ==========================================
-// 3. SERVICE GROSSISTE dédié (Nettoyé et Unique)
+// 3. SERVICE GROSSISTE dédié
 // ==========================================
 export const GrossisteService = {
-  // Récupère l'ensemble des 735 lignes ou applique des filtres macro (Ville, Grossiste, Date)
   getPerformances: async (filters = {}) => {
     try {
-      // Interroge l'endpoint du backend que nous avons stabilisé en SSL
       const response = await axios.get(`${API_BASE_URL}/grossiste-performances`, { params: filters });
       return response.data;
     } catch (error) {
@@ -92,7 +90,22 @@ export const GrossisteService = {
 };
 
 // ==========================================
-// 4. SERVICE OBJECTIFS
+// 4. SERVICE COMMANDO dédié (Ajouté et Sécurisé)
+// ==========================================
+export const CommandoService = {
+  getPerformances: async (filters = {}) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/commando-performances`, { params: filters });
+      return response.data;
+    } catch (error) {
+      console.error("Erreur lors de la récupération des performances Commando:", error);
+      throw error;
+    }
+  }
+};
+
+// ==========================================
+// 5. SERVICE OBJECTIFS
 // ==========================================
 export const ObjectiveService = {
   // Analyse performance vs objectifs
@@ -128,7 +141,7 @@ export const ObjectiveService = {
 };
 
 // ==========================================
-// 5. SERVICE TRAITEMENT PAR LOTS (BATCH)
+// 6. SERVICE TRAITEMENT PAR LOTS (BATCH)
 // ==========================================
 export const BatchProcessingService = {
   // Traitement d'un dossier
@@ -168,7 +181,7 @@ export const BatchProcessingService = {
 };
 
 // ==========================================
-// 6. SERVICE EXPORT POWER BI
+// 7. SERVICE EXPORT POWER BI
 // ==========================================
 export const PowerBIService = {
   // Export Power BI
