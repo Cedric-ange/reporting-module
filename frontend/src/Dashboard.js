@@ -21,7 +21,6 @@ import {
   CloudUpload,
   TrendingUp
 } from '@mui/icons-material';
-// --- CORRECTION DES IMPORTS RECHARTS (Ligne 16) ---
 import {
   BarChart,
   Bar,
@@ -41,7 +40,8 @@ import axios from 'axios';
 const PIE_COLORS = ['#1976d2', '#ff9800', '#4caf50', '#9c27b0', '#00bcd4'];
 const PRODUCT_COLORS = ['#1a237e', '#1565c0', '#42a5f5', '#66bb6a', '#e53935'];
 
-function Dashboard({ stats }) {
+// --- SÉCURISATION DES STATS PAR DÉFAUT ---
+function Dashboard({ stats = {} }) {
   const [commandoData, setCommandoData] = useState([]);
   const [grossisteData, setGrossisteData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ function Dashboard({ stats }) {
           axios.get('/api/grossiste-performances').catch(() => ({ data: [] }))
         ]);
 
-        // Sécurisation du canal commando
+        // Sécurisation du canal commando (s'adapte au format enveloppé { success: true, data: [...] })
         let cmdRecords = [];
         if (cmdRes && cmdRes.data) {
           if (Array.isArray(cmdRes.data)) cmdRecords = cmdRes.data;
@@ -85,7 +85,7 @@ function Dashboard({ stats }) {
   // Distribution globale
   const performancesChartData = useMemo(() => {
     return [
-      { name: 'Commando', value: Number(stats?.commando) || commandoData.length || 0, fill: '#f5576c' },
+      { name: 'Commando', value: commandoData.length || Number(stats?.commando) || 0, fill: '#f5576c' },
       { name: 'Grossiste', value: grossisteData.length || Number(stats?.grossiste) || 0, fill: '#1976d2' },
       { name: 'Promo Pâque', value: Number(stats?.promoPaque) || 0, fill: '#43e97b' }
     ];
@@ -179,7 +179,6 @@ function Dashboard({ stats }) {
         <Grid item xs={12} sm={6} lg={3}>
           <Card sx={{ borderRadius: 3, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)', color: 'white' }}>
             <CardContent>
-              {/* --- CORRECTION LIGNE 162 : SINTAXE DE JUSTIFYCONTENT --- */}
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Effectif Commercial</Typography>
@@ -197,7 +196,7 @@ function Dashboard({ stats }) {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Rapports Commando</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats?.commando || commandoData.length || 0}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{commandoData.length || stats?.commando || 0}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><Assessment /></Avatar>
               </Box>
@@ -225,7 +224,7 @@ function Dashboard({ stats }) {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Volume d'Entrées Total</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{(stats?.commando || commandoData.length) + grossisteData.length}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{commandoData.length + grossisteData.length}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><TrendingUp /></Avatar>
               </Box>
