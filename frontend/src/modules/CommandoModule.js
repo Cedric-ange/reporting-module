@@ -21,7 +21,7 @@ import {
 const PIE_COLORS = ['#1976d2', '#ff9800', '#4caf50', '#9c27b0', '#00bcd4', '#e53935'];
 
 export default function CommandoModule() {
-  // --- ÉTATS DES FILTRES BI POUSSÉS ---
+  // --- ÉTATS DES FILTRES BI ---
   const [searchQuery, setSearchQuery] = useState('');
   const [villeFilter, setVilleFilter] = useState('');
   const [agentFilter, setAgentFilter] = useState('');
@@ -33,7 +33,7 @@ export default function CommandoModule() {
     queryFn: () => CommandoService.getPerformances(),
   });
 
-  // Sécurisation structurelle du flux brut des 14 605 lignes
+  // Sécurisation structurelle du flux brut
   const data = useMemo(() => {
     if (!rawResponse) return [];
     if (Array.isArray(rawResponse)) return rawResponse;
@@ -42,7 +42,7 @@ export default function CommandoModule() {
     return [];
   }, [rawResponse]);
 
-  // --- EXTRACTION DYNAMIQUE DES LISTES DE FILTRES UNIQUE (DISTINCT) ---
+  // --- EXTRACTION DYNAMIQUE DES LISTES DE FILTRES ---
   const uniqueVilles = useMemo(() => {
     const villes = data.map(r => r.ville).filter(Boolean);
     return [...new Set(villes)].sort();
@@ -65,48 +65,48 @@ export default function CommandoModule() {
     return data.filter(r => {
       if (!r) return false;
 
-      // Filtre Recherche Globale (Commentaires / Impressions)
       const matchesSearch = searchQuery === '' || 
         (r.commentaires && r.commentaires.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (r.impressions && r.impressions.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Filtre Ville
       const matchesVille = !villeFilter || (r.ville && r.ville === villeFilter);
-
-      // Filtre Agent
       const matchesAgent = !agentFilter || (r.agent_promoteur && r.agent_promoteur === agentFilter);
-
-      // Filtre Catégorie de Métrique
       const matchesMetric = metricFilter === 'Tous' || (r.metric_category && r.metric_category === metricFilter);
 
       return matchesSearch && matchesVille && matchesAgent && matchesMetric;
     });
   }, [data, searchQuery, villeFilter, agentFilter, metricFilter]);
 
-  // --- AGREGATIONS & CALCULS KPI DYNAMIQUES ---
+  // --- AGREGATIONS & CALCULS KPI CORRIGÉS POUR L'EXCEL DYNAMIQUE ---
   const kpiCounters = useMemo(() => {
     return filteredData.reduce((acc, r) => {
       const valRealise = parseFloat(r.realise) || 0;
-      const cat = r.metric_category ? r.metric_category.trim() : '';
+      const cat = r.metric_category ? r.metric_category.trim().toLowerCase() : '';
 
-      if (cat.includes('Nombre de visite')) {
+      // Correspondance flexible avec la sémantique de ton Excel
+      if (cat.includes('visite')) {
         acc.visites += valRealise;
-      } else if (cat.includes('Vente en cartons')) {
+      } else if (cat.includes('vente')) {
         acc.ventes += valRealise;
-      } else if (cat.includes('Gratuité')) {
+      } else if (cat.includes('gratuit')) { // Capte désormais "Gratuits offerts en sachet"
         acc.gratuites += valRealise;
-      } else if (cat.includes('Matériel') || cat.includes('Visibilité')) {
+      } else if (cat.includes('matériel') || cat.includes('visibilité') || cat.includes('référencement')) {
         acc.plv += valRealise;
       }
       return acc;
     }, { visites: 0, ventes: 0, gratuites: 0, plv: 0 });
   }, [filteredData]);
 
-  // --- FORMATAGE DES DONNÉES DE DISTRIBUTION POUR LES GRAPHIQUES ---
+  // --- FORMATAGE DES DONNÉES DE DISTRIBUTION POUR LE GRAPHIQUE ---
   const chartDistributionData = useMemo(() => {
     const groups = {};
     filteredData.forEach(r => {
-      const label = r.type_pdv_ou_produit || 'Autre';
+      // Si on filtre sur une catégorie, on affiche le détail des produits/PDV (type_pdv_ou_produit)
+      // Sinon, on affiche la répartition globale par grande catégorie
+      const label = metricFilter === 'Tous' 
+        ? (r.metric_category || 'Autre') 
+        : (r.type_pdv_ou_produit || 'Autre');
+        
       groups[label] = (groups[label] || 0) + (parseFloat(r.realise) || 0);
     });
 
@@ -114,7 +114,7 @@ export default function CommandoModule() {
       .map(([name, value]) => ({ name, value: Math.round(value) }))
       .filter(d => d.value > 0)
       .sort((a, b) => b.value - a.value);
-  }, [filteredData]);
+  }, [filteredData, metricFilter]);
 
   const topAgentsData = useMemo(() => {
     const groups = {};
@@ -130,7 +130,7 @@ export default function CommandoModule() {
   }, [filteredData]);
 
   if (isLoading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh"><CircularProgress /></Box>;
-  if (error) return <Box p={3}><Alert severity="error">Erreur de chargement de l'infrastructure BI: {error.message}</Alert></Box>;
+  if (error) return <Box p={3}><Alert severity="error">Erreur de chargement: {error.message}</Alert></Box>;
 
   return (
     <Box p={1}>
@@ -140,7 +140,7 @@ export default function CommandoModule() {
         </Typography>
       </Box>
 
-      {/* Barre de filtrage BI multidimensionnelle */}
+      {/* Barre de filtrage BI */}
       <Card sx={{ mb: 4, borderRadius: 3, boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
@@ -173,7 +173,7 @@ export default function CommandoModule() {
             </Grid>
             <Grid item xs={12} sm={3}>
               <TextField
-                fullWidth size="small" label="Recherche textuelle commentaires"
+                fullWidth size="small" label="Recherche textuelle"
                 value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment>,
@@ -181,13 +181,6 @@ export default function CommandoModule() {
               />
             </Grid>
           </Grid>
-          {(villeFilter || agentFilter || metricFilter !== 'Tous' || searchQuery) && (
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button size="small" variant="outlined" color="error" onClick={() => { setVilleFilter(''); setAgentFilter(''); setMetricFilter('Tous'); setSearchQuery(''); }}>
-                Réinitialiser les dimensions de filtrage
-              </Button>
-            </Box>
-          )}
         </CardContent>
       </Card>
 
@@ -239,7 +232,7 @@ export default function CommandoModule() {
         </Grid>
       </Grid>
 
-      {/* Visualisations Avancées */}
+      {/* Visualisations */}
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} lg={7}>
           <Paper sx={{ p: 3, borderRadius: 3 }}>
@@ -284,7 +277,7 @@ export default function CommandoModule() {
         </Grid>
       </Grid>
 
-      {/* Registre exhaustif Audit Commando */}
+      {/* Registre */}
       <Paper sx={{ p: 2, borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.03)' }}>
         <Typography variant="h6" fontWeight="bold" sx={{ p: 1, color: '#1a237e' }}>Registre Exhaustif d'Audit Commando Line-by-Line</Typography>
         <TableContainer sx={{ maxHeight: 440 }}>
@@ -318,17 +311,9 @@ export default function CommandoModule() {
                   </TableCell>
                 </TableRow>
               ))}
-              {filteredData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 3, color: 'text.secondary' }}>Aucune donnée ne correspond aux critères de filtrage actuels.</TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
-        <Typography variant="caption" sx={{ display: 'block', mt: 1, textIndent: 8, color: 'text.secondary' }}>
-          Affichage des 100 premières lignes sur un total de {filteredData.length.toLocaleString()} entrées filtrées.
-        </Typography>
       </Paper>
     </Box>
   );
