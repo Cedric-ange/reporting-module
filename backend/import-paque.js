@@ -6,11 +6,11 @@ require('dotenv').config();
 
 // On configure le pool de manière adaptative. 
 // Si la base rejette le SSL, le client réessaiera sans SSL automatiquement.
+const CONFIG_DATABASE_URL = "postgresql://postgres.ididzabqgmnfgruryuev:Welcome$$12345!@aws-0-eu-west-3.pooler.supabase.com:6543/postgres";
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL.includes('supabase') 
-    ? { rejectUnauthorized: false } 
-    : false
+  connectionString: CONFIG_DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // Supabase exige généralement le SSL en direct
 });
 
 async function runPromoPaqueETL() {
