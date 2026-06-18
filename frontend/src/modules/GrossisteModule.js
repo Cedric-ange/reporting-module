@@ -15,10 +15,10 @@ import { Lightbulb as LightbulbIcon, AutoGraph as AutoGraphIcon } from '@mui/ico
 // --- FONCTION UTILITAIRE : CODE COULEUR DE PERFORMANCE BI ---
 const getPerformanceColor = (rate) => {
   const currentRate = Number(rate) || 0;
-  if (currentRate < 70) return { main: '#d32f2f', light: '#ffebee', label: 'Critique' };       // Rouge
-  if (currentRate < 100) return { main: '#f57c00', light: '#fff3e0', label: 'En Alerte' };     // Orange
-  if (currentRate <= 115) return { main: '#2e7d32', light: '#e8f5e9', label: 'Atteint' };      // Vert
-  return { main: '#0288d1', light: '#e1f5fe', label: 'Surperformance' };                // Bleu
+  if (currentRate < 70) return { main: '#d32f2f', light: '#ffebee', label: 'Critique' };
+  if (currentRate < 100) return { main: '#f57c00', light: '#fff3e0', label: 'En Alerte' };
+  if (currentRate <= 115) return { main: '#2e7d32', light: '#e8f5e9', label: 'Atteint' };
+  return { main: '#0288d1', light: '#e1f5fe', label: 'Surperformance' };
 };
 
 export default function GrossisteModule() {
@@ -77,7 +77,7 @@ export default function GrossisteModule() {
         return getPerformanceColor(rate).label === statutFilter;
       });
     }
-    // 5. Filtre Temporel (Derniers 7 jours vs Derniers 30 jours)
+    // 5. Filtre Temporel
     if (temporelFilter !== 'Tous') {
       const now = new Date();
       result = result.filter(r => {
@@ -100,17 +100,10 @@ export default function GrossisteModule() {
     return [...new Set(data.map(r => r?.format_produit).filter(Boolean))];
   }, [data]);
 
-  if (isLoading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh"><CircularProgress /></Box>;
-  if (error) return <Box p={3}><Alert severity="error">Erreur de chargement: {error.message}</Alert></Box>;
-
-  // --- CALCULS DES INDICES BI CONSOLIDÉS ---
-  const globalObj = filteredData.reduce((sum, r) => sum + (Number(r.objective_carton || r.objectif_carton) || 0), 0);
-  const globalReal = filteredData.reduce((sum, r) => sum + (Number(r.realisation_carton) || 0), 0);
-  const globalRate = globalObj > 0 ? (globalReal / globalObj) * 100 : 0;
-  const perfBrute = getPerformanceColor(globalRate);
-
-  // --- CONSTRUCTION DU GRAPHIQUE EN CASCADE (WATERFALL) ---
-  const getWaterfallData = () => {
+  // --- SÉCURISATION DU GRAPHIQUE EN CASCADE (WATERFALL) AGAINST TYPEERROR ---
+  const waterfallData = useMemo(() => {
+    if (!Array.isArray(filteredData) || filteredData.length === 0) return [];
+    
     const cityMap = {};
     filteredData.forEach(r => {
       if (!r || !r.ville) return;
@@ -118,7 +111,10 @@ export default function GrossisteModule() {
       cityMap[r.ville] += (Number(r.realisation_carton) || 0) - (Number(r.objective_carton || r.objectif_carton) || 0);
     });
 
-    let runningTotal = globalObj;
+    const currentObj = filteredData.reduce((sum, r) => sum + (Number(r.objective_carton || r.objectif_carton) || 0), 0);
+    const currentReal = filteredData.reduce((sum, r) => sum + (Number(r.realisation_carton) || 0), 0);
+
+    let runningTotal = currentObj;
     const waterfall = [{ name: 'Obj. Initial', Valeur: runningTotal, Base: 0, Couleur: '#90caf9' }];
 
     Object.entries(cityMap).sort((a,b) => b[1] - a[1]).slice(0, 5).forEach(([city, value]) => {
@@ -132,12 +128,13 @@ export default function GrossisteModule() {
       });
     });
 
-    waterfall.push({ name: 'Réel Global', Valeur: globalReal, Base: 0, Couleur: '#1a237e' });
+    waterfall.push({ name: 'Réel Global', Valeur: currentReal, Base: 0, Couleur: '#1a237e' });
     return waterfall;
-  };
+  }, [filteredData]);
 
   // --- CONFORMITÉ DU CHRONO TEMPOREL ---
-  const getTimelineData = () => {
+  const timelineData = useMemo(() => {
+    if (!Array.isArray(filteredData) || filteredData.length === 0) return [];
     const datesMap = {};
     filteredData.forEach(r => {
       if (!r) return;
@@ -149,10 +146,11 @@ export default function GrossisteModule() {
       datesMap[d].Réalisation += Number(r.realisation_carton) || 0;
     });
     return Object.values(datesMap).slice(-12);
-  };
+  }, [filteredData]);
 
   // --- CLASSEMENT PALMARÈS TOP / FLOP ---
-  const getGrossisteRanking = () => {
+  const rankingMetrics = useMemo(() => {
+    if (!Array.isArray(filteredData) || filteredData.length === 0) return { top: [], flop: [] };
     const grossistes = {};
     filteredData.forEach(r => {
       if (!r || !r.grossiste) return;
@@ -163,28 +161,46 @@ export default function GrossisteModule() {
       grossistes[r.grossiste].real += Number(r.realisation_carton) || 0;
     });
 
-    return Object.values(grossistes).map(g => {
+    const sorted = Object.values(grossistes).map(g => {
       const taux = g.obj > 0 ? (g.real / g.obj) * 100 : 0;
       return { ...g, taux, color: getPerformanceColor(taux) };
     }).sort((a, b) => b.taux - a.taux);
-  };
 
-  const grossisteRanked = getGrossisteRanking();
-  const topGrossistes = grossisteRanked.slice(0, 5);
-  const flopGrossistes = [...grossisteRanked].reverse().slice(0, 5).filter(g => g.taux < 100);
+    return {
+      top: sorted.slice(0, 5),
+      flop: [...sorted].reverse().slice(0, 5).filter(g => g.taux < 100)
+    };
+  }, [filteredData]);
 
-  // Groupement standard par ville pour le premier graphique
-  const chartData = Object.values(
-    filteredData.reduce((acc, current) => {
-      const city = current.ville || 'Inconnue';
-      if (!acc[city]) {
-        acc[city] = { name: city, Objectif: 0, Realisation: 0 };
-      }
-      acc[city].Objectif += Number(current.objective_carton || current.objectif_carton) || 0;
-      acc[city].Realisation += Number(current.realisation_carton) || 0;
-      return acc;
-    }, {})
-  );
+  // Groupement standard par ville pour le graphique en barres principal
+  const chartData = useMemo(() => {
+    if (!Array.isArray(filteredData) || filteredData.length === 0) return [];
+    return Object.values(
+      filteredData.reduce((acc, current) => {
+        if (!current) return acc;
+        const city = current.ville || 'Inconnue';
+        if (!acc[city]) acc[city] = { name: city, Objectif: 0, Realisation: 0 };
+        acc[city].Objectif += Number(current.objective_carton || current.objectif_carton) || 0;
+        acc[city].Realisation += Number(current.realisation_carton) || 0;
+        return acc;
+      }, {})
+    );
+  }, [filteredData]);
+
+  if (isLoading) return <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh"><CircularProgress /></Box>;
+  if (error) return <Box p={3}><Alert severity="error">Erreur de chargement: {error.message}</Alert></Box>;
+
+  // Indices de performance
+  const globalObj = filteredData.reduce((sum, r) => sum + (Number(r.objective_carton || r.objectif_carton) || 0), 0);
+  const globalReal = filteredData.reduce((sum, r) => sum + (Number(r.realisation_carton) || 0), 0);
+  const globalRate = globalObj > 0 ? (globalReal / globalObj) * 100 : 0;
+  const perfBrute = getPerformanceColor(globalRate);
+
+  const flawsCount = filteredData.filter(r => {
+    const obj = Number(r.objective_carton || r.objectif_carton) || 0;
+    const real = Number(r.realisation_carton) || 0;
+    return obj > 0 ? (real / obj) * 100 < 100 : false;
+  }).length;
 
   return (
     <Box p={1}>
@@ -273,7 +289,7 @@ export default function GrossisteModule() {
             <Typography variant="h6" fontWeight="bold" sx={{ color: '#1a237e', mb: 2 }}>📊 Suivi Temporel Réalisation vs Objectifs</Typography>
             <Box sx={{ width: '100%', height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={getTimelineData()}>
+                <ComposedChart data={timelineData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" style={{ fontSize: 11 }} />
                   <YAxis style={{ fontSize: 11 }} />
@@ -292,13 +308,13 @@ export default function GrossisteModule() {
             <Typography variant="h6" fontWeight="bold" sx={{ color: '#1a237e', mb: 2 }}>📉 Écart Volumétrique en Cascade</Typography>
             <Box sx={{ width: '100%', height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={getWaterfallData()}>
+                <BarChart data={waterfallData}>
                   <CartesianGrid strokeDasharray="2 2" />
                   <XAxis dataKey="name" style={{ fontSize: 10 }} />
                   <YAxis style={{ fontSize: 11 }} />
                   <ChartTooltip formatter={(v) => Math.round(v).toLocaleString()} />
                   <Bar dataKey="Valeur">
-                    {getWaterfallData().map((entry, index) => (
+                    {waterfallData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.Couleur} />
                     ))}
                   </Bar>
@@ -319,7 +335,7 @@ export default function GrossisteModule() {
             <TableContainer sx={{ mb: 2 }}>
               <Table size="small">
                 <TableBody>
-                  {topGrossistes.map((g, idx) => (
+                  {rankingMetrics.top.map((g, idx) => (
                     <TableRow key={idx}>
                       <TableCell sx={{ fontWeight: 600 }}>{g.name} ({g.ville})</TableCell>
                       <TableCell align="right">{Math.round(g.real).toLocaleString()} Crt</TableCell>
@@ -331,11 +347,11 @@ export default function GrossisteModule() {
             </TableContainer>
 
             <Typography variant="subtitle2" fontWeight="bold" color="error.main" sx={{ mb: 1 }}>🔴 Distributeurs Sous-Performants (&lt; 100%)</Typography>
-            {flopGrossistes.length > 0 ? (
+            {rankingMetrics.flop.length > 0 ? (
               <TableContainer>
                 <Table size="small">
                   <TableBody>
-                    {flopGrossistes.slice(0, 3).map((g, idx) => (
+                    {rankingMetrics.flop.slice(0, 3).map((g, idx) => (
                       <TableRow key={idx}>
                         <TableCell sx={{ fontWeight: 600 }}>{g.name} ({g.ville})</TableCell>
                         <TableCell align="right" sx={{ color: '#d32f2f', fontWeight: 'bold' }}>Écart: {Math.round(g.real - g.obj).toLocaleString()} Crt</TableCell>
@@ -362,6 +378,12 @@ export default function GrossisteModule() {
                 <Typography variant="subtitle2" fontWeight="bold">Analyse Contextuelle des Filtres</Typography>
                 <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
                   Dans le périmètre sélectionné, la réalisation moyenne s'établit à <strong>{globalRate.toFixed(1)}%</strong>. Le statut global est désigné comme : <strong>{perfBrute.label}</strong>.
+                </Typography>
+              </Box>
+              <Box p={1.5} component={Paper} sx={{ borderLeft: '4px solid #f57c00', elevation: 0 }}>
+                <Typography variant="subtitle2" fontWeight="bold">Suivi des Risques</Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
+                  Il y a actuellement <strong>{flawsCount}</strong> ligne(s) d'activité commerciale sous le seuil d'atteinte de quotas (100%).
                 </Typography>
               </Box>
             </Box>
