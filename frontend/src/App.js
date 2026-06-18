@@ -11,7 +11,6 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
-// Importation des composants modules
 import Dashboard from './Dashboard';
 import GrossisteModule from './modules/GrossisteModule';
 import CommandoModule from './modules/CommandoModule';
@@ -66,7 +65,7 @@ function App() {
           axios.get('/api/grossiste-performances').catch(() => ({ data: [] }))
         ]);
 
-        // Extraction et sécurisation de la taille réelle du tableau d'agrégation pivoté
+        // Compte la totalité des lignes du flux Commando reçu
         let cmdLength = 0;
         if (commandoRes && commandoRes.data) {
           if (Array.isArray(commandoRes.data.data)) {

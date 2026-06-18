@@ -10,7 +10,6 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Configuration CORS complète
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -19,11 +18,9 @@ app.use(cors({
 
 app.use(express.json());
 
-// Configuration de Multer pour stocker temporairement les fichiers en mémoire
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Configuration de la connexion PostgreSQL (Supabase Cloud Pooler)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -31,7 +28,6 @@ const pool = new Pool({
   }
 });
 
-// Test de connexion à la base de données
 pool.connect((err, client, release) => {
   if (err) {
     return console.error('❌ Erreur de connexion à PostgreSQL:', err.stack);
@@ -41,10 +37,9 @@ pool.connect((err, client, release) => {
 });
 
 // =========================================================================
-// 1. ENDPOINTS ET PIPELINES ANALYTIQUES GROSSISTES (EXISTANTS ET SÉCURISÉS)
+// 1. ENDPOINTS ET PIPELINES ANALYTIQUES GROSSISTES
 // =========================================================================
 
-// Récupération globale des données analytiques Grossiste
 app.get('/api/grossiste-performances', async (req, res) => {
   try {
     const client = await pool.connect();
@@ -57,7 +52,6 @@ app.get('/api/grossiste-performances', async (req, res) => {
   }
 });
 
-// Pipeline ETL d'importation Excel Grossiste autonome
 app.post('/api/grossiste/import', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -135,85 +129,60 @@ app.post('/api/grossiste/import', upload.single('file'), async (req, res) => {
 });
 
 // =========================================================================
-// 2. ENDPOINTS ET PIVOT ANALYTIQUE COMMANDO (SÉCURISÉ SUPABASE CORRIGÉ)
+// 2. ENDPOINTS COMMANDO - FLUX TOTAL & VARIABLES POUR FILTRES DIFFÉRENCIÉS
 // =========================================================================
-
 app.get('/api/commando-performances', async (req, res) => {
   try {
     const client = await pool.connect();
-    const queryResult = await client.query('SELECT numero_agent, agent_promoteur, ville, date_rapport, jour_semaine, metric_category, type_pdv_ou_produit, realise FROM commando_performances');
+    // Sélection de TOUTES les dimensions analytiques sans restriction
+    const queryResult = await client.query(`
+      SELECT 
+        id, 
+        numero_agent, 
+        agent_promoteur, 
+        ville, 
+        date_rapport, 
+        jour_semaine, 
+        metric_category, 
+        type_pdv_ou_produit, 
+        objectif, 
+        realise, 
+        taux_realisation, 
+        commentaires, 
+        impressions 
+      FROM commando_performances 
+      ORDER BY date_rapport DESC, id ASC
+    `);
     client.release();
 
-    const rawRows = queryResult.rows;
-    const aggregated = {};
-
-    rawRows.forEach(row => {
-      let formattedDate = 'N/A';
+    // Formatage unifié des dates sans décalage horaire
+    const rows = queryResult.rows.map(row => {
+      let cleanDate = 'N/A';
       if (row.date_rapport) {
         const d = new Date(row.date_rapport);
         if (!isNaN(d.getTime())) {
           const year = d.getFullYear();
           const month = String(d.getMonth() + 1).padStart(2, '0');
           const day = String(d.getDate()).padStart(2, '0');
-          formattedDate = `${year}-${month}-${day}`;
+          cleanDate = `${year}-${month}-${day}`;
         }
       }
-
-      const city = row.ville ? String(row.ville).trim() : 'Inconnu';
-      const key = `${formattedDate}_${city}`;
-
-      if (!aggregated[key]) {
-        aggregated[key] = {
-          id: key,
-          date: formattedDate,
-          ville: city,
-          commune: city,
-          secteur: 'Terrain',
-          visits_boutique: 0,
-          visits_superette: 0,
-          visits_kiosque: 0,
-          visits_tablier: 0,
-          visits_pushcart: 0,
-          sales_premium_16g: 0,
-          sales_premium_360g: 0,
-          sales_excellence_900g: 0,
-          sales_avoine_50g: 0,
-          sales_avoine_400g: 0
-        };
-      }
-
-      const category = row.metric_category ? String(row.metric_category).trim() : '';
-      const item = row.type_pdv_ou_produit ? String(row.type_pdv_ou_produit).trim() : '';
-      const valRealise = parseFloat(row.realise) || 0;
-
-      // Agrégation des Visites
-      if (category === 'Nombre de visite / Type de PDV') {
-        if (item === 'Boutique') aggregated[key].visits_boutique += valRealise;
-        if (item === 'Superette') aggregated[key].visits_superette += valRealise;
-        if (item === 'Kiosque') aggregated[key].visits_kiosque += valRealise;
-        if (item === 'Tablier') aggregated[key].visits_tablier += valRealise;
-        if (item === 'Pushcart') aggregated[key].visits_pushcart += valRealise;
-      }
-
-      // Agrégation des Ventes
-      if (category === 'Vente en cartons') {
-        if (item === 'Biblos Lait Premium 16g') aggregated[key].sales_premium_16g += valRealise;
-        if (item === 'Biblos Lait Premium 360g') aggregated[key].sales_premium_360g += valRealise;
-        if (item === 'Biblos Lait Excellence 900g') aggregated[key].sales_excellence_900g += valRealise;
-        if (item === "Biblos Flocon d'avoine 50g") aggregated[key].sales_avoine_50g += valRealise;
-        if (item === "Biblos Flocon d'avoine 400g") aggregated[key].sales_avoine_400g += valRealise;
-      }
+      return {
+        ...row,
+        date_rapport: cleanDate
+      };
     });
 
-    res.json({ success: true, data: Object.values(aggregated) });
+    // Retour du flux brut à 100% (success: true et tableau direct)
+    res.json({ success: true, data: rows });
 
   } catch (error) {
-    console.error('❌ Erreur critique lors du pivot algorithmique Commando:', error);
+    console.error('❌ Erreur lors de l\'extraction complète des données Commando:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// ROUTE D'IMPORTATION AUTOMATIQUE BULK (OPTIMISÉE)
+// ROUTE D'IMPORTATION AUTOMATIQUE BULK
 app.get('/api/commando/import-local', async (req, res) => {
   try {
     const excelPath = path.join(__dirname, 'BDD_COMMANDO_DYNAMIQUE.xlsx');
@@ -221,7 +190,7 @@ app.get('/api/commando/import-local', async (req, res) => {
     if (!fs.existsSync(excelPath)) {
       return res.status(404).json({ 
         success: false, 
-        error: `Le fichier source 'BDD_COMMANDO_DYNAMIQUE.xlsx' est introuvable à la racine.` 
+        error: `Le fichier source 'BDD_COMMANDO_DYNAMIQUE.xlsx' est introuvable.` 
       });
     }
 
@@ -231,7 +200,7 @@ app.get('/api/commando/import-local', async (req, res) => {
     const rawData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     if (rawData.length === 0) {
-      return res.json({ success: true, message: "Le fichier Excel sélectionné est vide." });
+      return res.json({ success: true, message: "Le fichier Excel sélectionné est vu comme vide." });
     }
 
     const client = await pool.connect();
@@ -240,7 +209,7 @@ app.get('/api/commando/import-local', async (req, res) => {
       await client.query('BEGIN');
       await client.query('TRUNCATE TABLE commando_performances');
 
-      console.log(`🚀 Préparation de l'import par lot (Bulk Insert) pour ${rawData.length} lignes...`);
+      console.log(`🚀 Bulk Insert de ${rawData.length} lignes...`);
 
       const values = [];
       let valueIndex = 1;
@@ -282,12 +251,11 @@ app.get('/api/commando/import-local', async (req, res) => {
           (numero_agent, agent_promoteur, ville, date_rapport, jour_semaine, metric_category, type_pdv_ou_produit, objectif, realise, taux_realisation, commentaires, impressions)
           VALUES ${valueLines.join(', ')}
         `;
-        
         await client.query(bulkQuery, values);
       }
 
       await client.query('COMMIT');
-      res.json({ success: true, message: `${valueLines.length} lignes Commando synchronisées avec succès depuis l'Excel local.` });
+      res.json({ success: true, message: `${valueLines.length} lignes Commando injectées en base.` });
 
     } catch (transactionError) {
       await client.query('ROLLBACK');
@@ -297,13 +265,13 @@ app.get('/api/commando/import-local', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('❌ Échec de la routine automatique locale Commando:', error);
+    console.error('❌ Échec de la routine :', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // =========================================================================
-// 3. ENDPOINTS SECONDAIRES & SYSTÈME (MANAGEMENT ET SANTÉ)
+// 3. ENDPOINTS SECONDAIRES & SYSTÈME
 // =========================================================================
 
 app.get('/api/health', (req, res) => {
@@ -318,7 +286,7 @@ app.get('/api/agents', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('Erreur lors du chargement de la table agents:', error);
-    res.status(500).json({ error: 'Erreur interne de récupération des effectifs' });
+    res.status(500).json({ error: 'Erreur interne' });
   }
 });
 
