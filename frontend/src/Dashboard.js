@@ -40,7 +40,6 @@ import axios from 'axios';
 const PIE_COLORS = ['#1976d2', '#ff9800', '#4caf50', '#9c27b0', '#00bcd4'];
 const PRODUCT_COLORS = ['#1a237e', '#1565c0', '#42a5f5', '#66bb6a', '#e53935'];
 
-// --- SÉCURISATION DES STATS PAR DÉFAUT ---
 function Dashboard({ stats = {} }) {
   const [commandoData, setCommandoData] = useState([]);
   const [grossisteData, setGrossisteData] = useState([]);
@@ -55,7 +54,6 @@ function Dashboard({ stats = {} }) {
           axios.get('/api/grossiste-performances').catch(() => ({ data: [] }))
         ]);
 
-        // Sécurisation du canal commando (s'adapte au format enveloppé { success: true, data: [...] })
         let cmdRecords = [];
         if (cmdRes && cmdRes.data) {
           if (Array.isArray(cmdRes.data)) cmdRecords = cmdRes.data;
@@ -63,7 +61,6 @@ function Dashboard({ stats = {} }) {
           else if (Array.isArray(cmdRes.data.performances)) cmdRecords = cmdRes.data.performances;
         }
 
-        // Sécurisation du canal grossiste
         let groRecords = [];
         if (groRes && groRes.data) {
           if (Array.isArray(groRes.data)) groRecords = groRes.data;
@@ -82,7 +79,6 @@ function Dashboard({ stats = {} }) {
     fetchData();
   }, []);
 
-  // Distribution globale
   const performancesChartData = useMemo(() => {
     return [
       { name: 'Commando', value: commandoData.length || Number(stats?.commando) || 0, fill: '#f5576c' },
@@ -91,7 +87,6 @@ function Dashboard({ stats = {} }) {
     ];
   }, [stats, commandoData, grossisteData]);
 
-  // Agrégation macro par Ville (Grossistes)
   const grossisteChartData = useMemo(() => {
     if (!Array.isArray(grossisteData) || grossisteData.length === 0) return [];
     const citiesGroup = {};
@@ -101,54 +96,63 @@ function Dashboard({ stats = {} }) {
       if (!citiesGroup[city]) {
         citiesGroup[city] = { name: city, objectif: 0, realisation: 0 };
       }
-      citiesGroup[city].objectif += Math.round(Number(g.objective_carton || g.objectif_carton) || 0);
+      citiesGroup[city].objectif += Math.round(Number(g.objective_carton) || 0);
       citiesGroup[city].realisation += Math.round(Number(g.realisation_carton) || 0);
     });
     return Object.values(citiesGroup).slice(0, 6);
   }, [grossisteData]);
 
-  // Visites par PDV (Commando)
+  // --- PARSE DYNAMIQUE DES VISITES PAR TYPE DE PDV ---
   const visitsData = useMemo(() => {
     if (!Array.isArray(commandoData) || commandoData.length === 0) return [];
-    const totals = commandoData.reduce((acc, p) => {
-      if (!p) return acc;
-      acc.boutique += Number(p.visits_boutique) || 0;
-      acc.superette += Number(p.visits_superette) || 0;
-      acc.kiosque += Number(p.visits_kiosque) || 0;
-      acc.tablier += Number(p.visits_tablier) || 0;
-      acc.pushcart += Number(p.visits_pushcart) || 0;
-      return acc;
-    }, { boutique: 0, superette: 0, kiosque: 0, tablier: 0, pushcart: 0 });
+    
+    const pdvCounters = { Boutique: 0, Superette: 0, Kiosque: 0, Tablier: 0, Pushcart: 0 };
+    
+    commandoData.forEach(p => {
+      if (!p || !p.metric_category || !p.type_pdv_ou_produit) return;
+      const category = p.metric_category.trim().toLowerCase();
+      
+      if (category.includes('visite')) {
+        const pdvType = p.type_pdv_ou_produit.trim();
+        if (pdvCounters[pdvType] !== undefined) {
+          pdvCounters[pdvType] += parseFloat(p.realise) || 0;
+        }
+      }
+    });
 
-    return [
-      { name: 'Boutique', value: totals.boutique },
-      { name: 'Superette', value: totals.superette },
-      { name: 'Kiosque', value: totals.kiosque },
-      { name: 'Tablier', value: totals.tablier },
-      { name: 'Pushcart', value: totals.pushcart }
-    ].filter(d => d.value > 0);
+    return Object.entries(pdvCounters)
+      .map(([name, value]) => ({ name, value: Math.round(value) }))
+      .filter(d => d.value > 0);
   }, [commandoData]);
 
-  // Ventes par SKU (Commando)
+  // --- PARSE DYNAMIQUE DES VENTES PAR SKU ---
   const salesData = useMemo(() => {
     if (!Array.isArray(commandoData) || commandoData.length === 0) return [];
-    const totals = commandoData.reduce((acc, p) => {
-      if (!p) return acc;
-      acc.premium16 += Number(p.sales_premium_16g) || 0;
-      acc.premium360 += Number(p.sales_premium_360g) || 0;
-      acc.excellence += Number(p.sales_excellence_900g) || 0;
-      acc.avoine50 += Number(p.sales_avoine_50g) || 0;
-      acc.avoine400 += Number(p.sales_avoine_400g) || 0;
-      return acc;
-    }, { premium16: 0, premium360: 0, excellence: 0, avoine50: 0, avoine400: 0 });
+    
+    const skus = {
+      'Premium 16g': 0,
+      'Premium 360g': 0,
+      'Excellence 900g': 0,
+      'Avoine 50g': 0,
+      'Avoine 400g': 0
+    };
 
-    return [
-      { name: 'Premium 16g', ventes: totals.premium16 },
-      { name: 'Premium 360g', ventes: totals.premium360 },
-      { name: 'Excellence 900g', ventes: totals.excellence },
-      { name: 'Avoine 50g', ventes: totals.avoine50 },
-      { name: 'Avoine 400g', ventes: totals.avoine400 }
-    ];
+    commandoData.forEach(p => {
+      if (!p || !p.metric_category || !p.type_pdv_ou_produit) return;
+      const category = p.metric_category.trim().toLowerCase();
+      
+      if (category.includes('vente')) {
+        const product = p.type_pdv_ou_produit.trim();
+        // Mappage sémantique flexible des libellés du fichier Excel
+        if (product.includes('16g')) skus['Premium 16g'] += parseFloat(p.realise) || 0;
+        else if (product.includes('360g')) skus['Premium 360g'] += parseFloat(p.realise) || 0;
+        else if (product.includes('900g')) skus['Excellence 900g'] += parseFloat(p.realise) || 0;
+        else if (product.includes('50g')) skus['Avoine 50g'] += parseFloat(p.realise) || 0;
+        else if (product.includes('400g')) skus['Avoine 400g'] += parseFloat(p.realise) || 0;
+      }
+    });
+
+    return Object.entries(skus).map(([name, ventes]) => ({ name, ventes: Math.round(ventes) }));
   }, [commandoData]);
 
   const recentActivities = [
@@ -196,7 +200,7 @@ function Dashboard({ stats = {} }) {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Rapports Commando</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{commandoData.length || stats?.commando || 0}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{(commandoData.length || stats?.commando || 0).toLocaleString()}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><Assessment /></Avatar>
               </Box>
@@ -210,7 +214,7 @@ function Dashboard({ stats = {} }) {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Lignes Grossistes</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{grossisteData.length}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{grossisteData.length.toLocaleString()}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><CloudUpload /></Avatar>
               </Box>
@@ -224,7 +228,7 @@ function Dashboard({ stats = {} }) {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5, fontWeight: 500 }}>Volume d'Entrées Total</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{commandoData.length + grossisteData.length}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{(commandoData.length + grossisteData.length).toLocaleString()}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}><TrendingUp /></Avatar>
               </Box>
@@ -265,12 +269,12 @@ function Dashboard({ stats = {} }) {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#1a237e', mb: 2 }}>
               Distribution Proportionnelle des Rapports
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={performancesChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="name" />
                 <YAxis allowDecimals={false} />
-                <Tooltip formatter={(value) => [value, 'Entrées']} />
+                <Tooltip formatter={(value) => [value.toLocaleString(), 'Entrées']} />
                 <Bar dataKey="value" name="Lignes actives" radius={[6, 6, 0, 0]}>
                   {performancesChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -287,12 +291,12 @@ function Dashboard({ stats = {} }) {
               Ventes par SKU (Canal Commando)
             </Typography>
             {salesData.some(d => d.ventes > 0) ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height="300}>
                 <BarChart data={salesData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" angle={-10} textAnchor="end" height={50} />
+                  <XAxis dataKey="name" angle={-10} textAnchor="end" height={50} style={{ fontSize: 11 }} />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip formatter={(v) => v.toLocaleString()} />
                   <Bar dataKey="ventes" name="Unités" radius={[4, 4, 0, 0]}>
                     {salesData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={PRODUCT_COLORS[index % PRODUCT_COLORS.length]} />
@@ -330,7 +334,7 @@ function Dashboard({ stats = {} }) {
                       <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip formatter={(v) => v.toLocaleString()} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
