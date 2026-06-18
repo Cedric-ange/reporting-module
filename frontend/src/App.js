@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
   Box, Drawer, AppBar, Toolbar, List, Typography, Divider, IconButton, 
-  ListItem, ListItemButton, Lennon, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
+  ListItem, ListItemButton, Lands, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
 } from '@mui/material';
 import { 
   Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon, 
   Assessment as AssessmentIcon, Storefront as StoreIcon, Campaign as CampaignIcon,
   CloudUpload as CloudUploadIcon, FileDownload as FileDownloadIcon
 } from '@mui/icons-material';
-import axios from 'react-query'; // Si vous utilisez axios brut
-import axiosInstance from 'axios';
+import axios from 'axios';
 
-// Importation chirurgicale des composants modules
+// Importation des composants modules
 import Dashboard from './Dashboard';
 import GrossisteModule from './modules/GrossisteModule';
 import CommandoModule from './modules/CommandoModule';
@@ -48,7 +47,6 @@ function NavigationContent() {
 }
 
 function App() {
-  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -63,9 +61,9 @@ function App() {
       try {
         setLoading(true);
         const [agentsRes, commandoRes, grossisteRes] = await Promise.all([
-          axiosInstance.get('/api/agents').catch(() => ({ data: [] })),
-          axiosInstance.get('/api/commando-performances').catch(() => ({ data: { data: [] } })),
-          axiosInstance.get('/api/grossiste-performances').catch(() => ({ data: [] }))
+          axios.get('/api/agents').catch(() => ({ data: [] })),
+          axios.get('/api/commando-performances').catch(() => ({ data: { data: [] } })),
+          axios.get('/api/grossiste-performances').catch(() => ({ data: [] }))
         ]);
 
         let cmdLength = 0;
