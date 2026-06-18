@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { 
   Box, Drawer, AppBar, Toolbar, List, Typography, Divider, IconButton, 
-  ListItem, ListItemButton, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
+  ListItem, ListItemButton, Lennon, ListItemIcon, ListItemText, CircularProgress, Container, Alert 
 } from '@mui/material';
 import { 
   Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon, 
   Assessment as AssessmentIcon, Storefront as StoreIcon, Campaign as CampaignIcon,
   CloudUpload as CloudUploadIcon, FileDownload as FileDownloadIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import axios from 'react-query'; // Si vous utilisez axios brut
+import axiosInstance from 'axios';
 
-// Importation des modules analytiques unifiés
+// Importation chirurgicale des composants modules
 import Dashboard from './Dashboard';
 import GrossisteModule from './modules/GrossisteModule';
 import CommandoModule from './modules/CommandoModule';
@@ -21,7 +22,7 @@ const drawerWidth = 240;
 function NavigationContent() {
   const location = useLocation();
   const menuItems = [
-    { text: 'Tableau de Bord', icon: <DashboardIcon />, path: '/' },
+    { text: 'Tableau de Bord', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Gestion Agents', icon: <PeopleIcon />, path: '/agents' },
     { text: 'Reporting Commando', icon: <AssessmentIcon />, path: '/commando' },
     { text: 'Activation Grossiste', icon: <StoreIcon />, path: '/grossiste' },
@@ -35,7 +36,7 @@ function NavigationContent() {
       {menuItems.map((item) => (
         <ListItem key={item.text} disablePadding>
           <ListItemButton component={Link} to={item.path} selected={location.pathname === item.path}>
-            <ListItemIcon color={location.pathname === item.path ? 'primary' : 'inherit'}>
+            <ListItemIcon sx={{ color: location.pathname === item.path ? '#1976d2' : 'inherit' }}>
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.text} />
@@ -47,6 +48,7 @@ function NavigationContent() {
 }
 
 function App() {
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,9 +63,9 @@ function App() {
       try {
         setLoading(true);
         const [agentsRes, commandoRes, grossisteRes] = await Promise.all([
-          axios.get('/api/agents').catch(() => ({ data: [] })),
-          axios.get('/api/commando-performances').catch(() => ({ data: { data: [] } })),
-          axios.get('/api/grossiste-performances').catch(() => ({ data: [] }))
+          axiosInstance.get('/api/agents').catch(() => ({ data: [] })),
+          axiosInstance.get('/api/commando-performances').catch(() => ({ data: { data: [] } })),
+          axiosInstance.get('/api/grossiste-performances').catch(() => ({ data: [] }))
         ]);
 
         let cmdLength = 0;
@@ -99,34 +101,32 @@ function App() {
   }
 
   return (
-    <Router>
-      <Box sx={{ display: 'flex' }}>
-        <AppBar position="fixed" sx={{ width: { sm: `calc(100% - ${drawerWidth}px)` }, ml: { sm: `${drawerWidth}px` }, bgcolor: '#1976d2' }}>
-          <Toolbar>
-            <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}><MenuIcon /></IconButton>
-            <Typography variant="h6" noWrap component="div" fontWeight="bold">Biblos Track Pro — BI Monitor</Typography>
-          </Toolbar>
-        </AppBar>
+    <Box sx={{ display: 'flex' }}>
+      <AppBar position="fixed" sx={{ width: { sm: `calc(100% - ${drawerWidth}px)` }, ml: { sm: `${drawerWidth}px` }, bgcolor: '#1976d2', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}><MenuIcon /></IconButton>
+          <Typography variant="h6" noWrap component="div" fontWeight="bold">Biblos Track Pro — BI Monitor</Typography>
+        </Toolbar>
+      </AppBar>
 
-        <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
-          <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} ModalProps={{ keepMounted: true }} sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth } }}><Toolbar /><Divider /><NavigationContent /></Drawer>
-          <Drawer variant="permanent" sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth } }} open><Toolbar /><Divider /><NavigationContent /></Drawer>
-        </Box>
-
-        <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: '64px' }}>
-          {error && <Alert severity="warning" sx={{ mb: 3 }}>{error}</Alert>}
-          <Container maxWidth="xl">
-            <Routes>
-              {/* --- CORRECTION ESSENTIELLE : TRADUCTION DE DASHBOARDSTATS --- */}
-              <Route path="/" element={<Dashboard stats={dashboardStats} />} />
-              <Route path="/grossiste" element={<GrossisteModule />} />
-              <Route path="/commando" element={<CommandoModule />} />
-              <Route path="*" element={<Box p={3}><Typography>Module en cours de modélisation infrastructurelle.</Typography></Box>} />
-            </Routes>
-          </Container>
-        </Box>
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+        <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} ModalProps={{ keepMounted: true }} sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth } }}><Toolbar /><Divider /><NavigationContent /></Drawer>
+        <Drawer variant="permanent" sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth } }} open><Toolbar /><Divider /><NavigationContent /></Drawer>
       </Box>
-    </Router>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: '64px' }}>
+        {error && <Alert severity="warning" sx={{ mb: 3 }}>{error}</Alert>}
+        <Container maxWidth="xl">
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard stats={dashboardStats} />} />
+            <Route path="/grossiste" element={<GrossisteModule />} />
+            <Route path="/commando" element={<CommandoModule />} />
+            <Route path="*" element={<Box p={3}><Typography variant="body1" color="textSecondary">Ce module ou cette vue est en cours de traitement infrastructurel.</Typography></Box>} />
+          </Routes>
+        </Container>
+      </Box>
+    </Box>
   );
 }
 
