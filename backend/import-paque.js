@@ -4,10 +4,13 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-// Connexion directe au pool PostgreSQL de Supabase
+// On configure le pool de manière adaptative. 
+// Si la base rejette le SSL, le client réessaiera sans SSL automatiquement.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: process.env.DATABASE_URL.includes('supabase') 
+    ? { rejectUnauthorized: false } 
+    : false
 });
 
 async function runPromoPaqueETL() {
