@@ -99,7 +99,7 @@ export default function CommandoModule() {
         acc.plv += valRealise;
       }
       return acc;
-    }, { visites: 0, ventes: 0 gratuites: 0, plv: 0 });
+    }, { visites: 0, ventes: 0, gratuites: 0, plv: 0 });
   }, [filteredData]);
 
   // --- FORMATAGE DES DONNÉES DE DISTRIBUTION POUR LES GRAPHIQUES ---
